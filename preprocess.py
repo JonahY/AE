@@ -5,7 +5,7 @@ from tqdm import tqdm
 import math
 import multiprocessing
 import argparse
-
+import time
 
 # os.getcwd()
 
@@ -46,7 +46,8 @@ class Preprocessing:
                 self.counts += 1
 
     def main(self, file_name, data=[]):
-        for name in tqdm(file_name):
+        pbar = tqdm(file_name)
+        for name in pbar:
             with open(name, "r") as f:
                 self.skip_n_column(f)
                 sample_interval = float(f.readline()[29:])
@@ -61,10 +62,9 @@ class Preprocessing:
                 # calculate the duration, amplitude, rise_time, energy and counts
                 valid_data = self.cal_features(dataset, time_label, sample_interval, time)
                 self.cal_counts(valid_data)
-                # print(name.split('_')[2], sample_interval, points_num, channel_num, hit_num, time)
-                # print('-' * 50)
 
-            data.append('{}, {:.1f}, {}, {:.2f}, {:.2f}, {:.1f}, {:.1f}, {:.8f}, {:.2f}, {}'.format(hit_num, time * 1000000, channel_num, self.thr_V * 1000000, self.amplitude * 1000000, self.rise_time * 1000000, self.duration * 1000000, self.energy, self.RMS * 1000000, self.counts))
+            data.append('{}, {:.1f}, {}, {:.2f}, {:.2f}, {:.1f}, {:.1f}, {:.8f}, {:.2f}, {}\n'.format(hit_num, time * 1000000, channel_num, self.thr_V * 1000000, self.amplitude * 1000000, self.rise_time * 1000000, self.duration * 1000000, self.energy, self.RMS * 1000000, self.counts))
+            pbar.set_description("Calculating: %s" % name.split('_')[2])
             # ID, Time(μs), Chan, Thr(μV), Amp(μV), RiseT(μs), Dur(μs), Eny(aJ), RMS(μV), Counts
             # print("-" * 50)
             # print(hit_num, time * 1000000, channel_num, self.thr_V * 1000000, self.amplitude * 1000000, self.rise_time * 1000000, self.duration * 1000000, self.energy, self.RMS * 1000000, self.counts)
@@ -74,14 +74,14 @@ class Preprocessing:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--folder_path", type=str, default="C:\\Users\\Yuan\\Desktop\\CM-6M-o18-2020.10.17-1-60-a-waveform", help="path to dataset")
-    parser.add_argument("--thr_dB", type=int, default=25, help="detection threshold")
-    parser.add_argument("--threads", type=int, default=4, help="cpu core number")
+    parser.add_argument("--data_path", type=str, default="C:\\Users\\Yuan\\Desktop\\CM-6M-o18-2020.10.17-1-60-a-waveform", help="Path of data")
+    parser.add_argument("--thr_dB", type=int, default=25, help="Detection threshold")
+    parser.add_argument("--threads", type=int, default=4, help="Cpu core number")
     opt = parser.parse_args()
     print(opt)
 
-    os.chdir(opt.folder_path)
-    file_list = os.listdir(opt.folder_path)
+    os.chdir(opt.data_path)
+    file_list = os.listdir(opt.data_path)
     # print(file_list)
 
     each_core = int(math.ceil(len(file_list) / float(opt.threads)))
@@ -93,14 +93,17 @@ if __name__ == "__main__":
         process = Preprocessing(opt.thr_dB)
         result.append(pool.apply_async(process.main, (file_list[i:i + each_core],)))
 
-    txt_name = opt.folder_path.split('\\')[-1] + '.txt'
+    txt_name = opt.data_path.split('\\')[-1] + '.txt'
     f = open(txt_name, "w")
     f.write("ID, Time(μs), Chan, Thr(μV), Amp(μV), RiseT(μs), Dur(μs), Eny(aJ), RMS(μV), Counts\n")
-    for i in tqdm(result):
-        for j in i.get():
-            # print(j)
-            f.write(j + '\n')
-        # data += i.get()
+    pbar = tqdm(result)
+    for idx, i in enumerate(pbar):
+        tmp = i.get()
+        data += tmp
+        pbar.set_description("Exporting Data: {}/{}".format(idx + 1, opt.threads))
+    data = sorted(data, key=lambda s: int(s.split(',')[0]))
+    for i in data:
+        f.write(i)
     f.close()
     pool.close()
     pool.join()
