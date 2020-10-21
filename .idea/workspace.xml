@@ -25,7 +25,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.ide.settings.web.browsers" />
   </component>
   <component name="RunManager" selected="Python.preprocess">
     <configuration name="preprocess" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -89,26 +89,30 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
+    <state x="687" y="272" key="#com.intellij.tools.ToolEditorDialog" timestamp="1603263813704">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="687" y="272" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1603263813704" />
     <state x="740" y="279" key="FileChooserDialogImpl" timestamp="1603174394643">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="740" y="279" key="FileChooserDialogImpl/0.0.1920.1050@0.0.1920.1050" timestamp="1603174394643" />
-    <state width="1899" height="285" key="GridCell.Tab.0.bottom" timestamp="1603245728968">
+    <state width="1899" height="285" key="GridCell.Tab.0.bottom" timestamp="1603263851876">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1899" height="285" key="GridCell.Tab.0.bottom/0.0.1920.1050@0.0.1920.1050" timestamp="1603245728968" />
-    <state width="1899" height="285" key="GridCell.Tab.0.center" timestamp="1603245728968">
+    <state width="1899" height="285" key="GridCell.Tab.0.bottom/0.0.1920.1050@0.0.1920.1050" timestamp="1603263851876" />
+    <state width="1899" height="285" key="GridCell.Tab.0.center" timestamp="1603263851876">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1899" height="285" key="GridCell.Tab.0.center/0.0.1920.1050@0.0.1920.1050" timestamp="1603245728968" />
-    <state width="1899" height="285" key="GridCell.Tab.0.left" timestamp="1603245728967">
+    <state width="1899" height="285" key="GridCell.Tab.0.center/0.0.1920.1050@0.0.1920.1050" timestamp="1603263851876" />
+    <state width="1899" height="285" key="GridCell.Tab.0.left" timestamp="1603263851876">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1899" height="285" key="GridCell.Tab.0.left/0.0.1920.1050@0.0.1920.1050" timestamp="1603245728967" />
-    <state width="1899" height="285" key="GridCell.Tab.0.right" timestamp="1603245728968">
+    <state width="1899" height="285" key="GridCell.Tab.0.left/0.0.1920.1050@0.0.1920.1050" timestamp="1603263851876" />
+    <state width="1899" height="285" key="GridCell.Tab.0.right" timestamp="1603263851876">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1899" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1603245728968" />
+    <state width="1899" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1603263851876" />
     <state width="1899" height="352" key="GridCell.Tab.1.bottom" timestamp="1603183552811">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -125,9 +129,9 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="1899" height="352" key="GridCell.Tab.1.right/0.0.1920.1050@0.0.1920.1050" timestamp="1603183552810" />
-    <state x="461" y="169" key="SettingsEditor" timestamp="1603174403223">
+    <state x="461" y="169" key="SettingsEditor" timestamp="1603263840876">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1603174403223" />
+    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1603263840876" />
   </component>
 </project>

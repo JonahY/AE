@@ -45,8 +45,7 @@ class Preprocessing:
     def cal_counts(self, valid_data):
         N = len(valid_data)
         for idx in range(1, N):
-            if valid_data[idx - 1] <= self.thr_V <= valid_data[idx] \
-                    or valid_data[idx] <= self.thr_V <= valid_data[idx - 1]:
+            if valid_data[idx - 1] <= thr_V <= valid_data[idx]:
                 self.counts += 1
 
     def main(self, file_name, data=[]):
@@ -67,12 +66,12 @@ class Preprocessing:
                 valid_data = self.cal_features(dataset, time_label)
                 self.cal_counts(valid_data)
                 if self.counts >= 2:
-                    data.append('{}, {:.1f}, {}, {:.2f}, {:.2f}, {:.1f}, {:.1f}, {:.2f}, {:.2f}, {}\n'.format(
-                        self.hit_num, self.time * pow(10, 6), self.channel_num, self.thr_V * pow(10, 6),
-                        self.amplitude * pow(10, 6), self.rise_time * pow(10, 6), self.duration * pow(10, 6),
+                    data.append('{}, {:.7f}, {}, {:.2f}, {:.2f}, {:.7f}, {:.7f}, {:.2f}, {:.2f}, {}\n'.format(
+                        self.hit_num, self.time, self.channel_num, self.thr_V * pow(10, 6),
+                        self.amplitude * pow(10, 6), self.rise_time, self.duration,
                         self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts))
             pbar.set_description("Calculating: %s" % name.split('_')[2])
-            # ID, Time(μs), Chan, Thr(μV), Amp(μV), RiseT(μs), Dur(μs), Eny(aJ), RMS(μV), Counts
+            # ID, Time(s), Chan, Thr(μV), Amp(μV), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts
             # print("-" * 50)
             # print(self.hit_num, self.time * pow(10, 6), self.channel_num, self.thr_V * pow(10, 6), self.amplitude * pow(10, 6), self.rise_time * pow(10, 6), self.duration * pow(10, 6), self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts)
 
@@ -103,7 +102,7 @@ if __name__ == "__main__":
 
     txt_name = opt.data_path.split('\\')[-1] + '.txt'
     f = open(txt_name, "w")
-    f.write("ID, Time(μs), Chan, Thr(μV), Amp(μV), RiseT(μs), Dur(μs), Eny(aJ), RMS(μV), Counts\n")
+    f.write("ID, Time(s), Chan, Thr(μV), Amp(μV), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts\n")
     pbar = tqdm(result)
     for idx, i in enumerate(pbar):
         tmp = i.get()
