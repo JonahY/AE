@@ -53,7 +53,7 @@ class Preprocessing:
                 self.counts += 1
 
     def main(self, file_name, data=[]):
-        pbar = tqdm(file_name)
+        pbar = tqdm(file_name, ncols=80)
         for name in pbar:
             with open(name, "r") as f:
                 self.skip_n_column(f)
@@ -96,7 +96,7 @@ class Preprocessing:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", type=str,
-                        default=r"C:\Users\Yuan\Desktop\CM-6M-o18-2020.10.17-1-60-a-waveform",
+                        default=r'C:/Users/Yuan/Desktop/CM-6M-o18-2020.10.17-1-60-a-waveform',
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("--thr_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("--thr_noise_ratio", type=int, default=5, help="Threshold to noise ratio")
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     txt_name = opt.data_path.split('/')[-1] + '.txt'
     f = open(txt_name, "w")
     f.write("ID, Time(s), Chan, Thr(μV), Thr(dB), Amp(μV), Amp(dB), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts\n")
-    pbar = tqdm(result)
+    pbar = tqdm(result, ncols=80)
     for idx, i in enumerate(pbar):
         tmp = i.get()
         data += tmp
