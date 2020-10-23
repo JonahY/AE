@@ -7,6 +7,7 @@ import multiprocessing
 import argparse
 import time
 
+
 # os.getcwd()
 
 
@@ -74,21 +75,29 @@ class Preprocessing:
                     valid_data = self.cal_features(dataset, time_label, valid_wave_idx)
                     self.cal_counts(valid_data)
                     if self.counts >= 2:
-                        data.append('{}, {:.7f}, {}, {:.8f}, {:.1f}, {:.8f}, {:.1f}, {:.7f}, {:.7f}, {:.8f}, {:.8f}, {}\n'.format(
-                            self.hit_num, self.time, self.channel_num, self.thr_V * pow(10, 6), self.thr_dB,
-                            self.amplitude * pow(10, 6), 20 * np.log10(self.thr_noise_ratio * self.amplitude * pow(10, 6)),
-                            self.rise_time, self.duration, self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts))
+                        data.append(
+                            '{}, {:.7f}, {}, {:.8f}, {:.1f}, {:.8f}, {:.1f}, {:.7f}, {:.7f}, {:.8f}, {:.8f}, {}\n'.format(
+                                self.hit_num, self.time, self.channel_num, self.thr_V * pow(10, 6), self.thr_dB,
+                                                                           self.amplitude * pow(10, 6),
+                                                                           20 * np.log10(
+                                                                               self.thr_noise_ratio * self.amplitude * pow(
+                                                                                   10, 6)), self.rise_time,
+                                self.duration, self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts))
             pbar.set_description("Calculating: %s" % name.split('_')[2])
             # ID, Time(s), Chan, Thr(μV), Thr(dB), Amp(μV), Amp(dB), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts
             # print("-" * 50)
-            # print(self.hit_num, self.time * pow(10, 6), self.channel_num, self.thr_V * pow(10, 6), self.amplitude * pow(10, 6), self.rise_time * pow(10, 6), self.duration * pow(10, 6), self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts)
+            # print(self.hit_num, self.time * pow(10, 6), self.channel_num, self.thr_V * pow(10, 6),
+            #     self.amplitude * pow(10, 6), self.rise_time * pow(10, 6), self.duration * pow(10, 6),
+            #     self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts)
 
         return data
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", type=str, default="C:\\Users\\Yuan\\Desktop\\CM-6M-o18-2020.10.17-1-60-a-waveform", help="Path of data")
+    parser.add_argument("--data_path", type=str,
+                        default=r"C:\Users\Yuan\Desktop\CM-6M-o18-2020.10.17-1-60-a-waveform",
+                        help="Absolute path of data(add 'r' in front)")
     parser.add_argument("--thr_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("--thr_noise_ratio", type=int, default=5, help="Threshold to noise ratio")
     parser.add_argument("--magnification_dB", type=int, default=60, help="Magnification /dB")
@@ -96,6 +105,7 @@ if __name__ == "__main__":
     opt = parser.parse_args()
     print(opt)
 
+    opt.data_path = opt.data_path.replace('\\', '/')
     os.chdir(opt.data_path)
     file_list = os.listdir(opt.data_path)
     # print(file_list)
@@ -109,7 +119,7 @@ if __name__ == "__main__":
         process = Preprocessing(opt.thr_dB, opt.thr_noise_ratio, opt.magnification_dB)
         result.append(pool.apply_async(process.main, (file_list[i:i + each_core],)))
 
-    txt_name = opt.data_path.split('\\')[-1] + '.txt'
+    txt_name = opt.data_path.split('/')[-1] + '.txt'
     f = open(txt_name, "w")
     f.write("ID, Time(s), Chan, Thr(μV), Thr(dB), Amp(μV), Amp(dB), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts\n")
     pbar = tqdm(result)
