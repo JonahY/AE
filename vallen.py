@@ -39,8 +39,27 @@ def sqlite_read(path):
     return int(res[-2][1]), int(res[-1][1])
 
 
-# Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
+def read_data(path_pri):
+    data_tra, data_pri, chan_2, chan_3, chan_4 = [], [], [], [], []
+    N_pri, N_tra = sqlite_read(path_pri)
+    for _ in tqdm(range(N_tra), ncols=80):
+        i = result_tra.fetchone()
+        data_tra.append(i)
+    for _ in tqdm(range(N_pri), ncols=80):
+        i = result_pri.fetchone()
+        if i[-2] is not None and i[-2] > 2:
+            data_pri.append(i)
+            if i[2] == 2:
+                chan_2.append(i)
+            elif i[2] == 3:
+                chan_3.append(i)
+            elif i[2] == 4:
+                chan_4.append(i)
+    return data_tra, data_pri, chan_2, chan_3, chan_4
+
+
 def validation(k):
+    # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
     i = data_tra[k]
     sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
     time = np.linspace(i[0], i[0] + pow(i[-5], -1) * (i[-4] - 1), i[-4])
@@ -72,16 +91,6 @@ def validation(k):
 
 
 class KernelKMeans(BaseEstimator, ClusterMixin):
-    """
-    Kernel K-means
-
-    Reference
-    ---------
-    Kernel k-means, Spectral Clustering and Normalized Cuts.
-    Inderjit S. Dhillon, Yuqiang Guan, Brian Kulis.
-    KDD 2004.
-    """
-
     def __init__(self, n_clusters=3, max_iter=50, tol=1e-3, random_state=None,
                  kernel="rbf", gamma=None, degree=3, coef0=1,
                  kernel_params=None, verbose=0):
@@ -212,25 +221,6 @@ def cal_frequency(k, valid=True):
     return half_frq, normalization_half
 
 
-def read_data(path_pri):
-    data_tra, data_pri, chan_2, chan_3, chan_4 = [], [], [], [], []
-    N_pri, N_tra = sqlite_read(path_pri)
-    for _ in tqdm(range(N_tra), ncols=80):
-        i = result_tra.fetchone()
-        data_tra.append(i)
-    for _ in tqdm(range(N_pri), ncols=80):
-        i = result_pri.fetchone()
-        if i[-2] is not None and i[-2] > 2:
-            data_pri.append(i)
-            if i[2] == 2:
-                chan_2.append(i)
-            elif i[2] == 3:
-                chan_3.append(i)
-            elif i[2] == 4:
-                chan_4.append(i)
-    return data_tra, data_pri, chan_2, chan_3, chan_4
-
-
 def ICA(Amp, Eny):
     x = np.zeros([Amp.shape[0], 2])
     x[:, 0], x[:, 1] = np.log10(Amp), np.log10(Eny)
@@ -242,6 +232,31 @@ def ICA(Amp, Eny):
     S_ = ica.fit_transform(x_nor)  # 重构信号
     A_ = ica.mixing_  # 获得估计混合后的矩阵
     return S_, A_
+
+
+def Material_status(status):
+    if status == 'pure':
+        # 0.508, 0.729, 1.022, 1.174, 1.609
+        idx_select_2 = [105, 94, 95, 109, 102]
+        TRAI_select_2 = [4117396, 4115821, 4115822, 4117632, 4117393]
+        # -0.264, -0.022
+        idx_select_1 = [95, 60]
+        TRAI_select_1 = [124104, 76892]
+    elif status == 'electrolysis':
+        # 0.115, 0.275, 0.297, 0.601, 1.024
+        idx_select_2 = [50, 148, 51, 252, 10]
+        TRAI_select_2 = [3067, 11644, 3079, 28583, 1501]
+        # 0.303, 0.409, 0.534, 0.759, 1.026
+        idx_select_1 = [13, 75, 79, 72, 71]
+        TRAI_select_1 = [2949, 14166, 14815, 14140, 14090]
+    return idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2
+
+
+def Find_wave(Dur, Eny, cls_KKM, chan, dur_lim, eny_lim):
+    for i in np.where((np.log10(Dur)[cls_KKM] > dur_lim[0]) & (np.log10(Dur)[cls_KKM] < dur_lim[1]) &
+                      (np.log10(Eny)[cls_KKM] > eny_lim[0]) & (np.log10(Eny)[cls_KKM] < eny_lim[1]))[0]:
+        # Idx, Dur, Eny, TRAI
+        print(i, np.log10(Dur)[cls_KKM][i], np.log10(Eny)[cls_KKM][i], '{:.0f}'.format(chan[cls_KKM][i][-1]))
 
 
 def Plot_log_log(Dur, Eny, cls_1_KKM, cls_2_KKM, color_1, color_2, idx_select_1=[], idx_select_2=[]):
@@ -315,9 +330,9 @@ def plot_norm(ax, xlabel, ylabel, title='', grid=False, formatter_x=False, forma
 
 
 if __name__ == '__main__':
-    os.chdir(r'E:\data\vallen\Ni-tension test-pure-1-0.01-AE-20201030')
-    path_pri = r'Ni-tension test-pure-1-0.01-AE-20201030.pridb'
-    path_tra = r'Ni-tension test-pure-1-0.01-AE-20201030.tradb'
+    os.chdir(r'E:\data\vallen\Ni-tension test-electrolysis-1-0.01-AE-20201031')
+    path_pri = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.pridb'
+    path_tra = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.tradb'
     # 316L-1.5-z3-AE-3 sensor-20200530
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
     # Ni-tension test-pure-1-0.01-AE-20201030
@@ -341,31 +356,25 @@ if __name__ == '__main__':
     Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan_2[:, 1], chan_2[:, 4], chan_2[:, 5], \
                                               chan_2[:, 6], chan_2[:, 7], chan_2[:, 8], chan_2[:, 9]
 
-    # ICA
+    # ICA and Kernel K-Means
     S_, A_ = ICA(Amp, Eny)
-
-    # Kernel K-Means
     km = KernelKMeans(n_clusters=2, max_iter=100, random_state=55, verbose=1, kernel="rbf")
     pred = km.fit_predict(S_)
     cls_1_KKM, cls_2_KKM = pred == 1, pred == 0
 
-    # # 0.115, 0.275, 0.297, 0.601, 1.024
-    # idx_select_2 = [50, 148, 51, 252, 10]
-    # TRAI_select_2 = [3067, 11644, 3079, 28583, 1501]
-    #
-    # # 0.303, 0.409, 0.534, 0.759, 1.026
-    # idx_select_1 = [13, 75, 79, 72, 71]
-    # TRAI_select_1 = [2949, 14166, 14815, 14140, 14090]
+    idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2 = Material_status(path_pri.split('-')[2])
 
-    # Plot log to log scatter
+    # Find waves on the edge
+    Find_wave(Dur, Eny, cls_1_KKM, chan_2, [2.0, 2.5], [-1, 0])
+
+    # Plot log to log scatter and Selected waveform
     fig1 = plt.figure(figsize=[6, 4.5])
-    Plot_log_log(Dur, Eny, cls_1_KKM, cls_2_KKM, color_1, color_2)
+    Plot_log_log(Dur, Eny, cls_1_KKM, cls_2_KKM, color_1, color_2, idx_select_1, idx_select_2)
 
-    # # Selected waveform
-    # fig2 = plt.figure(figsize=(12, 15))
-    # Plot_wave_frequency(data_tra, TRAI_select_1, fig2)
-    #
-    # fig3 = plt.figure(figsize=(12, 15))
-    # Plot_wave_frequency(data_tra, TRAI_select_1, fig3)
+    fig2 = plt.figure(figsize=(12, 15))
+    Plot_wave_frequency(data_tra, TRAI_select_1, fig2)
+
+    fig3 = plt.figure(figsize=(12, 15))
+    Plot_wave_frequency(data_tra, TRAI_select_2, fig3)
 
     plt.show()
