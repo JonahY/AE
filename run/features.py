@@ -7,6 +7,7 @@ import time
 from tqdm import tqdm
 import csv
 from plot_format import plot_norm
+from collections import Counter
 
 
 class Features:
@@ -36,7 +37,14 @@ class Features:
                                             len(str(tmp_max)) + 1)])
         return interz, midz
 
-    def cal_linear(self, energy, inter, mid, idx=0):
+    def cal_waitingTime_interval(self, res):
+        tmp = sorted(np.array(res))
+        tmp_min, tmp_max = math.floor(np.log10(min(tmp))), math.ceil(np.log10(max(tmp)))
+        inter = [pow(10, i) for i in range(tmp_min, tmp_max + 1)]
+        mid = [self.interval * pow(10, i) for i in range(tmp_min + 1, tmp_max + 2)]
+        return inter, mid
+
+    def cal_linear(self, tmp, inter, mid, idx=0):
         # 初始化横坐标
         x = np.array([])
         for i in inter:
@@ -47,15 +55,15 @@ class Features:
 
         # 初始化纵坐标
         y = np.zeros(x.shape[0])
-        for i in energy:
+        for i, n in Counter(tmp).items():
             while True:
                 try:
                     if x[idx] <= i < x[idx + 1]:
-                        y[idx] += 1
+                        y[idx] += n
                         break
                 except IndexError:
                     if x[idx] <= i:
-                        y[idx] += 1
+                        y[idx] += n
                         break
                 idx += 1
 
@@ -88,6 +96,39 @@ class Features:
         #     fit_x = np.linspace(min(log_xx), max(log_xx), 100)
         #     fit_y = np.polyval(fit, fit_x)
         return xx, yy
+
+    def cal_windows(self, tmp, samplerate=20000000):
+        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100]]
+        res = [[], [], [], []]
+        init = []
+        freq = 1 / samplerate
+
+        for idx in tqdm(range(len(eny_lim))):
+            i = 0
+            while i < tmp.shape[0]:
+                if eny_lim[idx][0] < tmp[i] < eny_lim[idx][1]:
+                    if not init:
+                        init.append(i)
+                    else:
+                        j = init.pop()
+                        if i > j + 1:
+                            k = (np.argmax(tmp[j + 1:i]) + 1) * freq
+                            res[idx].append(k)
+                elif tmp[i] > eny_lim[idx][1]:
+                    if init:
+                        j = init.pop()
+                        if i > j + 1:
+                            k = (np.argmax(tmp[j + 1:i]) + 1) * freq
+                            res[idx].append(k)
+                i += 1
+        return res
+
+    def find_max(self, res):
+        lenz = []
+        for i in range(len(res)):
+            lenz.append(len(res[i]))
+        idx = np.argmax(np.array(lenz))
+        return idx
 
     def cal_PDF(self, tmp_origin, features_path, inter, mid, tmp_1, tmp_2, xlabel, ylabel):
         xx_origin, yy_origin = self.cal_linear(tmp_origin, inter, mid)
@@ -219,6 +260,24 @@ class Features:
         ax.set_xticks(np.linspace(0, 40000, 9))
         ax.set_yticks([-1, 0, 1, 2, 3])
         plot_norm(ax, 'Time(s)', ylabel, legend=False, formatter_y=True)
+
+    def cal_waitingTime(self, tmp_origin, features_path, cls_1, cls_2, xlabel, ylabel):
+        tmp_origin, tmp_1, tmp_2 = self.cal_windows(tmp_origin), self.cal_windows(tmp_origin[cls_1]), \
+                                   self.cal_windows(tmp_origin[cls_2])
+
+        fig = plt.figure(figsize=[6, 4.5], num='Waiting Time Curve')
+        ax = plt.subplot()
+        for idx, [tmp, color, label] in enumerate(
+                zip([tmp_origin, tmp_1, tmp_2], ['y', self.color_1, self.color_2], ['Origin', 'Class 1', 'Class 2'])):
+            i = self.find_max(tmp)
+            inter, mid = self.cal_waitingTime_interval(tmp[i])
+            xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid)
+            ax.scatter(np.log10(xx), np.log10(yy), s=25, c=color, label=label)
+            with open(features_path[:-4] + '_pop%d ' % (idx) + ylabel + '.txt', 'w') as f:
+                f.write('{}, {}\n'.format(xlabel, ylabel))
+                for j in range(len(xx)):
+                    f.write('{}, {}\n'.format(xx[j], yy[j]))
+        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
 
 if __name__ == "__main__":

@@ -62,6 +62,7 @@ if __name__ == '__main__':
     features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2',
                               cls_1_KKM, cls_2_KKM, idx_select_1, idx_select_2)
     features.plot_feature_time(Eny, 'Energy(aJ)')
+    features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
 
     # Find waves on the edge
     waveform = Waveform(data_tra, path, path_pri)
