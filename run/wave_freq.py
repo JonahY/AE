@@ -1,0 +1,106 @@
+from plot_format import plot_norm
+from scipy.fftpack import fft
+import array
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+from tqdm import tqdm
+
+
+class Waveform:
+    def __init__(self, data_tra, path, path_pri):
+        self.data_tra = data_tra
+        self.path = path
+        self.path_pri = path_pri
+
+    def cal_wave(self, i, valid=True):
+        # Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI
+        sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+        time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
+        thr = i[2]
+        if valid:
+            valid_wave_idx = np.where(abs(sig) >= thr)[0]
+            start = time[valid_wave_idx[0]]
+            end = time[valid_wave_idx[-1]]
+            duration = end - start
+            sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+            time = np.linspace(0, duration, sig.shape[0])
+        return time, sig
+
+    def find_wave(self, Dur, Eny, cls_KKM, chan, dur_lim, eny_lim):
+        for i in np.where((np.log10(Dur)[cls_KKM] > dur_lim[0]) & (np.log10(Dur)[cls_KKM] < dur_lim[1]) &
+                          (np.log10(Eny)[cls_KKM] > eny_lim[0]) & (np.log10(Eny)[cls_KKM] < eny_lim[1]))[0]:
+            # Idx, Dur, Eny, TRAI
+            print(i, np.log10(Dur)[cls_KKM][i], np.log10(Eny)[cls_KKM][i], '{:.0f}'.format(chan[cls_KKM][i][-1]))
+
+    def plot_wave_TRAI(self, k):
+        # Waveform with specific TRAI
+        i = self.data_tra[k - 1]
+        time, sig = self.cal_wave(i, valid=False)
+
+        fig = plt.figure(figsize=(6, 3), num='Waveform--TRAI:%d' % k)
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot(time, sig)
+        plt.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="red")
+        plt.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="red")
+        plot_norm(ax, 'Time', 'Signal', title='TRAI:%d' % k, legend=False, grid=True)
+
+    def save_wave(self, TRAI, pop):
+        # Save waveform
+        os.chdir(self.path)
+        for idx, j in enumerate(tqdm(TRAI)):
+            i = self.data_tra[j - 1]
+            valid_time, valid_data = self.cal_wave(i)
+            with open(self.path_pri[:-6] + '_pop%s-%d' % (pop, idx + 1) + '.txt', 'w') as f:
+                f.write('Time, Signal\n')
+                for k in range(valid_data.shape[0]):
+                    f.write("{}, {}\n".format(valid_time[k], valid_data[k]))
+
+
+class Frequency:
+    def __init__(self, data_tra, path, path_pri):
+        self.data_tra = data_tra
+        self.waveform = Waveform(data_tra, path, path_pri)
+
+    def cal_frequency(self, k, valid=True):
+        i = self.data_tra[k]
+        sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+        thr, Fs = i[2], i[3]
+        Ts = 1 / Fs
+        if valid:
+            valid_wave_idx = np.where(abs(sig) >= thr)[0]
+            sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+        N = sig.shape[0]
+        fft_y = fft(sig)
+        abs_y = np.abs(fft_y)
+        normalization = abs_y / N
+        normalization_half = normalization[range(int(N / 2))]
+        frq = (np.arange(N) / N) * Fs
+        half_frq = frq[range(int(N / 2))]
+        return half_frq, normalization_half
+
+    def plot_wave_frequency(self, TRAI_select, pop):
+        fig = plt.figure(figsize=(12, 15), num='Waveform & Frequency--pop%s' % pop)
+        for idx, j in enumerate(TRAI_select):
+            i = self.data_tra[j - 1]
+            valid_time, valid_data = self.waveform.cal_wave(i, valid=False)
+            half_frq, normalization_half = self.cal_frequency(j - 1, valid=False)
+
+            ax = fig.add_subplot(5, 2, 1 + idx * 2)
+            ax.plot(valid_time, valid_data)
+            ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="red")
+            ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="red")
+            plot_norm(ax, 'Time', 'Signal', title='TRAI:%d' % j, legend=False, grid=True)
+
+            ax = fig.add_subplot(5, 2, 2 + idx * 2)
+            ax.plot(half_frq, normalization_half)
+            plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', 'TRAI:%d' % j, x_lim=[0, pow(10, 6)], legend=False)
+
+    def plot_freq_TRAI(self, k):
+        # Frequency with specific TRAI
+        half_frq, normalization_half = self.cal_frequency(k, valid=False)
+
+        fig = plt.figure(figsize=(6, 3), num='Frequency--TRAI:%d' % (k + 1))
+        ax = plt.subplot()
+        ax.plot(half_frq, normalization_half)
+        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', 'TRAI:%d' % (k + 1), legend=False)
