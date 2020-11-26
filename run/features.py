@@ -250,8 +250,8 @@ class Features:
                            label='Random selection')
         else:
             ax.scatter(np.log10(tmp_1), np.log10(tmp_2), s=25, c='g')
-            plot_norm(ax, xlabel, ylabel, chan, legend=False)
-        plot_norm(ax, xlabel, ylabel, chan)
+            plot_norm(ax, kwargs['xlabel'], kwargs['ylabel'], chan, legend=False)
+        plot_norm(ax, xlabel, ylabel, title=chan)
 
     def plot_feature_time(self, tmp, ylabel):
         fig = plt.figure(figsize=[6, 4.5], num='Time domain curve')

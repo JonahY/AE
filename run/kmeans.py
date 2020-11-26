@@ -101,14 +101,17 @@ class KernelKMeans(BaseEstimator, ClusterMixin):
         return dist.argmin(axis=1)
 
 
-def ICA(Amp, Eny):
-    x = np.zeros([Amp.shape[0], 2])
-    x[:, 0], x[:, 1] = np.log10(Amp), np.log10(Eny)
+def ICA(dim, *args):
+    n = len(args)
+    x = np.zeros([args[0].shape[0], n])
+    for i in range(n):
+        x[:, i] = np.log10(args[i])
+
     x_mean = np.mean(x, axis=0)
     x_std = np.std(x, axis=0)
     x_nor = (x - x_mean) / x_std
 
-    ica = FastICA(n_components=2)
+    ica = FastICA(n_components=dim)
     S_ = ica.fit_transform(x_nor)  # 重构信号
     A_ = ica.mixing_  # 获得估计混合后的矩阵
     return S_, A_

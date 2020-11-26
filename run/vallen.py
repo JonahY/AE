@@ -46,33 +46,35 @@ if __name__ == '__main__':
     ylabelz = ['PDF(A)', 'PDF(D)', 'PDF(E)']
     color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
     color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    features = Features(color_1, color_2, Time, feature_idx)
+    features = Features(color_1, color_2, Time, feature_idx, 8)
     interz, midz = features.cal_interval()
 
     # ICA and Kernel K-Means
-    S_, A_ = ICA(Amp, Eny)
+    S_, A_ = ICA(2, Amp, Eny, Dur)
     km = KernelKMeans(n_clusters=2, max_iter=100, random_state=55, verbose=1, kernel="rbf")
     pred = km.fit_predict(S_)
     cls_1_KKM, cls_2_KKM = pred == 1, pred == 0
 
-    # Select TRAI with material status
-    idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2 = material_status(path_pri.split('-')[2])
+    # # Select TRAI with material status
+    # idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2 = material_status(path_pri.split('-')[2])
 
     # Plot log to log scatter and Selected waveform
-    features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2',
-                              cls_1_KKM, cls_2_KKM, idx_select_1, idx_select_2)
+
+    features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
+    features.plot_correlation(Dur, Amp, 'Duration(μs)', 'Amplitude(μV)', 'Chan 2', cls_1_KKM, cls_2_KKM)
+    features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
     features.plot_feature_time(Eny, 'Energy(aJ)')
     features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
 
-    # Find waves on the edge
-    waveform = Waveform(data_tra, path, path_pri)
-    waveform.find_wave(Dur, Eny, cls_1_KKM, chan_2, [2.0, 2.5], [-1, 0])
-    waveform.save_wave(TRAI_select_1, '1')
-    waveform.save_wave(TRAI_select_2, '2')
-
-    frequency = Frequency(data_tra, path, path_pri)
-    frequency.plot_wave_frequency(TRAI_select_1, '1')
-    frequency.plot_wave_frequency(TRAI_select_2, '2')
+    # # Find waves on the edge
+    # waveform = Waveform(data_tra, path, path_pri)
+    # waveform.find_wave(Dur, Eny, cls_1_KKM, chan_2, [2.0, 2.5], [-1, 0])
+    # waveform.save_wave(TRAI_select_1, '1')
+    # waveform.save_wave(TRAI_select_2, '2')
+    #
+    # frequency = Frequency(data_tra, path, path_pri)
+    # frequency.plot_wave_frequency(TRAI_select_1, '1')
+    # frequency.plot_wave_frequency(TRAI_select_2, '2')
 
     # for i, [idx, inter, mid, xlabel, ylabel] in enumerate(zip(feature_idx, interz, midz, xlabelz, ylabelz)):
     #     tmp, tmp_1, tmp_2 = sorted(idx), sorted(idx[cls_1_KKM]), sorted(idx[cls_2_KKM])
