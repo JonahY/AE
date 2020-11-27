@@ -15,10 +15,10 @@ from features import Features
 
 
 if __name__ == '__main__':
-    path = r'E:\data\vallen\Ni-tension test-electrolysis-1-0.01-AE-20201031'
-    path_pri = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.pridb'
-    path_tra = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.tradb'
-    features_path = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.txt'
+    path = r'E:\data\vallen\Ni-tension test-pure-1-0.01-AE-20201030'
+    path_pri = r'Ni-tension test-pure-1-0.01-AE-20201030.pridb'
+    path_tra = r'Ni-tension test-pure-1-0.01-AE-20201030.tradb'
+    features_path = r'Ni-tension test-pure-1-0.01-AE-20201030.txt'
     os.chdir(path)
     # 316L-1.5-z3-AE-3 sensor-20200530
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     features.plot_correlation(Dur, Amp, 'Duration(μs)', 'Amplitude(μV)', 'Chan 2', cls_1_KKM, cls_2_KKM)
     features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
     features.plot_feature_time(Eny, 'Energy(aJ)')
-    features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
+    # features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
 
     # # Find waves on the edge
     # waveform = Waveform(data_tra, path, path_pri)
@@ -76,11 +76,11 @@ if __name__ == '__main__':
     # frequency.plot_wave_frequency(TRAI_select_1, '1')
     # frequency.plot_wave_frequency(TRAI_select_2, '2')
 
-    # for i, [idx, inter, mid, xlabel, ylabel] in enumerate(zip(feature_idx, interz, midz, xlabelz, ylabelz)):
-    #     tmp, tmp_1, tmp_2 = sorted(idx), sorted(idx[cls_1_KKM]), sorted(idx[cls_2_KKM])
-    #     features.cal_PDF(tmp, features_path, interz[i], midz[i], tmp_1, tmp_2, xlabel, ylabel)
-    #     features.cal_CCDF(tmp, features_path, tmp_1, tmp_2, xlabel, 'CCD C(s)')
-    #     features.cal_ML(tmp, features_path, tmp_1, tmp_2, xlabel, r'$\epsilon$')
+    for i, [idx, inter, mid, xlabel, ylabel] in enumerate(zip(feature_idx, interz, midz, xlabelz, ylabelz)):
+        tmp, tmp_1, tmp_2 = sorted(idx), sorted(idx[cls_1_KKM]), sorted(idx[cls_2_KKM])
+        features.cal_PDF(tmp, features_path, interz[i], midz[i], tmp_1, tmp_2, xlabel, ylabel)
+        features.cal_CCDF(tmp, features_path, tmp_1, tmp_2, xlabel, 'CCD C(s)')
+        features.cal_ML(tmp, features_path, tmp_1, tmp_2, xlabel, r'$\epsilon$')
     #
     # features.cal_contour(Eny, Dur, 'Energy(aJ)', 'Duration(μs)', 'Contour')
     # features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
