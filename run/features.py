@@ -141,11 +141,11 @@ class Features:
                 for j in range(len(xx)):
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
 
-        fig = plt.figure(figsize=[6, 4.5], num='PDF--%s' % xlabel)
+        fig = plt.figure(figsize=[5, 3], num='PDF--%s' % xlabel)
         ax = plt.subplot()
         for [xx, yy, color, label] in zip([xx_origin, xx_1, xx_2], [yy_origin, yy_1, yy_2],
                                           ['y', self.color_1, self.color_2], ['Origin', 'Class 1', 'Class 2']):
-            ax.scatter(np.log10(xx), np.log10(yy), s=25, c=color, label=label)
+            ax.loglog(xx, yy, '.', Marker='.', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_CCDF(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel):
@@ -169,7 +169,7 @@ class Features:
         ax = plt.subplot()
         for [xx, yy, color, label] in zip([xx_origin, xx_1, xx_2], [yy_origin, yy_1, yy_2],
                                           ['y', self.color_1, self.color_2], ['Origin', 'Class 1', 'Class 2']):
-            ax.plot(np.log10(xx), np.log10(yy), markersize=25, color=color, label=label)
+            ax.loglog(xx, yy, '.', Marker='.', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_ML(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel):

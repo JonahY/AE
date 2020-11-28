@@ -15,7 +15,7 @@ from features import Features
 
 
 if __name__ == '__main__':
-    path = r'E:\data\vallen\Ni-tension test-pure-1-0.01-AE-20201030'
+    path = r'D:\Dataset\vallen\Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = r'Ni-tension test-pure-1-0.01-AE-20201030.pridb'
     path_tra = r'Ni-tension test-pure-1-0.01-AE-20201030.tradb'
     features_path = r'Ni-tension test-pure-1-0.01-AE-20201030.txt'
