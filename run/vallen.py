@@ -15,10 +15,10 @@ from features import Features
 
 
 if __name__ == '__main__':
-    path = r'D:\Dataset\vallen\Ni-tension test-pure-1-0.01-AE-20201030'
-    path_pri = r'Ni-tension test-pure-1-0.01-AE-20201030.pridb'
-    path_tra = r'Ni-tension test-pure-1-0.01-AE-20201030.tradb'
-    features_path = r'Ni-tension test-pure-1-0.01-AE-20201030.txt'
+    path = r'E:\data\vallen\Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    path_pri = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.pridb'
+    path_tra = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.tradb'
+    features_path = r'Ni-tension test-electrolysis-1-0.01-AE-20201031.txt'
     os.chdir(path)
     # 316L-1.5-z3-AE-3 sensor-20200530
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
@@ -37,8 +37,9 @@ if __name__ == '__main__':
     chan_2, chan_3, chan_4 = np.array(chan_2), np.array(chan_3), np.array(chan_4)
 
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan_2[:, 1], chan_2[:, 4], chan_2[:, 5], \
-                                              chan_2[:, 6], chan_2[:, 7], chan_2[:, 8], chan_2[:, 9]
+    chan = chan_2
+    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
+                                              chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     feature_idx = [Amp, Dur, Time]
@@ -53,35 +54,51 @@ if __name__ == '__main__':
     S_, A_ = ICA(2, Amp, Eny, Dur)
     km = KernelKMeans(n_clusters=2, max_iter=100, random_state=55, verbose=1, kernel="rbf")
     pred = km.fit_predict(S_)
-    cls_1_KKM, cls_2_KKM = pred == 1, pred == 0
+    cls_1_KKM, cls_2_KKM = pred == 0, pred == 1
 
-    # # Select TRAI with material status
-    # idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2 = material_status(path_pri.split('-')[2])
+    # Select TRAI with material component and status
+    idx_same_amp_1, idx_same_amp_2, TRAI_same_amp_1, TRAI_same_amp_2 = material_status(path_pri.split('-')[2], 'amp')
+    idx_same_eny_1, idx_same_eny_2, TRAI_same_eny_1, TRAI_same_eny_2 = material_status(path_pri.split('-')[2], 'eny')
+    TRAI_1_all = chan[cls_1_KKM][:, -1].astype(int)
+    TRAI_2_all = chan[cls_2_KKM][:, -1].astype(int)
+    TRAI_all = np.append(TRAI_1_all, TRAI_2_all)
 
     # Plot log to log scatter and Selected waveform
-
-    features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
-    features.plot_correlation(Dur, Amp, 'Duration(μs)', 'Amplitude(μV)', 'Chan 2', cls_1_KKM, cls_2_KKM)
-    features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
-    features.plot_feature_time(Eny, 'Energy(aJ)')
+    # features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
+    # features.plot_correlation(Dur, Amp, 'Duration(μs)', 'Amplitude(μV)', 'Chan 2', cls_1_KKM, cls_2_KKM)
+    features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', cls_1_KKM,
+                              cls_2_KKM, idx_same_amp_1, idx_same_amp_2, title='Same amplitude')
+    features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', cls_1_KKM,
+                              cls_2_KKM, idx_same_eny_1, idx_same_eny_2, title='Same energy')
+    features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', cls_1_KKM, cls_2_KKM)
+    # features.plot_feature_time(Eny, 'Energy(aJ)')
     # features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
 
-    # # Find waves on the edge
-    # waveform = Waveform(data_tra, path, path_pri)
+    # Find waves on the edge
+    waveform = Waveform(color_1, color_2, data_tra, path, path_pri)
+    waveform.plot_2cls_wave(TRAI_same_amp_1, TRAI_same_amp_2, 'amplitude')
+    waveform.plot_2cls_wave(TRAI_same_eny_1, TRAI_same_eny_2, 'energy')
     # waveform.find_wave(Dur, Eny, cls_1_KKM, chan_2, [2.0, 2.5], [-1, 0])
     # waveform.save_wave(TRAI_select_1, '1')
     # waveform.save_wave(TRAI_select_2, '2')
-    #
-    # frequency = Frequency(data_tra, path, path_pri)
+
+    TRAI_1_all = chan[cls_1_KKM][:, -1].astype(int)
+    TRAI_2_all = chan[cls_2_KKM][:, -1].astype(int)
+    TRAI_all = np.append(TRAI_1_all, TRAI_2_all)
+
+    frequency = Frequency(color_1, color_2, data_tra, path, path_pri)
+    for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
+        Res = frequency.cal_ave_freq(trai)
+        frequency.plot_ave_freq(Res, trai.shape[0], title)
     # frequency.plot_wave_frequency(TRAI_select_1, '1')
     # frequency.plot_wave_frequency(TRAI_select_2, '2')
 
-    for i, [idx, inter, mid, xlabel, ylabel] in enumerate(zip(feature_idx, interz, midz, xlabelz, ylabelz)):
-        tmp, tmp_1, tmp_2 = sorted(idx), sorted(idx[cls_1_KKM]), sorted(idx[cls_2_KKM])
-        features.cal_PDF(tmp, features_path, interz[i], midz[i], tmp_1, tmp_2, xlabel, ylabel)
-        features.cal_CCDF(tmp, features_path, tmp_1, tmp_2, xlabel, 'CCD C(s)')
-        features.cal_ML(tmp, features_path, tmp_1, tmp_2, xlabel, r'$\epsilon$')
-    #
+    # for i, [idx, inter, mid, xlabel, ylabel] in enumerate(zip(feature_idx, interz, midz, xlabelz, ylabelz)):
+    #     tmp, tmp_1, tmp_2 = sorted(idx), sorted(idx[cls_1_KKM]), sorted(idx[cls_2_KKM])
+    #     features.cal_PDF(tmp, features_path, interz[i], midz[i], tmp_1, tmp_2, xlabel, ylabel)
+    #     features.cal_CCDF(tmp, features_path, tmp_1, tmp_2, xlabel, 'CCD C(s)')
+    #     features.cal_ML(tmp, features_path, tmp_1, tmp_2, xlabel, r'$\epsilon$')
+
     # features.cal_contour(Eny, Dur, 'Energy(aJ)', 'Duration(μs)', 'Contour')
     # features.plot_correlation(Dur, Eny, 'Duration(μs)', 'Energy(aJ)', 'Chan 2', cls_1_KKM, cls_2_KKM)
     plt.show()

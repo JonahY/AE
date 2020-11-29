@@ -39,21 +39,35 @@ def read_data(result_tra, result_pri, path_pri):
     return data_tra, data_pri, chan_2, chan_3, chan_4
 
 
-def material_status(status):
-    if status == 'pure':
-        # 0.508, 0.729, 1.022, 1.174, 1.609
-        idx_select_2 = [105, 94, 95, 109, 102]
-        TRAI_select_2 = [4117396, 4115821, 4115822, 4117632, 4117393]
-        # -0.264, -0.022
-        idx_select_1 = [95, 60]
-        TRAI_select_1 = [124104, 76892]
-    elif status == 'electrolysis':
-        # 0.115, 0.275, 0.297, 0.601, 1.024
-        idx_select_2 = [50, 148, 51, 252, 10]
-        TRAI_select_2 = [3067, 11644, 3079, 28583, 1501]
-        # 0.303, 0.409, 0.534, 0.759, 1.026
-        idx_select_1 = [13, 75, 79, 72, 71]
-        TRAI_select_1 = [2949, 14166, 14815, 14140, 14090]
+def material_status(component, status):
+    if component == 'pure':
+        if status == 'random':
+            # 0.508, 0.729, 1.022, 1.174, 1.609
+            idx_select_2 = [105, 94, 95, 109, 102]
+            TRAI_select_2 = [4117396, 4115821, 4115822, 4117632, 4117393]
+            # -0.264, -0.022
+            idx_select_1 = [95, 60]
+            TRAI_select_1 = [124104, 76892]
+    elif component == 'electrolysis':
+        if status == 'random':
+            # 0.115, 0.275, 0.297, 0.601, 1.024
+            idx_select_2 = [50, 148, 51, 252, 10]
+            TRAI_select_2 = [3067, 11644, 3079, 28583, 1501]
+            # 0.303, 0.409, 0.534, 0.759, 1.026
+            idx_select_1 = [13, 75, 79, 72, 71]
+            TRAI_select_1 = [2949, 14166, 14815, 14140, 14090]
+        if status == 'amp':
+            idx_select_2 = [90, 23, 48, 50, 29]
+            TRAI_select_2 = [4619, 2229, 2977, 3014, 2345]
+
+            idx_select_1 = [16, 26, 87, 34, 22]
+            TRAI_select_1 = [3932, 7412, 16349, 9001, 6300]
+        elif status == 'eny':
+            idx_select_2 = [79, 229, 117, 285, 59]
+            TRAI_select_2 = [4012, 22499, 7445, 34436, 3282]
+
+            idx_select_1 = [160, 141, 57, 37, 70]
+            TRAI_select_1 = [26465, 23930, 11974, 9379, 13667]
     return idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2
 
 

@@ -6,46 +6,36 @@ def formatnum(x, pos):
     return '$10^{}$'.format(int(x))
 
 
-def plot_norm(ax, *args, title='', grid=False, formatter_x=False, formatter_y=False, formatter_z=False,
-              x_lim=[], y_lim=[], z_lim=[], legend=True, legend_loc='upper left'):
-    formatter1 = FuncFormatter(formatnum)
-    if formatter_x:
-        ax.xaxis.set_major_formatter(formatter1)
-    if formatter_y:
-        ax.yaxis.set_major_formatter(formatter1)
-    # if formatter_z:
-    #     ax.zaxis.set_major_formatter(formatter1)
-    ax.spines['bottom'].set_linewidth(2)
-    ax.spines['left'].set_linewidth(2)
-    ax.spines['right'].set_linewidth(2)
-    ax.spines['top'].set_linewidth(2)
+def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], legend=True, grid=False,
+              legend_loc='upper left', legendsize=13, labelsize=14, titlesize=15, ticksize=13, linewidth=2):
+    ax.spines['bottom'].set_linewidth(linewidth)
+    ax.spines['left'].set_linewidth(linewidth)
+    ax.spines['right'].set_linewidth(linewidth)
+    ax.spines['top'].set_linewidth(linewidth)
 
     # 设置坐标刻度值的大小以及刻度值的字体
-    plt.tick_params(labelsize=12)
+    plt.tick_params(which='both', width=linewidth, labelsize=ticksize)
     labels = ax.get_xticklabels() + ax.get_yticklabels()
-    [label.set_fontname('DejaVu Sans') for label in labels]
+    [label.set_fontname('Arial') for label in labels]
 
-    font_legend = {'family': 'DejaVu Sans', 'weight': 'normal', 'size': 14}
-    font_label = {'family': 'DejaVu Sans', 'weight': 'bold', 'size': 15}
-    font_title = {'family': 'DejaVu Sans', 'weight': 'bold', 'size': 18}
+    font_legend = {'family': 'Arial', 'weight': 'normal', 'size': legendsize}
+    font_label = {'family': 'Arial', 'weight': 'bold', 'size': labelsize}
+    font_title = {'family': 'Arial', 'weight': 'bold', 'size': titlesize}
 
     if x_lim:
-        ax.set_xlim(x_lim[0], x_lim[1])
+        plt.xlim(x_lim[0], x_lim[1])
     if y_lim:
-        ax.set_ylim(y_lim[0], y_lim[1])
-    # if z_lim:
-    #     ax.set_zlim(z_lim[0], z_lim[1])
+        plt.ylim(y_lim[0], y_lim[1])
     if legend:
-        ax.legend(loc=legend_loc, prop=font_legend)
+        plt.legend(loc=legend_loc, prop=font_legend)
     if grid:
         ax.grid(ls='-.')
-    ax.set_xlabel(args[0], font_label)
-    ax.set_ylabel(args[1], font_label)
-    # if len(args) == 3:
-    #     if formatter_z:
-    #         ax.zaxis.set_major_formatter(formatter1)
-    #     if z_lim:
-    #         ax.set_zlim(z_lim[0], z_lim[1])
-    # ax.set_zlabel(args[2], font_label)
-    ax.set_title(title, font_title)
+    if xlabel:
+        ax.set_xlabel(xlabel, font_label)
+    if ylabel:
+        ax.set_ylabel(ylabel, font_label)
+    if zlabel:
+        ax.set_zlabel(zlabel, font_label)
+    if title:
+        ax.set_title(title, font_title)
     plt.tight_layout()
