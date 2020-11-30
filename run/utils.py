@@ -21,22 +21,24 @@ def sqlite_read(path):
 
 
 def read_data(result_tra, result_pri, path_pri):
-    data_tra, data_pri, chan_2, chan_3, chan_4 = [], [], [], [], []
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
     N_pri, N_tra = sqlite_read(path_pri)
     for _ in tqdm(range(N_tra), ncols=80):
         i = result_tra.fetchone()
         data_tra.append(i)
     for _ in tqdm(range(N_pri), ncols=80):
         i = result_pri.fetchone()
-        if i[-2] is not None and i[-2] > 2:
+        if i[-2] is not None and i[-2] > 5:
             data_pri.append(i)
+            if i[2] == 1:
+                chan_1.append(i)
             if i[2] == 2:
                 chan_2.append(i)
             elif i[2] == 3:
                 chan_3.append(i)
             elif i[2] == 4:
                 chan_4.append(i)
-    return data_tra, data_pri, chan_2, chan_3, chan_4
+    return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
 
 def material_status(component, status):
