@@ -1,5 +1,12 @@
 import sqlite3
 from tqdm import tqdm
+import numpy as np
+import array
+import sys
+import math
+import os
+import multiprocessing
+import shutil
 
 
 def sqlite_read(path):
@@ -24,7 +31,12 @@ def sqlite_read(path):
     return int(res)
 
 
-def read_data(result_tra, result_pri, path_pri, path_tra):
+def read_data(path_pri, path_tra, lower=2):
+    conn_tra = sqlite3.connect(path_tra)
+    conn_pri = sqlite3.connect(path_pri)
+    result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
+    result_pri = conn_pri.execute(
+        "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
     N_pri = sqlite_read(path_pri)
     N_tra = sqlite_read(path_tra)
@@ -33,7 +45,7 @@ def read_data(result_tra, result_pri, path_pri, path_tra):
         data_tra.append(i)
     for _ in tqdm(range(N_pri), ncols=80):
         i = result_pri.fetchone()
-        if i[-2] is not None and i[-2] > 5 and i[-1] > 0:
+        if i[-2] is not None and i[-2] > lower and i[-1] > 0:
             data_pri.append(i)
             if i[2] == 1:
                 chan_1.append(i)
@@ -43,6 +55,12 @@ def read_data(result_tra, result_pri, path_pri, path_tra):
                 chan_3.append(i)
             elif i[2] == 4:
                 chan_4.append(i)
+    data_tra = sorted(data_tra, key=lambda x: x[-1])
+    data_pri = np.array(data_pri)
+    chan_1 = np.array(chan_1)
+    chan_2 = np.array(chan_2)
+    chan_3 = np.array(chan_3)
+    chan_4 = np.array(chan_4)
     return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
 
@@ -125,3 +143,80 @@ def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM):
     df_2 = pd.DataFrame({'time': Time[cls_2_KKM], 'energy': Eny[cls_2_KKM]})
     df_1.to_csv('E-T_pure_pop1.csv')
     df_2.to_csv('E-T_pure_pop2.csv')
+
+
+class Export:
+    def __init__(self, chan, data_tra, features_path):
+        self.data_tra = data_tra
+        self.features_path = features_path
+        self.chan = chan
+
+    def find_idx(self):
+        Res = []
+        for i in self.data_tra:
+            Res.append(i[-1])
+        Res = np.array(Res)
+        return Res
+
+    def detect_folder(self):
+        tar = './waveform'
+        if not os.path.exists(tar):
+            os.mkdir(tar)
+        else:
+            print("=" * 46 + " Warning " + "=" * 45)
+            while True:
+                ans = input(
+                    "The exported data file has been detected. Do you want to overwrite it: (Enter 'yes' or 'no') ")
+                if ans.strip() == 'yes':
+                    shutil.rmtree(tar)
+                    os.mkdir(tar)
+                    break
+                elif ans.strip() == 'no':
+                    sys.exit(0)
+                print("Please enter 'yes' or 'no' to continue!")
+
+    def export_waveform(self, chan, thread_id=0, status='normal'):
+        if status == 'normal':
+            self.detect_folder()
+        Res = self.find_idx()
+        pbar = tqdm(chan, ncols=80)
+        for i in pbar:
+            trai = i[-1]
+            try:
+                j = self.data_tra[int(trai - 1)]
+            except IndexError:
+                try:
+                    idx = np.where(Res == trai)[0][0]
+                    j = self.data_tra[idx]
+                except IndexError:
+                    print('Error 1: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                    continue
+            if j[-1] != trai:
+                try:
+                    idx = np.where(Res == trai)[0][0]
+                    j = self.data_tra[idx]
+                except IndexError:
+                    print('Error 2: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                    continue
+            sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
+            with open('./waveform/' + self.features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
+                f.write('Amp(uV)\n')
+                for a in sig:
+                    f.write('{}\n'.format(a))
+            pbar.set_description("Process: %s | Exporting: %s" % (thread_id, int(trai)))
+
+    def accelerate_export(self, N=4):
+        # check existing file
+        self.detect_folder()
+
+        # Multiprocessing acceleration
+        each_core = int(math.ceil(self.chan.shape[0] / float(N)))
+        pool = multiprocessing.Pool(processes=N)
+        result = []
+        for idx, i in enumerate(range(0, self.chan.shape[0], each_core)):
+            result.append(pool.apply_async(self.export_waveform, (self.chan[i:i + each_core], idx + 1, 'accelerate',)))
+
+        pool.close()
+        pool.join()
+        print('Finished export of waveforms!')
+        return result

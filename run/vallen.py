@@ -11,10 +11,11 @@ import csv
 import sqlite3
 from wave_freq import Waveform, Frequency
 from kmeans import KernelKMeans, ICA
-from utils import sqlite_read, read_data, material_status, validation, val_TRAI, save_E_T
+from utils import *
 from features import Features
 import multiprocessing
 from multiprocessing import cpu_count
+import sys
 
 
 class Done:
@@ -39,109 +40,29 @@ class Done:
 
 
 if __name__ == '__main__':
-    path = r'D:\Dataset\vallen\2020.10.23-PM-2-49'
-    path_pri = r'2020.10.23-PM-2-49.pridb'
-    path_tra = r'2020.10.23-PM-2-49.tradb'
-    features_path = r'2020.10.23-PM-2-49.txt'
-    os.chdir(path)
+    path = r'E:\data\vallen'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    path_pri = fold + '.pridb'
+    path_tra = fold + '.tradb'
+    features_path = fold + '.txt'
+    os.chdir('\\'.join([path, fold]))
     # 316L-1.5-z3-AE-3 sensor-20200530
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
-    conn_tra = sqlite3.connect(path_tra)
-    conn_pri = sqlite3.connect(path_pri)
-    result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
-    result_pri = conn_pri.execute(
-        "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
-
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = read_data(result_tra, result_pri, path_pri, path_tra)
-    data_tra = sorted(data_tra, key=lambda x: x[-1])
-    data_pri = np.array(data_pri)
-    chan_1, chan_2, chan_3, chan_4 = np.array(chan_1), np.array(chan_2), np.array(chan_3), np.array(chan_4)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = read_data(path_pri, path_tra, lower=2)
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
-    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # chan = chan_2
+    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
     #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
-    # mydb = sqlite3.connect(path_tra)  # 链接数据库
-    # mydb.text_factory = lambda x: str(x, 'gbk', 'ignore')
-    # cur = mydb.cursor()  # 创建游标cur来执行SQL语句
-    #
-    # # 获取表名
-    # cur.execute("SELECT name FROM sqlite_master WHERE type='view'")
-    # Views = cur.fetchall()  # Tables 为元组列表
-    #
-    # # 获取表结构的所有信息
-    # cur.execute("SELECT TRAI FROM {}".format(Views[0][0]))
-    # res = cur.fetchall()
-    # print(len(res))
-
-    Res = []
-    for i in data_tra:
-        Res.append(i[-1])
-    Res = np.array(Res)
-
-    # each_core = int(math.ceil(chan_2.shape[0] / float(cpu_count())))
-    # result = []
-    #
-    # # Multiprocessing acceleration
-    # pool = multiprocessing.Pool(processes=cpu_count())
-    # for idx, i in enumerate(range(0, chan_2.shape[0], each_core)):
-    #     print(i)
-    #     done = Done(Res, data_tra, features_path)
-    #     result.append(pool.apply_async(done.main, (chan_2[i:i + each_core],)))
-    #
-    # pool.close()
-    # pool.join()
-    #
-    # print('!')
-
-    # data_tra = []
-    # N_tra = sqlite_read(path_tra)
-    # for _ in tqdm(range(9192202), ncols=80):
-    #     i = result_tra.fetchone()
-    #     if i is not None:
-    #         data_tra.append(i)
-    #     # print('-' * 10)
-    #     # print(i[-1])
-    #     # print('-'*10)
-
-    # j = 1
-    # data_tra = sorted(data_tra, key=lambda x: x[-1])
-    # for i in data_tra:
-    #     if i[-1] != j:
-    #         print('Error! ', i[-1], j)
-    #     j += 1
-
-    # print(len(data_tra), data_pri.shape)
-    # print(chan_2[365457][-1], data_tra[int(chan_2[365457][-1] - 1)][-1])
-
-    for i in tqdm(chan_2, ncols=80):
-        trai = i[-1]
-        try:
-            j = data_tra[int(trai-1)]
-        except IndexError:
-            try:
-                idx = np.where(Res == trai)[0][0]
-                j = data_tra[idx]
-            except IndexError:
-                print('Error 1: TRAI:{} in Channel is not found in data_tra!'.format(trai))
-                continue
-        if j[-1] != trai:
-            try:
-                idx = np.where(Res == trai)[0][0]
-                j = data_tra[idx]
-            except IndexError:
-                print('Error 2: TRAI:{} in Channel is not found in data_tra!'.format(trai))
-                continue
-        sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
-        with open('./waveform/' + features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
-            f.write('Amp(uV)\n')
-            for a in sig:
-                f.write('{}\n'.format(a))
+    # Export waveforms to txt
+    export = Export(chan, data_tra, features_path)
+    result = export.accelerate_export(cpu_count())  # Use multiprocessing to accelerate exporting
+    # export.export_waveform(chan)    # Use one thread to export
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # feature_idx = [Amp, Dur, Time]
