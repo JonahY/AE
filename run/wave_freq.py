@@ -128,7 +128,7 @@ class Frequency:
         return Res
 
     def plot_wave_frequency(self, TRAI_select, pop):
-        fig = plt.figure(figsize=(12, 15), num='Waveform & Frequency--pop%s' % pop)
+        fig = plt.figure(figsize=(6.5, 10), num='Waveform & Frequency--pop%s' % pop)
         for idx, j in enumerate(TRAI_select):
             i = self.data_tra[j - 1]
             valid_time, valid_data = self.waveform.cal_wave(i, valid=False)
@@ -138,11 +138,11 @@ class Frequency:
             ax.plot(valid_time, valid_data)
             ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
             ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', title='TRAI:%d' % j, legend=False, grid=True)
+            plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', legend=False, grid=True)
 
             ax = fig.add_subplot(5, 2, 2 + idx * 2)
             ax.plot(half_frq, normalization_half)
-            plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', 'TRAI:%d' % j, x_lim=[0, pow(10, 6)], legend=False)
+            plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
     def plot_ave_freq(self, Res, N, title):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
