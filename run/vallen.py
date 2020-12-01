@@ -6,15 +6,40 @@ import matplotlib.pyplot as plt
 import math
 import time
 from tqdm import tqdm
+import array
 import csv
 import sqlite3
 from wave_freq import Waveform, Frequency
 from kmeans import KernelKMeans, ICA
-from utils import read_data, material_status, validation, val_TRAI, save_E_T
+from utils import sqlite_read, read_data, material_status, validation, val_TRAI, save_E_T
 from features import Features
+import multiprocessing
+from multiprocessing import cpu_count
+
+
+class Done:
+    def __init__(self, Res, data_tra, features_path):
+        self.Res = Res
+        self.data_tra = data_tra
+        self.features_path = features_path
+
+    def main(self, chan):
+        for i in tqdm(chan, ncols=80):
+            trai = i[-1]
+            idx = np.where(self.Res == trai)[0][0]
+            j = self.data_tra[idx]
+            if j[-1] != trai:
+                print('Error: TRAI:{} in data_tra is not inconsistent with {} in Channel!'.format(j[-1], trai))
+                continue
+            sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
+            with open('./waveform/' + self.features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
+                f.write('Amp(uV)\n')
+                for a in sig:
+                    f.write('{}\n'.format(a))
+
 
 if __name__ == '__main__':
-    path = r'D:\data\vallen\2020.10.23-PM-2-49'
+    path = r'D:\Dataset\vallen\2020.10.23-PM-2-49'
     path_pri = r'2020.10.23-PM-2-49.pridb'
     path_tra = r'2020.10.23-PM-2-49.tradb'
     features_path = r'2020.10.23-PM-2-49.txt'
@@ -30,7 +55,7 @@ if __name__ == '__main__':
     result_pri = conn_pri.execute(
         "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
 
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = read_data(result_tra, result_pri, path_pri)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = read_data(result_tra, result_pri, path_pri, path_tra)
     data_tra = sorted(data_tra, key=lambda x: x[-1])
     data_pri = np.array(data_pri)
     chan_1, chan_2, chan_3, chan_4 = np.array(chan_1), np.array(chan_2), np.array(chan_3), np.array(chan_4)
@@ -41,15 +66,82 @@ if __name__ == '__main__':
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
     #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
-    for idx, i in enumerate(tqdm(chan_2, ncols=80)):
+    # mydb = sqlite3.connect(path_tra)  # 链接数据库
+    # mydb.text_factory = lambda x: str(x, 'gbk', 'ignore')
+    # cur = mydb.cursor()  # 创建游标cur来执行SQL语句
+    #
+    # # 获取表名
+    # cur.execute("SELECT name FROM sqlite_master WHERE type='view'")
+    # Views = cur.fetchall()  # Tables 为元组列表
+    #
+    # # 获取表结构的所有信息
+    # cur.execute("SELECT TRAI FROM {}".format(Views[0][0]))
+    # res = cur.fetchall()
+    # print(len(res))
+
+    Res = []
+    for i in data_tra:
+        Res.append(i[-1])
+    Res = np.array(Res)
+
+    # each_core = int(math.ceil(chan_2.shape[0] / float(cpu_count())))
+    # result = []
+    #
+    # # Multiprocessing acceleration
+    # pool = multiprocessing.Pool(processes=cpu_count())
+    # for idx, i in enumerate(range(0, chan_2.shape[0], each_core)):
+    #     print(i)
+    #     done = Done(Res, data_tra, features_path)
+    #     result.append(pool.apply_async(done.main, (chan_2[i:i + each_core],)))
+    #
+    # pool.close()
+    # pool.join()
+    #
+    # print('!')
+
+    # data_tra = []
+    # N_tra = sqlite_read(path_tra)
+    # for _ in tqdm(range(9192202), ncols=80):
+    #     i = result_tra.fetchone()
+    #     if i is not None:
+    #         data_tra.append(i)
+    #     # print('-' * 10)
+    #     # print(i[-1])
+    #     # print('-'*10)
+
+    # j = 1
+    # data_tra = sorted(data_tra, key=lambda x: x[-1])
+    # for i in data_tra:
+    #     if i[-1] != j:
+    #         print('Error! ', i[-1], j)
+    #     j += 1
+
+    # print(len(data_tra), data_pri.shape)
+    # print(chan_2[365457][-1], data_tra[int(chan_2[365457][-1] - 1)][-1])
+
+    for i in tqdm(chan_2, ncols=80):
         trai = i[-1]
-        j = data_tra[trai - 1]
-        if j != trai:
-            print('Error: TRAI in data_tra is not inconsistent with that in Channel!')
-        with open('./waveform/' + features_path[:-4] + '_%d.txt' % (idx + 1), 'w') as f:
-            f.write('Time(s), Amp(uV)\n')
-            for t, a in zip(time, amp):
-                f.write('{}, {}\n'.format(t, a))
+        try:
+            j = data_tra[int(trai-1)]
+        except IndexError:
+            try:
+                idx = np.where(Res == trai)[0][0]
+                j = data_tra[idx]
+            except IndexError:
+                print('Error 1: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                continue
+        if j[-1] != trai:
+            try:
+                idx = np.where(Res == trai)[0][0]
+                j = data_tra[idx]
+            except IndexError:
+                print('Error 2: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                continue
+        sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
+        with open('./waveform/' + features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
+            f.write('Amp(uV)\n')
+            for a in sig:
+                f.write('{}\n'.format(a))
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # feature_idx = [Amp, Dur, Time]

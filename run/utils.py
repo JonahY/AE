@@ -15,20 +15,25 @@ def sqlite_read(path):
     Tables = cur.fetchall()  # Tables 为元组列表
 
     # 获取表结构的所有信息
-    cur.execute("SELECT * FROM {}".format(Tables[3][0]))
-    res = cur.fetchall()
-    return int(res[-2][1]), int(res[-1][1])
+    if path[-5:] == 'pridb':
+        cur.execute("SELECT * FROM {}".format(Tables[3][0]))
+        res = cur.fetchall()[-2][1]
+    elif path[-5:] == 'tradb':
+        cur.execute("SELECT * FROM {}".format(Tables[1][0]))
+        res = cur.fetchall()[-3][1]
+    return int(res)
 
 
-def read_data(result_tra, result_pri, path_pri):
+def read_data(result_tra, result_pri, path_pri, path_tra):
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
-    N_pri, N_tra = sqlite_read(path_pri)
+    N_pri = sqlite_read(path_pri)
+    N_tra = sqlite_read(path_tra)
     for _ in tqdm(range(N_tra), ncols=80):
         i = result_tra.fetchone()
         data_tra.append(i)
     for _ in tqdm(range(N_pri), ncols=80):
         i = result_pri.fetchone()
-        if i[-2] is not None and i[-2] > 5:
+        if i[-2] is not None and i[-2] > 5 and i[-1] > 0:
             data_pri.append(i)
             if i[2] == 1:
                 chan_1.append(i)
