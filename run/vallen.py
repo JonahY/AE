@@ -18,27 +18,6 @@ from multiprocessing import cpu_count
 import sys
 
 
-class Done:
-    def __init__(self, Res, data_tra, features_path):
-        self.Res = Res
-        self.data_tra = data_tra
-        self.features_path = features_path
-
-    def main(self, chan):
-        for i in tqdm(chan, ncols=80):
-            trai = i[-1]
-            idx = np.where(self.Res == trai)[0][0]
-            j = self.data_tra[idx]
-            if j[-1] != trai:
-                print('Error: TRAI:{} in data_tra is not inconsistent with {} in Channel!'.format(j[-1], trai))
-                continue
-            sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
-            with open('./waveform/' + self.features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
-                f.write('Amp(uV)\n')
-                for a in sig:
-                    f.write('{}\n'.format(a))
-
-
 if __name__ == '__main__':
     path = r'E:\data\vallen'
     fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
@@ -95,6 +74,7 @@ if __name__ == '__main__':
     #                           cls_2_KKM, idx_same_eny_1, idx_same_eny_2, title='Same energy')
     # features.plot_correlation(Amp, Eny, 'Amplitude(μV)', 'Energy(aJ)', cls_1_KKM, cls_2_KKM)
     # features.plot_feature_time(Eny, 'Energy(aJ)')
+    # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', [20, 55], [-20, 40], 50, 50)
     # features.cal_waitingTime(Eny, features_path, cls_1_KKM, cls_2_KKM, 'Δt(s)', 'p(Δt)')
 
     # Find waves on the edge

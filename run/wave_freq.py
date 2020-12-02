@@ -41,7 +41,7 @@ class Waveform:
         for idx, [j, lim] in enumerate(zip(TRAI_select_1, ylim)):
             i = self.data_tra[j - 1]
             if i[-1] != j:
-                print('Error!')
+                print('Error: TRAI in data_tra is inconsistent with that by input!')
                 break
             valid_time, valid_data = self.cal_wave(i, valid=False)
 
@@ -49,22 +49,24 @@ class Waveform:
             ax.plot(valid_time, valid_data, color=self.color_1)
             ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
             ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax, xlabel='Time(μs)', ylabel='Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
+            plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
 
             ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
             i = self.data_tra[TRAI_select_2[idx] - 1]
             if i[-1] != TRAI_select_2[idx]:
-                print('Error!')
+                print('Error: TRAI in data_tra is inconsistent with that by input!')
                 break
             valid_time, valid_data = self.cal_wave(i, valid=False)
             ax2.plot(valid_time, valid_data, color=self.color_2)
             ax2.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
             ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax2, xlabel='Time(μs)', ylabel='Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
+            plot_norm(ax2, 'Time(μs)', 'Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
 
     def plot_wave_TRAI(self, k):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
+        if i[-1] != k:
+            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], k))
         time, sig = self.cal_wave(i, valid=False)
 
         fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI:%d' % k)
@@ -157,4 +159,4 @@ class Frequency:
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d' % (k + 1))
         ax = plt.subplot()
         ax.plot(half_frq, normalization_half)
-        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', 'TRAI:%d' % (k + 1), legend=False)
+        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', title='TRAI:%d' % (k + 1), legend=False)

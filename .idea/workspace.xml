@@ -176,7 +176,7 @@
       <option name="presentableId" value="Default" />
       <updated>1603173964200</updated>
       <workItem from="1606207705998" duration="47770000" />
-      <workItem from="1606702538253" duration="14797000" />
+      <workItem from="1606702538253" duration="25086000" />
     </task>
     <servers />
   </component>
@@ -196,6 +196,10 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="682" y="347" key="#Notifications" timestamp="1606871540658">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="682" y="347" key="#Notifications/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1606871540658" />
     <state x="687" y="272" key="#com.intellij.tools.ToolEditorDialog" timestamp="1603263813704">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

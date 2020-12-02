@@ -133,7 +133,7 @@ class Features:
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
         ax = plt.subplot()
         for tmp, color, label in zip([tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2],
-                                       ['whole', 'population 1', 'population 2']):
+                                     ['whole', 'population 1', 'population 2']):
             xx, yy = self.cal_linear(tmp, inter, mid)
             ax.loglog(xx, yy, '.', Marker='.', markersize=8, color=color, label=label)
             with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
@@ -148,8 +148,8 @@ class Features:
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
         ax = plt.subplot()
         for tmp, N, color, label in zip([tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2],
-                                          ['black', self.color_1, self.color_2],
-                                          ['whole', 'population 1', 'population 2']):
+                                        ['black', self.color_1, self.color_2],
+                                        ['whole', 'population 1', 'population 2']):
             xx, yy = [], []
             for i in range(N - 1):
                 xx.append(np.mean([tmp[i], tmp[i + 1]]))
@@ -168,8 +168,8 @@ class Features:
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
         for tmp, N, color, label in zip([tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2],
-                                          ['black', self.color_1, self.color_2],
-                                          ['whole', 'population 1', 'population 2']):
+                                        ['black', self.color_1, self.color_2],
+                                        ['whole', 'population 1', 'population 2']):
             ML_y, Error_bar = [], []
             for j in tqdm(range(N)):
                 valid_x = sorted(tmp)[j:]
@@ -195,7 +195,7 @@ class Features:
         fig = plt.figure(figsize=[6, 3.9], num='Waiting Time Curve')
         ax = plt.subplot()
         for tmp, color, label in zip([tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2],
-                                       ['whole', 'population 1', 'population 2']):
+                                     ['whole', 'population 1', 'population 2']):
             i = self.find_max(tmp)
             inter, mid = self.cal_waitingTime_interval(tmp[i])
             xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid)
@@ -206,34 +206,34 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, padding=False, clabel=False):
+    def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, x_lim, y_lim, size_x=40, size_y=40, padding=False, clabel=False,
+                    title=''):
         tmp_1, tmp_2 = 20 * np.log10(tmp_1), 20 * np.log10(tmp_2)
-        x, y = np.linspace(0, 100, 75), np.linspace(-20, 80, 65)
+        x, y = np.linspace(x_lim[0], x_lim[1], size_x), np.linspace(y_lim[0], y_lim[1], size_y)
         X, Y = np.meshgrid(x, y)
         height = np.zeros([X.shape[0], Y.shape[1]])
-        linestyles = ['solid'] * 6 + ['--'] * 4
-        levels = [0.5, 1.5, 3, 6, 12, 24, 48, 96, 192, 384]
-        colors = ['navy', 'blueviolet', 'cornflowerblue', 'lightsteelblue',
-                  'aliceblue', 'lightyellow', 'gold', 'yellow', 'red', 'darkred']
+        linestyles = ['solid'] * 8 + ['--'] * 4
+        levels = [1, 2, 3, 6, 12, 24, 48, 96, 192, 384, 768, 1536]
+        colors = [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0.5, 0.5, 0.5],
+                  [1, 0.3, 0], [0, 0, 0], [0, 1, 1], [1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0]]
 
         for i in range(X.shape[1] - 1):
             valid_x = np.where((tmp_1 < X[0, i + 1]) & (tmp_1 >= X[0, i]))[0]
             for j in range(Y.shape[0] - 1):
                 valid_y = np.where((tmp_2 < Y[j + 1, 0]) & (tmp_2 >= Y[j, 0]))[0]
-
                 height[j, i] = np.intersect1d(valid_x, valid_y).shape[0]
 
         fig = plt.figure(figsize=[6, 3.9], num='Contour--%s & %s' % (ylabel, xlabel))
         ax = plt.subplot()
         if padding:
-            ct = ax.contourf(X, Y, height, levels, colors=colors, extend='max')
-            cbar = plt.colorbar(ct)
+            ctf = ax.contourf(X, Y, height, levels, colors=colors, extend='max')
+            cbar = plt.colorbar(ctf)
         else:
             ct = plt.contour(X, Y, height, levels, colors=colors, linewidths=1, linestyles=linestyles)
             cbar = plt.colorbar(ct)
         if clabel:
             ax.clabel(ct, inline=True, colors='k', fmt='%.1f')
-        plot_norm(ax, xlabel, ylabel, title, legend=False)
+        plot_norm(ax, xlabel, ylabel, title=title, legend=False)
 
     def plot_correlation(self, tmp_1, tmp_2, xlabel, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None, title=''):
         fig = plt.figure(figsize=[6, 3.9], num='Correlation--%s & %s %s' % (ylabel, xlabel, title))
