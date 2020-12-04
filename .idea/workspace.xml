@@ -66,7 +66,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
-  <component name="RunManager" selected="Python.vallen (1)">
+  <component name="RunManager" selected="Python.vallen">
     <configuration name="preprocess" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -111,13 +111,10 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="vallen (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="vallen" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -126,7 +123,7 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run/vallen.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -157,7 +154,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.vallen (1)" />
+        <item itemvalue="Python.vallen" />
         <item itemvalue="Python.vallen" />
         <item itemvalue="Python.preprocess" />
         <item itemvalue="Python.test" />
@@ -177,6 +174,7 @@
       <updated>1603173964200</updated>
       <workItem from="1606207705998" duration="47770000" />
       <workItem from="1606702538253" duration="25697000" />
+      <workItem from="1607063709015" duration="11108000" />
     </task>
     <servers />
   </component>
@@ -200,6 +198,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="682" y="347" key="#Notifications/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1606871540658" />
+    <state x="326" y="366" key="#SQL_Dialects" timestamp="1607064197282">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="326" y="366" key="#SQL_Dialects/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607064197282" />
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1607063829188">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607063829188" />
     <state x="687" y="272" key="#com.intellij.tools.ToolEditorDialog" timestamp="1603263813704">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -254,6 +260,10 @@
     </state>
     <state x="-94" y="111" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1606788682272" />
     <state x="461" y="169" key="SettingsEditor/0.0.1920.1050@0.0.1920.1050" timestamp="1603263840876" />
+    <state x="437" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1607070638431">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="437" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607070638431" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

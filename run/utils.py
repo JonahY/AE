@@ -9,59 +9,97 @@ import multiprocessing
 import shutil
 
 
-def sqlite_read(path):
-    """
-    python读取sqlite数据库文件
-    """
-    mydb = sqlite3.connect(path)  # 链接数据库
-    mydb.text_factory = lambda x: str(x, 'gbk', 'ignore')
-    cur = mydb.cursor()  # 创建游标cur来执行SQL语句
+class Reload:
+    def __init__(self, path_pri, path_tra, fold):
+        self.path_pri = path_pri
+        self.path_tra = path_tra
+        self.fold = fold
 
-    # 获取表名
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    Tables = cur.fetchall()  # Tables 为元组列表
+    def sqlite_read(self, path):
+        """
+        python读取sqlite数据库文件
+        """
+        mydb = sqlite3.connect(path)  # 链接数据库
+        mydb.text_factory = lambda x: str(x, 'gbk', 'ignore')
+        cur = mydb.cursor()  # 创建游标cur来执行SQL语句
 
-    # 获取表结构的所有信息
-    if path[-5:] == 'pridb':
-        cur.execute("SELECT * FROM {}".format(Tables[3][0]))
-        res = cur.fetchall()[-2][1]
-    elif path[-5:] == 'tradb':
-        cur.execute("SELECT * FROM {}".format(Tables[1][0]))
-        res = cur.fetchall()[-3][1]
-    return int(res)
+        # 获取表名
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        Tables = cur.fetchall()  # Tables 为元组列表
 
+        # 获取表结构的所有信息
+        if path[-5:] == 'pridb':
+            cur.execute("SELECT * FROM {}".format(Tables[3][0]))
+            res = cur.fetchall()[-2][1]
+        elif path[-5:] == 'tradb':
+            cur.execute("SELECT * FROM {}".format(Tables[1][0]))
+            res = cur.fetchall()[-3][1]
+        return int(res)
 
-def read_data(path_pri, path_tra, lower=2):
-    conn_tra = sqlite3.connect(path_tra)
-    conn_pri = sqlite3.connect(path_pri)
-    result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
-    result_pri = conn_pri.execute(
-        "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
-    N_pri = sqlite_read(path_pri)
-    N_tra = sqlite_read(path_tra)
-    for _ in tqdm(range(N_tra), ncols=80):
-        i = result_tra.fetchone()
-        data_tra.append(i)
-    for _ in tqdm(range(N_pri), ncols=80):
-        i = result_pri.fetchone()
-        if i[-2] is not None and i[-2] > lower and i[-1] > 0:
-            data_pri.append(i)
-            if i[2] == 1:
-                chan_1.append(i)
-            if i[2] == 2:
-                chan_2.append(i)
-            elif i[2] == 3:
-                chan_3.append(i)
-            elif i[2] == 4:
-                chan_4.append(i)
-    data_tra = sorted(data_tra, key=lambda x: x[-1])
-    data_pri = np.array(data_pri)
-    chan_1 = np.array(chan_1)
-    chan_2 = np.array(chan_2)
-    chan_3 = np.array(chan_3)
-    chan_4 = np.array(chan_4)
-    return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
+    def read_with_time(self, time):
+        conn_pri = sqlite3.connect(self.path_pri)
+        result_pri = conn_pri.execute(
+            "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+        chan_1, chan_2, chan_3, chan_4 = [], [], [], []
+        t = [[] for _ in range(len(time) - 1)]
+        N_pri = self.sqlite_read(self.path_pri)
+        for _ in tqdm(range(N_pri)):
+            i = result_pri.fetchone()
+            if i[-2] is not None and i[-2] >= 6 and i[-1] > 0:
+                for idx, chan in zip(np.arange(1, 5), [chan_1, chan_2, chan_3, chan_4]):
+                    if i[2] == idx:
+                        chan.append(i)
+                        for j in range(len(t)):
+                            if time[j] <= i[1] < time[j + 1]:
+                                t[j].append(i)
+                                break
+                        break
+        chan_1 = np.array(chan_1)
+        chan_2 = np.array(chan_2)
+        chan_3 = np.array(chan_3)
+        chan_4 = np.array(chan_4)
+        return t, chan_1, chan_2, chan_3, chan_4
+
+    def read_data(self, lower=2):
+        conn_tra = sqlite3.connect(self.path_tra)
+        conn_pri = sqlite3.connect(self.path_pri)
+        result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
+        result_pri = conn_pri.execute(
+            "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+        data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
+        N_pri = self.sqlite_read(self.path_pri)
+        N_tra = self.sqlite_read(self.path_tra)
+        for _ in tqdm(range(N_tra), ncols=80):
+            i = result_tra.fetchone()
+            data_tra.append(i)
+        for _ in tqdm(range(N_pri), ncols=80):
+            i = result_pri.fetchone()
+            if i[-2] is not None and i[-2] > lower and i[-1] > 0:
+                data_pri.append(i)
+                if i[2] == 1:
+                    chan_1.append(i)
+                if i[2] == 2:
+                    chan_2.append(i)
+                elif i[2] == 3:
+                    chan_3.append(i)
+                elif i[2] == 4:
+                    chan_4.append(i)
+        data_tra = sorted(data_tra, key=lambda x: x[-1])
+        data_pri = np.array(data_pri)
+        chan_1 = np.array(chan_1)
+        chan_2 = np.array(chan_2)
+        chan_3 = np.array(chan_3)
+        chan_4 = np.array(chan_4)
+        return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
+
+    def export_feature(self, t, time):
+        for i in range(len(time) - 1):
+            with open(self.fold + '-%d-%d.txt' % (time[i], time[i + 1]), 'w') as f:
+                f.write('SetID, TRAI, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts\n')
+                # ID, Time(s), Chan, Thr(μV), Thr(dB), Amp(μV), Amp(dB), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts, Frequency(Hz)
+                for i in t[i]:
+                    f.write('{}, {}, {:.8f}, {}, {:.7f}, {:.7f}, {:.2f}, {:.2f}, {:.7f}, {:.7f}, {}\n'.format(
+                        i[0], i[-1], i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9]))
 
 
 def material_status(component, status):

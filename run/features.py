@@ -206,10 +206,21 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, x_lim, y_lim, size_x=40, size_y=40, padding=False, clabel=False,
-                    title=''):
+    def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
+                    method='linear_bin', padding=False, clabel=False):
         tmp_1, tmp_2 = 20 * np.log10(tmp_1), 20 * np.log10(tmp_2)
-        x, y = np.linspace(x_lim[0], x_lim[1], size_x), np.linspace(y_lim[0], y_lim[1], size_y)
+        if method == 'log_bin':
+            sum_x, sum_y = x_lim[1] - x_lim[0], y_lim[1] - y_lim[0]
+            arry_x = np.logspace(np.log10(sum_x + 10), 1, size_x) / (sum(np.logspace(np.log10(sum_x + 10), 1, size_x)) / sum_x)
+            arry_y = np.logspace(np.log10(sum_y + 10), 1, size_y) / (sum(np.logspace(np.log10(sum_y + 10), 1, size_y)) / sum_y)
+            x, y = [], []
+            for tmp, res, arry in zip([x_lim[0], y_lim[0]], [x, y], [arry_x, arry_y]):
+                for i in arry:
+                    res.append(tmp)
+                    tmp += i
+            x, y = np.array(x), np.array(y)
+        elif method == 'linear_bin':
+            x, y = np.linspace(x_lim[0], x_lim[1], size_x), np.linspace(y_lim[0], y_lim[1], size_y)
         X, Y = np.meshgrid(x, y)
         height = np.zeros([X.shape[0], Y.shape[1]])
         linestyles = ['solid'] * 8 + ['--'] * 4
@@ -223,7 +234,7 @@ class Features:
                 valid_y = np.where((tmp_2 < Y[j + 1, 0]) & (tmp_2 >= Y[j, 0]))[0]
                 height[j, i] = np.intersect1d(valid_x, valid_y).shape[0]
 
-        fig = plt.figure(figsize=[6, 3.9], num='Contour--%s & %s' % (ylabel, xlabel))
+        fig = plt.figure(figsize=[6, 3.9], num='Contour--%s & %s' % (ylabel.split(' ')[-1][0], xlabel.split(' ')[-1][0]))
         ax = plt.subplot()
         if padding:
             ctf = ax.contourf(X, Y, height, levels, colors=colors, extend='max')

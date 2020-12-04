@@ -20,27 +20,32 @@ import sys
 
 if __name__ == '__main__':
     path = r'E:\data\vallen'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = '2020.11.10-PM-self'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('\\'.join([path, fold]))
+    # 2020.11.10-PM-self
+    # 6016_CR_1
     # 316L-1.5-z3-AE-3 sensor-20200530
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = read_data(path_pri, path_tra, lower=2)
-    print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
-                                                                                 chan_3.shape[0], chan_4.shape[0]))
-    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    chan = chan_2
+    reload = Reload(path_pri, path_tra, fold)
+    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_data(lower=2)
+    time = [0, 1600, 3044, 4177, 5997, 8285, 11592, 16240, 18000]
+    t, chan_1, chan_2, chan_3, chan_4 = reload.read_with_time(time)
+    # print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
+    #                                                                              chan_3.shape[0], chan_4.shape[0]))
+    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
     #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
     # Export waveforms to txt
-    export = Export(chan, data_tra, features_path)
-    result = export.accelerate_export(cpu_count())  # Use multiprocessing to accelerate exporting
+    # export = Export(chan, data_tra, features_path)
+    # result = export.accelerate_export(cpu_count())  # Use multiprocessing to accelerate exporting
     # export.export_waveform(chan)    # Use one thread to export
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
