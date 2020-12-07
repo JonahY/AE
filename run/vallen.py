@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # interz, midz = features.cal_interval()
 
     # # ICA and Kernel K-Means
-    # S_, A_ = ICA(2, Amp, Eny, Dur)
+    # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
     # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=55, verbose=1, kernel="rbf")
     # pred = km.fit_predict(S_)
     # cls_1_KKM, cls_2_KKM = pred == 0, pred == 1
@@ -90,10 +90,6 @@ if __name__ == '__main__':
     # waveform.save_wave(TRAI_select_1, '1')
     # waveform.save_wave(TRAI_select_2, '2')
 
-    # TRAI_1_all = chan[cls_1_KKM][:, -1].astype(int)
-    # TRAI_2_all = chan[cls_2_KKM][:, -1].astype(int)
-    # TRAI_all = np.append(TRAI_1_all, TRAI_2_all)
-    #
     # frequency = Frequency(color_1, color_2, data_tra, path, path_pri)
     # for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
     #     Res = frequency.cal_ave_freq(trai)

@@ -105,7 +105,7 @@ def ICA(dim, *args):
     n = len(args)
     x = np.zeros([args[0].shape[0], n])
     for i in range(n):
-        x[:, i] = np.log10(args[i])
+        x[:, i] = args[i]
 
     x_mean = np.mean(x, axis=0)
     x_std = np.std(x, axis=0)
@@ -114,4 +114,4 @@ def ICA(dim, *args):
     ica = FastICA(n_components=dim)
     S_ = ica.fit_transform(x_nor)  # 重构信号
     A_ = ica.mixing_  # 获得估计混合后的矩阵
-    return S_, A_
+    return S_, A_s
