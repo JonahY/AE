@@ -50,11 +50,11 @@ class Features:
                                             len(str(tmp_max)) + 1)])
         return interz, midz
 
-    def cal_waitingTime_interval(self, res):
+    def cal_negtive_interval(self, res):
         tmp = sorted(np.array(res))
         tmp_min, tmp_max = math.floor(np.log10(min(tmp))), math.ceil(np.log10(max(tmp)))
-        inter = [pow(10, i) for i in range(tmp_min, tmp_max + 1)]
-        mid = [self.interval * pow(10, i) for i in range(tmp_min + 1, tmp_max + 2)]
+        inter = [pow(10, i) for i in range(tmp_min, tmp_max+1)]
+        mid = [interval * pow(10, i) for i in range(tmp_min+1, tmp_max+2)]
         return inter, mid
 
     def cal_linear(self, tmp, inter, mid, idx=0):
@@ -110,38 +110,40 @@ class Features:
         #     fit_y = np.polyval(fit, fit_x)
         return xx, yy
 
-    def cal_windows(self, tmp, samplerate=20000000):
-        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100]]
-        res = [[], [], [], []]
-        init = []
-        freq = 1 / samplerate
+    def cal_N_Naft(self, tmp, eny_lim):
+        N_ms, N_as = 0, 0
+        main_peak = np.where(eny_lim[0] < tmp)[0]
+        if len(main_peak):
+            for i in range(main_peak.shape[0] - 1):
+                if main_peak[i] >= eny_lim[1]:
+                    continue
+                elif main_peak[i+1] - main_peak[i] == 1:
+                    N_ms += tmp[main_peak[i]]
+                    continue
+                N_ms += tmp[main_peak[i]]
+                N_as += np.max(tmp[main_peak[i]+1:main_peak[i+1]])
+            if main_peak[-1] < tmp.shape[0] - 1:
+                N_as += np.max(tmp[main_peak[-1]+1:])
+            N_ms += tmp[main_peak[-1]]
+        return N_ms + N_as, N_as
 
+    def cal_OmiroLaw_helper(self, tmp, eny_lim):
+        res = [[] for _ in range(len(eny_lim))]
         for idx in tqdm(range(len(eny_lim))):
-            i = 0
-            while i < tmp.shape[0]:
-                if eny_lim[idx][0] < tmp[i] < eny_lim[idx][1]:
-                    if not init:
-                        init.append(i)
-                    else:
-                        j = init.pop()
-                        if i > j + 1:
-                            k = (np.argmax(tmp[j + 1:i]) + 1) * freq
+            main_peak = np.where((eny_lim[idx][0] < tmp) & (tmp < eny_lim[idx][1]))[0]
+            if len(main_peak):
+                for i in range(main_peak.shape[0] - 1):
+                    for j in range(main_peak[i]+1, main_peak[i+1]+1):
+                        if tmp[j] < eny_lim[idx][1]:
+                            k = Time[j] - Time[main_peak[i]]
                             res[idx].append(k)
-                elif tmp[i] > eny_lim[idx][1]:
-                    if init:
-                        j = init.pop()
-                        if i > j + 1:
-                            k = (np.argmax(tmp[j + 1:i]) + 1) * freq
-                            res[idx].append(k)
-                i += 1
+                        else:
+                            break
+                if main_peak[-1] < tmp.shape[0] - 1:
+                    for j in range(main_peak[-1] + 1, tmp.shape[0]):
+                        k = Time[j] - Time[main_peak[-1]]
+                        res[idx].append(k)
         return res
-
-    def find_max(self, res):
-        lenz = []
-        for i in range(len(res)):
-            lenz.append(len(res[i]))
-        idx = np.argmax(np.array(lenz))
-        return idx
 
     def cal_PDF(self, tmp_origin, features_path, inter, mid, tmp_1, tmp_2, xlabel, ylabel):
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
@@ -168,7 +170,8 @@ class Features:
             for i in range(N - 1):
                 xx.append(np.mean([tmp[i], tmp[i + 1]]))
                 yy.append((N - i + 1) / N)
-            ax.loglog(xx, yy, '.', Marker='.', markersize=8, color=color, label=label)
+            ax.loglog(xx, yy, color=color, label=label)
+#             ax.plot(np.log10(xx), np.log10(yy), markersize=25, color=color, label=label)
             with open(features_path[:-4] + '_{}_'.format(label) + 'CCDF(%s).txt' % xlabel[0], 'w') as f:
                 f.write('{}, {}\n'.format(xlabel, ylabel))
                 for j in range(len(xx)):
@@ -201,24 +204,6 @@ class Features:
                 for j in range(len(ML_y)):
                     f.write('{}, {}, {}\n'.format(sorted(tmp)[j], ML_y[j], Error_bar[j]))
         plot_norm(ax, xlabel, ylabel, y_lim=[1.25, 3])
-
-    def cal_waitingTime(self, tmp_origin, features_path, cls_1, cls_2, xlabel, ylabel):
-        tmp_origin, tmp_1, tmp_2 = self.cal_windows(tmp_origin), self.cal_windows(tmp_origin[cls_1]), \
-                                   self.cal_windows(tmp_origin[cls_2])
-
-        fig = plt.figure(figsize=[6, 3.9], num='Waiting Time Curve')
-        ax = plt.subplot()
-        for tmp, color, label in zip([tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2],
-                                     ['whole', 'population 1', 'population 2']):
-            i = self.find_max(tmp)
-            inter, mid = self.cal_waitingTime_interval(tmp[i])
-            xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid)
-            ax.loglog(xx, yy, '.', Marker='.', markersize=8, color=color, label=label)
-            with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
-                f.write('{}, {}\n'.format(xlabel, ylabel))
-                for j in range(len(xx)):
-                    f.write('{}, {}\n'.format(xx[j], yy[j]))
-        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
@@ -328,6 +313,70 @@ class Features:
         ax.set_xticks(np.linspace(0, 40000, 9))
         ax.set_yticks([-1, 0, 1, 2, 3])
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
+
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel):
+        fig = plt.figure(figsize=[6, 3.9], num='Bath law')
+        ax = plt.subplot()
+        for tmp, marker, color, label in zip([tmp_1, tmp_2], ['p', 'h'], [color_1, color_2], ['Population 1', 'Population 2']):
+            tmp_max = int(max(tmp))
+            inter = [pow(10, i) for i in range(0, len(str(tmp_max)))]
+            x = np.array([])
+            y = []
+            for i in inter:
+                x = np.append(x, np.linspace(i, i * 10, self.interval_num, endpoint=False))
+            for k in range(x.shape[0]):
+                if k != x.shape[0] - 1:
+                    N, Naft = cal_N_Naft(tmp, [x[k], x[k+1]])
+                    if Naft != 0 and N != 0:
+                        y.append(np.log10(N / Naft))
+                    else:
+                        y.append(float('inf'))
+                else:
+                    N, Naft = cal_N_Naft(tmp, [x[k], float('inf')])
+                    if Naft != 0 and N != 0:
+                        y.append(np.log10(N / Naft))
+                    else:
+                        y.append(float('inf'))
+
+            y = np.array(y)
+            x, y = x[y != float('inf')], y[y != float('inf')]
+            x_eny = np.zeros(x.shape[0])
+            for idx in range(len(x) - 1):
+                x_eny[idx] = (x[idx] + x[idx + 1]) / 2
+            x_eny[-1] = x[-1] + pow(10, len(str(x[-1])))*(0.9/self.interval_num) / 2
+            ax.semilogx(x_eny, y, color=color, marker=marker, mec=color, mfc='none', label=label)
+        ax.axhline(1.2, ls='-.', linewidth=1, color="black")
+        plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
+
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel):
+        fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
+        ax = plt.subplot()
+        for [time, marker, color, label] in zip([time_1, time_2], ['p', 'h'], ['blue', 'g'],
+                                                ['Population 1', 'Population 2']):
+            res = []
+            for i in range(time.shape[0] - 1):
+                res.append(time[i+1] - time[i])
+            inter, mid = self.cal_negtive_interval(res)
+            xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid)
+            ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel):
+        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
+        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1, eny_lim), self.cal_OmiroLaw_helper(tmp_2, eny_lim)
+        for idx, [tmp, title] in enumerate(zip([tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1',
+                                                                            'Omori law_Population 2'])):
+            fig = plt.figure(figsize=[6, 3.9], num=title)
+            ax = plt.subplot()
+            for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'], ['r', 'y', 'blue', 'g', 'purple'],
+                                                           ['$10^{-2}aJ<E_{MS}<10^{-1}aJ$', '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
+                                                            '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{2}aJ$',
+                                                            '$10^{2}aJ<E_{MS}<10^{3}aJ$'])):
+                if len(tmp[i]):
+                    inter, mid = self.cal_negtive_interval(tmp[i])
+                    xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid)
+                    ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+            plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
 
 if __name__ == "__main__":
