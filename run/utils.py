@@ -111,6 +111,13 @@ def material_status(component, status):
             # -0.264, -0.022
             idx_select_1 = [95, 60]
             TRAI_select_1 = [124104, 76892]
+
+            idx_same_amp_1 = [45, 62, 39, 41, 56]
+            TRAI_same_amp_1 = [88835, 114468, 82239, 84019, 104771]
+
+            idx_same_amp_2 = [61, 118, 139, 91, 136]
+            TRAI_same_amp_2 = [74951, 168997, 4114923, 121368, 4078227]
+
     elif component == 'electrolysis':
         if status == 'random':
             # 0.115, 0.275, 0.297, 0.601, 1.024

@@ -24,6 +24,10 @@ from utils import *
 import sys
 
 
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
+
+
 class Features:
     def __init__(self, color_1, color_2, time, feature_idx, interval_num=6):
         self.color_1 = color_1
@@ -54,7 +58,7 @@ class Features:
         tmp = sorted(np.array(res))
         tmp_min, tmp_max = math.floor(np.log10(min(tmp))), math.ceil(np.log10(max(tmp)))
         inter = [pow(10, i) for i in range(tmp_min, tmp_max+1)]
-        mid = [interval * pow(10, i) for i in range(tmp_min+1, tmp_max+2)]
+        mid = [self.interval * pow(10, i) for i in range(tmp_min+1, tmp_max+2)]
         return inter, mid
 
     def cal_linear(self, tmp, inter, mid, idx=0):
@@ -145,27 +149,32 @@ class Features:
                         res[idx].append(k)
         return res
 
-    def cal_PDF(self, tmp_origin, features_path, inter, mid, tmp_1, tmp_2, xlabel, ylabel):
+    def cal_PDF(self, tmp_origin, features_path, inter, mid, tmp_1, tmp_2, xlabel, ylabel, whole=0):
+        convert = lambda x, a, b: pow(x, a) * pow(10, b)
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
         ax = plt.subplot()
-        for tmp, color, label in zip([tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2],
-                                     ['whole', 'population 1', 'population 2']):
+        TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        for tmp, color, label in zip(TMP[whole:], COLOR[whole:], LABEL[whole:]):
             xx, yy = self.cal_linear(tmp, inter, mid)
-            ax.loglog(xx, yy, '.', Marker='.', markersize=8, color=color, label=label)
+            start = xx.shape[0]//2 # xx.shape[0]//2
+            fit = np.polyfit(np.log10(xx[start:]), np.log10(yy[start:]), 1)
+            alpha, b = fit[0], fit[1]
+            fit_x = np.linspace(xx[start:], xx[-1], 100)
+            fit_y = convert(fit_x, alpha, b)
+            ax.plot(fit_x, fit_y, lw=1, color=color)
+            ax.loglog(xx, yy, '.', marker='.', markersize=8, color=color, label='{}--{:.2f}'.format(label, abs(alpha)))
             with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
                 f.write('{}, {}\n'.format(xlabel, ylabel))
                 for j in range(len(xx)):
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_CCDF(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel):
+    def cal_CCDF(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel, whole=0):
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
-
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
         ax = plt.subplot()
-        for tmp, N, color, label in zip([tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2],
-                                        ['black', self.color_1, self.color_2],
-                                        ['whole', 'population 1', 'population 2']):
+        TMP, N, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        for tmp, N, color, label in zip(TMP[whole:], N[whole:], COLOR[whole:], LABEL[whole:]):
             xx, yy = [], []
             for i in range(N - 1):
                 xx.append(np.mean([tmp[i], tmp[i + 1]]))
@@ -178,15 +187,14 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_ML(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel):
+    def cal_ML(self, tmp_origin, features_path, tmp_1, tmp_2, xlabel, ylabel, whole=0):
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
-
         fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
-        for tmp, N, layer, color, label in zip([tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [0.1, 0.2, 0.3],
-                                               ['black', self.color_1, self.color_2],
-                                               ['whole', 'population 1', 'population 2']):
+        TMP, N, LAYER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 2, 3], ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+
+        for tmp, N, layer, color, label in zip(TMP[whole:], N[whole:], LAYER[whole:], COLOR[whole:], LABEL[whole:]):
             ML_y, Error_bar = [], []
             for j in tqdm(range(N)):
                 valid_x = sorted(tmp)[j:]
@@ -250,8 +258,8 @@ class Features:
         fig = plt.figure(figsize=[6, 3.9], num='Correlation--%s & %s %s' % (ylabel, xlabel, title))
         ax = plt.subplot()
         if cls_1 is not None and cls_2 is not None:
-            ax.loglog(tmp_1[cls_2], tmp_2[cls_2], '.', marker='.', markersize=8, color=self.color_2, label='Class 2')
-            ax.loglog(tmp_1[cls_1], tmp_2[cls_1], '.', marker='.', markersize=8, color=self.color_1, label='Class 1')
+            ax.loglog(tmp_1[cls_2], tmp_2[cls_2], '.', marker='.', markersize=8, color=self.color_2, label='Population 2')
+            ax.loglog(tmp_1[cls_1], tmp_2[cls_1], '.', marker='.', markersize=8, color=self.color_1, label='Population 1')
             if idx_1:
                 ax.loglog(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', marker='.', markersize=8, color='black')
             if idx_2:
@@ -285,8 +293,8 @@ class Features:
                 b.append(fit[1])
                 fit_x.append(np.linspace(min_x, max_x, 100))
                 fit_y.append(convert(np.linspace(min_x, max_x, 100), fit[0], fit[1]))
-            ax.plot(fit_x[0], fit_y[0], color='black')
-            ax.plot(fit_x[1], fit_y[1], color='black')
+            ax.plot(fit_x[0], fit_y[0], lw=1, color='black')
+            ax.plot(fit_x[1], fit_y[1], lw=1, color='black')
             if status == 'A-D':
                 min_y = max(min(fit_y[0]), min(fit_y[1]))
                 max_y = min(max(fit_y[0]), max(fit_y[1]))
@@ -314,10 +322,11 @@ class Features:
         ax.set_yticks([-1, 0, 1, 2, 3])
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
-    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel):
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, whole=0):
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
         ax = plt.subplot()
-        for tmp, marker, color, label in zip([tmp_1, tmp_2], ['p', 'h'], [color_1, color_2], ['Population 1', 'Population 2']):
+        TMP, MARKER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h'], ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        for tmp, marker, color, label in zip(TMP[whole:], MARKER[whole:], COLOR[whole:], LABEL[whole:]):
             tmp_max = int(max(tmp))
             inter = [pow(10, i) for i in range(0, len(str(tmp_max)))]
             x = np.array([])
@@ -326,13 +335,13 @@ class Features:
                 x = np.append(x, np.linspace(i, i * 10, self.interval_num, endpoint=False))
             for k in range(x.shape[0]):
                 if k != x.shape[0] - 1:
-                    N, Naft = cal_N_Naft(tmp, [x[k], x[k+1]])
+                    N, Naft = self.cal_N_Naft(tmp, [x[k], x[k+1]])
                     if Naft != 0 and N != 0:
                         y.append(np.log10(N / Naft))
                     else:
                         y.append(float('inf'))
                 else:
-                    N, Naft = cal_N_Naft(tmp, [x[k], float('inf')])
+                    N, Naft = self.cal_N_Naft(tmp, [x[k], float('inf')])
                     if Naft != 0 and N != 0:
                         y.append(np.log10(N / Naft))
                     else:
@@ -344,15 +353,15 @@ class Features:
             for idx in range(len(x) - 1):
                 x_eny[idx] = (x[idx] + x[idx + 1]) / 2
             x_eny[-1] = x[-1] + pow(10, len(str(x[-1])))*(0.9/self.interval_num) / 2
-            ax.semilogx(x_eny, y, color=color, marker=marker, mec=color, mfc='none', label=label)
+            ax.semilogx(x_eny, y, color=color, marker=marker, markersize=8, mec=color, mfc='none', label=label)
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel):
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, whole=0):
         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
         ax = plt.subplot()
-        for [time, marker, color, label] in zip([time_1, time_2], ['p', 'h'], ['blue', 'g'],
-                                                ['Population 1', 'Population 2']):
+        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        for [time, marker, color, label] in zip(TIME[whole:], MARKER[whole:], COLOR[whole:], LABEL[whole:]):
             res = []
             for i in range(time.shape[0] - 1):
                 res.append(time[i+1] - time[i])
@@ -361,14 +370,15 @@ class Features:
             ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel):
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, whole=0):
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
         tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1, eny_lim), self.cal_OmiroLaw_helper(tmp_2, eny_lim)
-        for idx, [tmp, title] in enumerate(zip([tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1',
-                                                                            'Omori law_Population 2'])):
+        TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
+        for idx, [tmp, title] in enumerate(zip(TMP[whole:], TITLE[whole:])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
             ax = plt.subplot()
-            for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'], ['r', 'y', 'blue', 'g', 'purple'],
+            for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'],
+                                                           [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0.5, 0.5, 0.5]],
                                                            ['$10^{-2}aJ<E_{MS}<10^{-1}aJ$', '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
                                                             '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{2}aJ$',
                                                             '$10^{2}aJ<E_{MS}<10^{3}aJ$'])):

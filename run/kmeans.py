@@ -114,4 +114,4 @@ def ICA(dim, *args):
     ica = FastICA(n_components=dim)
     S_ = ica.fit_transform(x_nor)  # 重构信号
     A_ = ica.mixing_  # 获得估计混合后的矩阵
-    return S_, A_s
+    return S_, A_
