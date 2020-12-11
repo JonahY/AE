@@ -7,13 +7,13 @@ def formatnum(x, pos):
 
 
 def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], legend=True, grid=False,
-              legend_loc='upper left', legendsize=13, labelsize=14, titlesize=15, ticksize=13, linewidth=2):
+              legend_loc='upper left', legendsize=11, labelsize=14, titlesize=15, ticksize=13, linewidth=2):
     ax.spines['bottom'].set_linewidth(linewidth)
     ax.spines['left'].set_linewidth(linewidth)
     ax.spines['right'].set_linewidth(linewidth)
     ax.spines['top'].set_linewidth(linewidth)
 
-    # 设置坐标刻度值的大小以及刻度值的字体
+    # 设置坐标刻度值的大小以及刻度值的字体 Arial
     plt.tick_params(which='both', width=linewidth, labelsize=ticksize)
     labels = ax.get_xticklabels() + ax.get_yticklabels()
     [label.set_fontname('Arial') for label in labels]

@@ -8,12 +8,13 @@ from tqdm import tqdm
 
 
 class Waveform:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status):
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
         self.color_1 = color_1
         self.color_2 = color_2
+        self.status = status
 
     def cal_wave(self, i, valid=True):
         # Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI
@@ -35,45 +36,47 @@ class Waveform:
             # Idx, Dur, Eny, TRAI
             print(i, np.log10(Dur)[cls_KKM][i], np.log10(Eny)[cls_KKM][i], '{:.0f}'.format(chan[cls_KKM][i][-1]))
 
-    def plot_2cls_wave(self, TRAI_select_1, TRAI_select_2, same):
-        ylim = [35, 60, 80, 150, 250]
-        fig = plt.figure(figsize=(6.5, 10), num='Waveforms with same %s' % same)
-        for idx, [j, lim] in enumerate(zip(TRAI_select_1, ylim)):
-            i = self.data_tra[j - 1]
-            if i[-1] != j:
-                print('Error: TRAI in data_tra is inconsistent with that by input!')
-                break
-            valid_time, valid_data = self.cal_wave(i, valid=False)
+    def plot_2cls_wave(self, TRAI_select_1, TRAI_select_2, same, value, valid=False):
+        fig = plt.figure(figsize=(9.2, 3), num='Waveforms with same %s--%d μV' % (same, value))
+        fig.text(0.48, 0.24, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+                 horizontalalignment="right")
+        fig.text(0.975, 0.24, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+                 horizontalalignment="right")
+        i = self.data_tra[TRAI_select_1 - 1]
+        if i[-1] != TRAI_select_1:
+            print('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], TRAI_select_1))
+            return
+        valid_time, valid_data = self.cal_wave(i, valid=valid)
 
-            ax = fig.add_subplot(5, 2, 1 + idx * 2)
-            ax.plot(valid_time, valid_data, color=self.color_1)
-            ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
+        ax = fig.add_subplot(1, 2, 1)
+        ax.plot(valid_time, valid_data, lw=0.5, color=self.color_1)
+        ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        plot_norm(ax, xlabel='Time(μs)', ylabel='Amplitude(μV)', legend=False, grid=True)
 
-            ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
-            i = self.data_tra[TRAI_select_2[idx] - 1]
-            if i[-1] != TRAI_select_2[idx]:
-                print('Error: TRAI in data_tra is inconsistent with that by input!')
-                break
-            valid_time, valid_data = self.cal_wave(i, valid=False)
-            ax2.plot(valid_time, valid_data, color=self.color_2)
-            ax2.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax2, 'Time(μs)', 'Amplitude(μV)', y_lim=[-lim, lim], legend=False, grid=True)
+        ax2 = fig.add_subplot(1, 2, 2)
+        i = self.data_tra[TRAI_select_2 - 1]
+        if i[-1] != TRAI_select_2:
+            print('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], TRAI_select_2))
+            return
+        valid_time, valid_data = self.cal_wave(i, valid=valid)
+        ax2.plot(valid_time, valid_data, lw=0.5, color=self.color_2)
+        ax2.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        plot_norm(ax2, xlabel='Time(μs)', ylabel='Amplitude(μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k):
+    def plot_wave_TRAI(self, k, valid=True):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[-1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], k))
-        time, sig = self.cal_wave(i, valid=False)
+        time, sig = self.cal_wave(i, valid=valid)
 
         fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI:%d' % k)
         ax = fig.add_subplot(1, 1, 1)
         ax.plot(time, sig)
-        plt.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-        plt.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        plt.axhline(abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
+        plt.axhline(-abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', title='TRAI:%d' % k, legend=False, grid=True)
 
     def save_wave(self, TRAI, pop):
@@ -159,4 +162,17 @@ class Frequency:
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d' % (k + 1))
         ax = plt.subplot()
         ax.plot(half_frq, normalization_half)
-        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', title='TRAI:%d' % (k + 1), legend=False)
+        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], title='TRAI:%d' % (k + 1), legend=False)
+
+    def plot_2cls_freq(self, TRAI_1, TRAI_2, same):
+        fig = plt.figure(figsize=(6.5, 10), num='Frequency with same %s' % same)
+        for idx, k in enumerate(TRAI_1):
+            half_frq, normalization_half = self.cal_frequency(k - 1)
+            ax = fig.add_subplot(5, 2, 1 + idx * 2)
+            ax.plot(half_frq, normalization_half)
+            plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
+
+            half_frq, normalization_half = self.cal_frequency(TRAI_2[idx] - 1)
+            ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
+            ax2.plot(half_frq, normalization_half)
+            plot_norm(ax2, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
