@@ -127,26 +127,58 @@ class Preprocessing:
 
         return data
 
+    def read_pac_data(self, file_name, tra_1=[], tra_2=[], tra_3=[], tra_4=[]):
+        pbar = tqdm(file_name, ncols=100)
+        for name in pbar:
+            with open(name, "r") as f:
+                self.skip_n_column(f)
+                self.sample_interval = float(f.readline()[29:])
+                self.skip_n_column(f)
+                points_num = int(f.readline()[36:])
+                self.channel_num = int(f.readline().strip()[16:])
+                self.hit_num = int(f.readline()[12:])
+                self.time = float(f.readline()[14:])
+                dataset = np.array([float(i.strip("\n")) for i in f.readlines()[1:]]) / self.magnification
+            if self.channel_num == 1:
+                tra_1.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
+            elif self.channel_num == 2:
+                tra_2.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
+            elif self.channel_num == 3:
+                tra_3.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
+            elif self.channel_num == 4:
+                tra_4.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
+        return tra_1, tra_2, tra_3, tra_4
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-path", "--data_path", type=str,
-                        default=r"E:\data\CM-4M-o18-2020.10.17-1-60",
-                        help="Absolute path of data(add 'r' in front)")
-    parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
-    parser.add_argument("-mag", "--magnification_dB", type=int, default=60, help="Magnification /dB")
-    parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
-    opt = parser.parse_args()
-    print("=" * 44 + " Parameters " + "=" * 44)
-    print(opt)
+    def read_pac_features(self, dir_features, min_cnts=2):
+        with open(dir_features, 'r') as f:
+            res = np.array([i.strip("\n").strip(',') for i in f.readlines()[1:]])
+        pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], []
+        for i in tqdm(res):
+            tmp = []
+            ls = i.strip("\n").split(', ')
+            if int(ls[-1]) > min_cnts:
+                for j in ls:
+                    tmp.append(float(j))
+                pri.append(tmp)
+                if int(ls[2]) == 1:
+                    chan_1.append(tmp)
+                elif int(ls[2]) == 2:
+                    chan_2.append(tmp)
+                elif int(ls[2]) == 3:
+                    chan_3.append(tmp)
+                elif int(ls[2]) == 4:
+                    chan_4.append(tmp)
+        data_pri = np.array(pri)
+        chan_1 = np.array(chan_1)
+        chan_2 = np.array(chan_2)
+        chan_3 = np.array(chan_3)
+        chan_4 = np.array(chan_4)
+        return data_pri, chan_1, chan_2, chan_3, chan_4
 
-    opt.data_path = opt.data_path.replace('\\', '/')
-    os.chdir(opt.data_path)
-    file_list = os.listdir(opt.data_path)
-    # print(file_list)
 
+def convert_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
     # check existing file
-    tar = opt.data_path.split('/')[-1] + '.txt'
+    tar = data_path.split('/')[-1] + '.txt'
     if tar in file_list:
         print("=" * 46 + " Warning " + "=" * 45)
         while True:
@@ -158,17 +190,17 @@ if __name__ == "__main__":
                 sys.exit(0)
             print("Please enter 'yes' or 'no' to continue!")
 
-    file_list = os.listdir(opt.data_path)
-    each_core = int(math.ceil(len(file_list) / float(opt.processor)))
+    file_list = os.listdir(data_path)
+    each_core = int(math.ceil(len(file_list) / float(processor)))
     result = []
 
     print("=" * 47 + " Start " + "=" * 46)
     start = time.time()
 
     # Multiprocessing acceleration
-    pool = multiprocessing.Pool(processes=opt.processor)
+    pool = multiprocessing.Pool(processes=processor)
     for idx, i in enumerate(range(0, len(file_list), each_core)):
-        process = Preprocessing(idx, opt.threshold_dB, opt.magnification_dB, opt.data_path, opt.processor)
+        process = Preprocessing(idx, threshold_dB, magnification_dB, data_path, processor)
         result.append(pool.apply_async(process.main, (file_list[i:i + each_core],)))
 
     N = process.save_features(result)
@@ -181,3 +213,57 @@ if __name__ == "__main__":
     print("Quantity of valid data: %s" % N)
     print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
                                                                      (end - start) / 60))
+
+
+def multiprocess_read_pac_data(file_list, data_path, magnification_dB, threshold_dB, processor):
+    each_core = int(math.ceil(len(file_list) / float(processor)))
+    result, tra_1, tra_2, tra_3, tra_4 = [], [], [], [], []
+    data_tra = []
+    # Multiprocessing acceleration
+    pool = multiprocessing.Pool(processes=processor)
+    for idx, i in enumerate(range(0, len(file_list), each_core)):
+        process = Preprocessing(idx, threshold_dB, magnification_dB, data_path, processor)
+        result.append(pool.apply_async(process.read_pac_data, (file_list[i:i + each_core],)))
+
+    pbar = tqdm(result, ncols=100)
+    for idx, i in enumerate(pbar):
+        tmp_1, tmp_2, tmp_3, tmp_4 = i.get()
+        tra_1.append(tmp_1)
+        tra_2.append(tmp_2)
+        tra_3.append(tmp_3)
+        tra_4.append(tmp_4)
+        pbar.set_description("Exporting Data: {}/{}".format(idx + 1, processor))
+
+    pool.close()
+    pool.join()
+
+    for tra in [tra_1, tra_2, tra_3, tra_4]:
+        tra = [j for i in tra for j in i]
+        try:
+            data_tra.append(sorted(tra, key=lambda x: x[-1]))
+        except IndexError:
+            data_tra.append([])
+            print('There is no data in this channel!')
+    return data_tra[0], data_tra[1], data_tra[2], data_tra[3]
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-path", "--data_path", type=str,
+                        default=r"E:\data\CM-6M-o18-2020.10.17-1-60",
+                        help="Absolute path of data(add 'r' in front)")
+    parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
+    parser.add_argument("-mag", "--magnification_dB", type=int, default=60, help="Magnification /dB")
+    parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
+    opt = parser.parse_args()
+    print("=" * 44 + " Parameters " + "=" * 44)
+    print(opt)
+
+    opt.data_path = opt.data_path.replace('\\', '/')
+    os.chdir(opt.data_path)
+    file_list = os.listdir(opt.data_path)[:100]
+    # print(file_list)
+
+    convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
+
+    # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = multiprocess_read_pac_data(file_list, opt.data_path, opt.magnification_dB, opt.threshold_dB, opt.processor)

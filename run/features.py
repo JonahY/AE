@@ -22,8 +22,13 @@ import sqlite3
 from kmeans import KernelKMeans, ICA
 from utils import *
 from wave_freq import *
+import warnings
+from matplotlib.pylab import mpl
+from scipy.signal import savgol_filter
 
 
+warnings.filterwarnings("ignore")
+mpl.rcParams['axes.unicode_minus'] = False  #显示负号
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 
@@ -443,7 +448,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'E:\data\vallen'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -456,7 +461,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_data(lower=2)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2)
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
@@ -480,5 +485,5 @@ if __name__ == "__main__":
     cls_KKM = []
     for i in range(2):
         cls_KKM.append(pred == i)
-    cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
 

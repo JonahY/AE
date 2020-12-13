@@ -7,6 +7,8 @@ import math
 import os
 import multiprocessing
 import shutil
+import pandas as pd
+from scipy.signal import savgol_filter
 
 
 class Reload:
@@ -60,7 +62,7 @@ class Reload:
         chan_4 = np.array(chan_4)
         return t, chan_1, chan_2, chan_3, chan_4
 
-    def read_data(self, lower=2):
+    def read_vallen_data(self, lower=2):
         conn_tra = sqlite3.connect(self.path_tra)
         conn_pri = sqlite3.connect(self.path_pri)
         result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
@@ -92,6 +94,35 @@ class Reload:
         chan_4 = np.array(chan_4)
         return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
+    def read_pac_data(self, path, lower=2):
+        os.chdir(path)
+        dir_features = os.listdir(path)[0]
+        data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
+        with open(dir_features, 'r') as f:
+            data_pri = np.array([j.strip(', ') for i in f.readlines()[1:] for j in i.strip("\n")])
+        for _ in tqdm(range(N_tra), ncols=80):
+            i = result_tra.fetchone()
+            data_tra.append(i)
+        for _ in tqdm(range(N_pri), ncols=80):
+            i = result_pri.fetchone()
+            if i[-2] is not None and i[-2] > lower and i[-1] > 0:
+                data_pri.append(i)
+                if i[2] == 1:
+                    chan_1.append(i)
+                if i[2] == 2:
+                    chan_2.append(i)
+                elif i[2] == 3:
+                    chan_3.append(i)
+                elif i[2] == 4:
+                    chan_4.append(i)
+        data_tra = sorted(data_tra, key=lambda x: x[-1])
+        data_pri = np.array(data_pri)
+        chan_1 = np.array(chan_1)
+        chan_2 = np.array(chan_2)
+        chan_3 = np.array(chan_3)
+        chan_4 = np.array(chan_4)
+        return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
+
     def export_feature(self, t, time):
         for i in range(len(time) - 1):
             with open(self.fold + '-%d-%d.txt' % (time[i], time[i + 1]), 'w') as f:
@@ -100,6 +131,83 @@ class Reload:
                 for i in t[i]:
                     f.write('{}, {}, {:.8f}, {}, {:.7f}, {:.7f}, {:.2f}, {:.2f}, {:.7f}, {:.7f}, {}\n'.format(
                         i[0], i[-1], i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9]))
+
+
+class Export:
+    def __init__(self, chan, data_tra, features_path):
+        self.data_tra = data_tra
+        self.features_path = features_path
+        self.chan = chan
+
+    def find_idx(self):
+        Res = []
+        for i in self.data_tra:
+            Res.append(i[-1])
+        Res = np.array(Res)
+        return Res
+
+    def detect_folder(self):
+        tar = './waveform'
+        if not os.path.exists(tar):
+            os.mkdir(tar)
+        else:
+            print("=" * 46 + " Warning " + "=" * 45)
+            while True:
+                ans = input(
+                    "The exported data file has been detected. Do you want to overwrite it: (Enter 'yes' or 'no') ")
+                if ans.strip() == 'yes':
+                    shutil.rmtree(tar)
+                    os.mkdir(tar)
+                    break
+                elif ans.strip() == 'no':
+                    sys.exit(0)
+                print("Please enter 'yes' or 'no' to continue!")
+
+    def export_waveform(self, chan, thread_id=0, status='normal'):
+        if status == 'normal':
+            self.detect_folder()
+        Res = self.find_idx()
+        pbar = tqdm(chan, ncols=80)
+        for i in pbar:
+            trai = i[-1]
+            try:
+                j = self.data_tra[int(trai - 1)]
+            except IndexError:
+                try:
+                    idx = np.where(Res == trai)[0][0]
+                    j = self.data_tra[idx]
+                except IndexError:
+                    print('Error 1: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                    continue
+            if j[-1] != trai:
+                try:
+                    idx = np.where(Res == trai)[0][0]
+                    j = self.data_tra[idx]
+                except IndexError:
+                    print('Error 2: TRAI:{} in Channel is not found in data_tra!'.format(trai))
+                    continue
+            sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
+            with open('./waveform/' + self.features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
+                f.write('Amp(uV)\n')
+                for a in sig:
+                    f.write('{}\n'.format(a))
+            pbar.set_description("Process: %s | Exporting: %s" % (thread_id, int(trai)))
+
+    def accelerate_export(self, N=4):
+        # check existing file
+        self.detect_folder()
+
+        # Multiprocessing acceleration
+        each_core = int(math.ceil(self.chan.shape[0] / float(N)))
+        pool = multiprocessing.Pool(processes=N)
+        result = []
+        for idx, i in enumerate(range(0, self.chan.shape[0], each_core)):
+            result.append(pool.apply_async(self.export_waveform, (self.chan[i:i + each_core], idx + 1, 'accelerate',)))
+
+        pool.close()
+        pool.join()
+        print('Finished export of waveforms!')
+        return result
 
 
 def material_status(component, status):
@@ -190,78 +298,28 @@ def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM):
     df_2.to_csv('E-T_pure_pop2.csv')
 
 
-class Export:
-    def __init__(self, chan, data_tra, features_path):
-        self.data_tra = data_tra
-        self.features_path = features_path
-        self.chan = chan
+def load_stress(path_curve):
+    data = pd.read_csv(path_curve, encoding='gbk').drop(index=[0]).astype('float32')
+    data_drop = data.drop_duplicates(['拉伸应变 (应变 1)'])
+    time = np.array(data_drop.iloc[:, 0])
+    displace = np.array(data_drop.iloc[:, 1])
+    load = np.array(data_drop.iloc[:, 2])
+    strain = np.array(data_drop.iloc[:, 3])
+    stress = np.array(data_drop.iloc[:, 4])
+    sort_idx = np.argsort(strain)
+    strain = strain[sort_idx]
+    stress = stress[sort_idx]
+    return time, displace, load, strain, stress
 
-    def find_idx(self):
-        Res = []
-        for i in self.data_tra:
-            Res.append(i[-1])
-        Res = np.array(Res)
-        return Res
 
-    def detect_folder(self):
-        tar = './waveform'
-        if not os.path.exists(tar):
-            os.mkdir(tar)
-        else:
-            print("=" * 46 + " Warning " + "=" * 45)
-            while True:
-                ans = input(
-                    "The exported data file has been detected. Do you want to overwrite it: (Enter 'yes' or 'no') ")
-                if ans.strip() == 'yes':
-                    shutil.rmtree(tar)
-                    os.mkdir(tar)
-                    break
-                elif ans.strip() == 'no':
-                    sys.exit(0)
-                print("Please enter 'yes' or 'no' to continue!")
+def smooth_curve(time, stress, window_length=99, polyorder=1, epoch=200, curoff=[2500, 25000]):
+    y_smooth = savgol_filter(stress, window_length, polyorder, mode= 'nearest')
+    for i in range(epoch):
+        if i == 5:
+            front = y_smooth
+        y_smooth = savgol_filter(y_smooth, window_length, polyorder, mode= 'nearest')
 
-    def export_waveform(self, chan, thread_id=0, status='normal'):
-        if status == 'normal':
-            self.detect_folder()
-        Res = self.find_idx()
-        pbar = tqdm(chan, ncols=80)
-        for i in pbar:
-            trai = i[-1]
-            try:
-                j = self.data_tra[int(trai - 1)]
-            except IndexError:
-                try:
-                    idx = np.where(Res == trai)[0][0]
-                    j = self.data_tra[idx]
-                except IndexError:
-                    print('Error 1: TRAI:{} in Channel is not found in data_tra!'.format(trai))
-                    continue
-            if j[-1] != trai:
-                try:
-                    idx = np.where(Res == trai)[0][0]
-                    j = self.data_tra[idx]
-                except IndexError:
-                    print('Error 2: TRAI:{} in Channel is not found in data_tra!'.format(trai))
-                    continue
-            sig = np.multiply(array.array('h', bytes(j[-2])), j[-3] * 1000)
-            with open('./waveform/' + self.features_path[:-4] + '_{:.0f}_{:.8f}.txt'.format(trai, j[0]), 'w') as f:
-                f.write('Amp(uV)\n')
-                for a in sig:
-                    f.write('{}\n'.format(a))
-            pbar.set_description("Process: %s | Exporting: %s" % (thread_id, int(trai)))
-
-    def accelerate_export(self, N=4):
-        # check existing file
-        self.detect_folder()
-
-        # Multiprocessing acceleration
-        each_core = int(math.ceil(self.chan.shape[0] / float(N)))
-        pool = multiprocessing.Pool(processes=N)
-        result = []
-        for idx, i in enumerate(range(0, self.chan.shape[0], each_core)):
-            result.append(pool.apply_async(self.export_waveform, (self.chan[i:i + each_core], idx + 1, 'accelerate',)))
-
-        pool.close()
-        pool.join()
-        print('Finished export of waveforms!')
-        return result
+    front_idx = np.where(time < curoff[0])[0][-1]
+    rest_idx = np.where(time > curoff[1])[0][0]
+    res = np.concatenate((stress[:40], front[40:front_idx], y_smooth[front_idx:rest_idx], stress[rest_idx:]))
+    return res
