@@ -8,26 +8,39 @@ from tqdm import tqdm
 
 
 class Waveform:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device):
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
         self.color_1 = color_1
         self.color_2 = color_2
         self.status = status
+        self.device = device
 
     def cal_wave(self, i, valid=True):
-        # Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI
-        sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
-        time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
-        thr = i[2]
-        if valid:
-            valid_wave_idx = np.where(abs(sig) >= thr)[0]
-            start = time[valid_wave_idx[0]]
-            end = time[valid_wave_idx[-1]]
-            duration = end - start
-            sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
-            time = np.linspace(0, duration, sig.shape[0])
+        if self.device == 'vallen':
+            # Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI
+            sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
+            thr = i[2]
+            if valid:
+                valid_wave_idx = np.where(abs(sig) >= thr)[0]
+                start = time[valid_wave_idx[0]]
+                end = time[valid_wave_idx[-1]]
+                duration = end - start
+                sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+                time = np.linspace(0, duration, sig.shape[0])
+        elif self.device == 'pac':
+            sig = i[-2]
+            time = np.linspace(0, i[2] * (i[-3] - 1), i[-3])
+            thr = 17.78279410
+            if valid:
+                valid_wave_idx = np.where(abs(sig) >= thr)[0]
+                start = time[valid_wave_idx[0]]
+                end = time[valid_wave_idx[-1]]
+                duration = end - start
+                sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+                time = np.linspace(0, duration, sig.shape[0])
         return time, sig
 
     def find_wave(self, Dur, Eny, cls_KKM, chan, dur_lim, eny_lim):

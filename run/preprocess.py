@@ -9,7 +9,14 @@ import time
 from multiprocessing import cpu_count
 import sys
 from scipy.fftpack import fft
-
+import csv
+from plot_format import plot_norm
+from kmeans import KernelKMeans, ICA
+from utils import *
+from wave_freq import *
+from features import *
+import warnings
+from matplotlib.pylab import mpl
 
 # os.getcwd()
 np.seterr(invalid='ignore')
@@ -75,7 +82,7 @@ class Preprocessing:
         txt_name = self.data_path.split('/')[-1] + '.txt'
         f = open(txt_name, "w")
         f.write("ID, Time(s), Chan, Thr(μV), Thr(dB), Amp(μV), Amp(dB), "
-                "RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts, Frequency(Hz)\n")
+                "RiseT(s), Dur(s), Eny(aJ), RMS(μV), Frequency(Hz), Counts\n")
         pbar = tqdm(result, ncols=100)
         for idx, i in enumerate(pbar):
             tmp = i.get()
@@ -110,14 +117,16 @@ class Preprocessing:
                 if valid_wave_idx.shape[0] > 1:
                     valid_data = self.cal_features(dataset, time_label, valid_wave_idx)
                     self.cal_counts(valid_data)
-                    if self.counts >= 2:
+                    if self.counts > 2:
                         self.cal_freq(valid_data, valid_wave_idx)
                         data.append('{}, {:.7f}, {}, {:.8f}, {:.1f}, {:.8f}, {:.1f}, {:.7f}, {:.7f}, {:.8f}, {:.8f}, '
-                                    '{}, {}\n'.format(self.hit_num, self.time, self.channel_num,
-                                                      self.thr_V * pow(10, 6), self.thr_dB, self.amplitude * pow(10, 6),
-                                                      20 * np.log10(self.amplitude * pow(10, 6)), self.rise_time,
-                                                      self.duration, self.energy * pow(10, 14), self.RMS * pow(10, 6),
-                                                      self.counts, self.freq_max))
+                                    '{:.8f}, {}\n'.format(self.hit_num, self.time, self.channel_num,
+                                                          self.thr_V * pow(10, 6), self.thr_dB,
+                                                          self.amplitude * pow(10, 6),
+                                                          20 * np.log10(self.amplitude * pow(10, 6)), self.rise_time,
+                                                          self.duration, self.energy * pow(10, 14),
+                                                          self.RMS * pow(10, 6),
+                                                          self.freq_max, self.counts))
             pbar.set_description("Process: %s | Calculating: %s" % (self.idx, name.split('_')[2]))
             # ID, Time(s), Chan, Thr(μV)P, Thr(dB), Amp(μV), Amp(dB), RiseT(s), Dur(s), Eny(aJ), RMS(μV), Counts
             # print("-" * 50)
@@ -138,7 +147,7 @@ class Preprocessing:
                 self.channel_num = int(f.readline().strip()[16:])
                 self.hit_num = int(f.readline()[12:])
                 self.time = float(f.readline()[14:])
-                dataset = np.array([float(i.strip("\n")) for i in f.readlines()[1:]]) / self.magnification
+                dataset = np.array([float(i.strip("\n")) for i in f.readlines()[1:]]) / self.magnification * pow(10, 6)
             if self.channel_num == 1:
                 tra_1.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
             elif self.channel_num == 2:
@@ -147,18 +156,18 @@ class Preprocessing:
                 tra_3.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
             elif self.channel_num == 4:
                 tra_4.append([self.time, self.channel_num, self.sample_interval, points_num, dataset, self.hit_num])
+            pbar.set_description("Process: %s | Calculating: %s" % (self.idx, name.split('_')[2]))
         return tra_1, tra_2, tra_3, tra_4
 
-    def read_pac_features(self, dir_features, min_cnts=2):
-        with open(dir_features, 'r') as f:
-            res = np.array([i.strip("\n").strip(',') for i in f.readlines()[1:]])
+    def read_pac_features(self, res, min_cnts=2):
         pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], []
-        for i in tqdm(res):
+        pbar = tqdm(res, ncols=100)
+        for i in pbar:
             tmp = []
             ls = i.strip("\n").split(', ')
             if int(ls[-1]) > min_cnts:
-                for j in ls:
-                    tmp.append(float(j))
+                for r, j in zip([0, 7, 0, 8, 1, 8, 1, 7, 7, 8, 8, 8, 0], ls):
+                    tmp.append(int(j) if r == 0 else round(float(j), r))
                 pri.append(tmp)
                 if int(ls[2]) == 1:
                     chan_1.append(tmp)
@@ -168,12 +177,8 @@ class Preprocessing:
                     chan_3.append(tmp)
                 elif int(ls[2]) == 4:
                     chan_4.append(tmp)
-        data_pri = np.array(pri)
-        chan_1 = np.array(chan_1)
-        chan_2 = np.array(chan_2)
-        chan_3 = np.array(chan_3)
-        chan_4 = np.array(chan_4)
-        return data_pri, chan_1, chan_2, chan_3, chan_4
+            pbar.set_description("Process: %s | Calculating: %s" % (self.idx, ls[0]))
+        return pri, chan_1, chan_2, chan_3, chan_4
 
 
 def convert_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
@@ -212,13 +217,19 @@ def convert_pac_data(file_list, data_path, processor, threshold_dB, magnificatio
     print("=" * 46 + " Report " + "=" * 46)
     print("Quantity of valid data: %s" % N)
     print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
-                                                                     (end - start) / 60))
+                                                                       (end - start) / 60))
 
 
-def multiprocess_read_pac_data(file_list, data_path, magnification_dB, threshold_dB, processor):
+def main_read_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
+    # check existing file
+    tar = data_path.split('/')[-1] + '.txt'
+    if tar in file_list:
+        file_list = file_list[1:]
     each_core = int(math.ceil(len(file_list) / float(processor)))
     result, tra_1, tra_2, tra_3, tra_4 = [], [], [], [], []
     data_tra = []
+    print("=" * 47 + " Start " + "=" * 46)
+    start = time.time()
     # Multiprocessing acceleration
     pool = multiprocessing.Pool(processes=processor)
     for idx, i in enumerate(range(0, len(file_list), each_core)):
@@ -237,33 +248,106 @@ def multiprocess_read_pac_data(file_list, data_path, magnification_dB, threshold
     pool.close()
     pool.join()
 
-    for tra in [tra_1, tra_2, tra_3, tra_4]:
+    for idx, tra in enumerate([tra_1, tra_2, tra_3, tra_4]):
         tra = [j for i in tra for j in i]
         try:
             data_tra.append(sorted(tra, key=lambda x: x[-1]))
         except IndexError:
             data_tra.append([])
-            print('There is no data in this channel!')
+            print('Warning: There is no data in channel %d!' % idx)
+    end = time.time()
+    print("=" * 46 + " Report " + "=" * 46)
+    print("Channel 1: %d | Channel 2: %d | Channel 3: %d | Channel 4: %d" %
+          (len(data_tra[0]), len(data_tra[1]), len(data_tra[2]), len(data_tra[3])))
+    print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
+                                                                       (end - start) / 60))
     return data_tra[0], data_tra[1], data_tra[2], data_tra[3]
+
+
+def main_read_pac_features(data_path, processor, threshold_dB, magnification_dB, min_cnts=2):
+    dir_features = data_path.split('/')[-1] + '.txt'
+    with open(dir_features, 'r') as f:
+        res = np.array([i.strip("\n").strip(',') for i in f.readlines()[1:]])
+    result, pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
+    each_core = int(math.ceil(res.shape[0] / float(processor)))
+    print("=" * 47 + " Start " + "=" * 46)
+    start = time.time()
+    # Multiprocessing acceleration
+    pool = multiprocessing.Pool(processes=processor)
+    for idx, i in enumerate(range(0, res.shape[0], each_core)):
+        process = Preprocessing(idx, threshold_dB, magnification_dB, data_path, processor)
+        result.append(pool.apply_async(process.read_pac_features, (res[i:i + each_core], min_cnts,)))
+
+    pbar = tqdm(result, ncols=100)
+    for idx, i in enumerate(pbar):
+        # print(len(i.get()))
+        tmp_pri, tmp_1, tmp_2, tmp_3, tmp_4 = i.get()
+        pri.append(tmp_pri)
+        chan_1.append(tmp_1)
+        chan_2.append(tmp_2)
+        chan_3.append(tmp_3)
+        chan_4.append(tmp_4)
+        pbar.set_description("Exporting Data: {}/{}".format(idx + 1, processor))
+
+    pool.close()
+    pool.join()
+    tmp_all = []
+    pbar = tqdm([pri, chan_1, chan_2, chan_3, chan_4], ncols=100)
+    for idx, tmp in enumerate(pbar):
+        tmp = [j for i in tmp for j in i]
+        try:
+            tmp_all.append(sorted(tmp, key=lambda x: x[0]))
+        except IndexError:
+            tmp_all.append([])
+            print('Warning: There is no data in channel %d!' % idx)
+        pbar.set_description("Sorting Data: {}/5".format(idx + 1))
+
+    pri = np.array(tmp_all[0])
+    chan_1 = np.array(tmp_all[1])
+    chan_2 = np.array(tmp_all[2])
+    chan_3 = np.array(tmp_all[3])
+    chan_4 = np.array(tmp_all[4])
+
+    end = time.time()
+    print("=" * 46 + " Report " + "=" * 46)
+    print("All channel: %d | Channel 1: %d | Channel 2: %d | Channel 3: %d | Channel 4: %d | " %
+          (pri.shape[0], chan_1.shape[0], chan_2.shape[0], chan_3.shape[0], chan_4.shape[0]))
+    print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
+                                                                       (end - start) / 60))
+    return pri, chan_1, chan_2, chan_3, chan_4
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", "--data_path", type=str,
-                        default=r"E:\data\CM-6M-o18-2020.10.17-1-60",
+                        default=r"D:\data\3D porous TC4-8mA-compression test-z1-0.01-20201010",
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("-mag", "--magnification_dB", type=int, default=60, help="Magnification /dB")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
+    parser.add_argument("-cnts", "--min_cnts", type=int, default=2, help="Number of Threads")
     opt = parser.parse_args()
     print("=" * 44 + " Parameters " + "=" * 44)
     print(opt)
 
     opt.data_path = opt.data_path.replace('\\', '/')
     os.chdir(opt.data_path)
-    file_list = os.listdir(opt.data_path)[:100]
+    file_list = os.listdir(opt.data_path)
     # print(file_list)
 
-    convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
+    # convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 
-    # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = multiprocess_read_pac_data(file_list, opt.data_path, opt.magnification_dB, opt.threshold_dB, opt.processor)
+    # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
+
+    # data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, opt.min_cnts)
+
+    # chan = chan_1
+    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), chan[:, 8] * pow(10, 6), \
+    #                                           chan[:, 9], chan[:, 10], chan[:, -1]
+    # feature_idx = [Amp, Dur, Eny]
+    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+    # ylabelz = ['PDF(A)', 'PDF(D)', 'PDF(E)']
+    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    # status = 'test'
+    # features = Features(color_1, color_2, Time, feature_idx, status)

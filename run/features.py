@@ -1,12 +1,4 @@
 # -*- coding: UTF-8 -*-
-import os
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import math
-import time
-from tqdm import tqdm
-import csv
 from plot_format import plot_norm
 from collections import Counter
 import os
@@ -24,7 +16,7 @@ from utils import *
 from wave_freq import *
 import warnings
 from matplotlib.pylab import mpl
-from scipy.signal import savgol_filter
+
 
 
 warnings.filterwarnings("ignore")
@@ -303,10 +295,10 @@ class Features:
                 ax.loglog(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', marker='.', markersize=8, color='black')
             if idx_2:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
+            plot_norm(ax, xlabel, ylabel)
         else:
             ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='g')
             plot_norm(ax, xlabel, ylabel, legend=False)
-        plot_norm(ax, xlabel, ylabel)
 
         if fit:
             cor_x1, cor_x2 = tmp_1[cls_1], tmp_1[cls_2]
