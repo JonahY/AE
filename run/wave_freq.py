@@ -5,10 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
+from preprocess import Preprocessing
 
 
 class Waveform:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, magnification_dB=60):
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
@@ -16,7 +17,8 @@ class Waveform:
         self.color_2 = color_2
         self.status = status
         self.device = device
-        self.thr = pow(10, thr_dB / 20)
+        self.thr_μV = pow(10, thr_dB / 20)
+        self.process = Preprocessing(None, thr_dB, magnification_dB, path, None)
 
     def cal_wave(self, i, valid=True):
         if self.device == 'vallen':
@@ -35,7 +37,7 @@ class Waveform:
             sig = i[-2]
             time = np.linspace(0, i[2] * (i[-3] - 1) * pow(10, 6), i[-3])
             if valid:
-                valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
+                valid_wave_idx = np.where(abs(sig) >= self.thr_μV)[0]
                 start = time[valid_wave_idx[0]]
                 end = time[valid_wave_idx[-1]]
                 duration = end - start
@@ -78,7 +80,7 @@ class Waveform:
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k, valid=True):
+    def plot_wave_TRAI(self, k, valid=False):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[-1] != k:
@@ -95,6 +97,19 @@ class Waveform:
             plt.axhline(abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
             plt.axhline(-abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % k, legend=False, grid=True)
+
+    def plot_wave_realtime(self, k, file_list, file_idx, chan, valid=False):
+        try:
+            sig, time = self.process.read_wave_realtime(file_list, file_idx, chan, k, valid)
+        except TypeError:
+            return
+
+        fig = plt.figure(figsize=(6, 4.1), num='Waveform--Hit number:%d (%s)' % (k, valid))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot(time, sig, lw=1)
+        plt.axhline(abs(self.thr_μV), 0, sig.shape[0], linewidth=1, color="black")
+        plt.axhline(-abs(self.thr_μV), 0, sig.shape[0], linewidth=1, color="black")
+        plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Hit number:%d' % k, legend=False, grid=True)
 
     def save_wave(self, TRAI, pop):
         # Save waveform

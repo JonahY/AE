@@ -17,9 +17,44 @@ from wave_freq import *
 from features import *
 import warnings
 from matplotlib.pylab import mpl
+from multiprocessing.managers import BaseManager
+import threading
+share_lock = threading.Lock()
 
 # os.getcwd()
 np.seterr(invalid='ignore')
+
+
+class GlobalV():
+    def __init__(self):
+        self.tra_1 = []
+        self.tra_2 = []
+        self.tra_3 = []
+        self.tra_4 = []
+
+    def append_1(self, arg):
+        self.tra_1.append(arg)
+
+    def append_2(self, arg):
+        self.tra_2.append(arg)
+
+    def append_3(self, arg):
+        self.tra_3.append(arg)
+
+    def append_4(self, arg):
+        self.tra_4.append(arg)
+
+    def get_1(self):
+        return self.tra_1
+
+    def get_2(self):
+        return self.tra_2
+
+    def get_3(self):
+        return self.tra_3
+
+    def get_4(self):
+        return self.tra_4
 
 
 class Preprocessing:
@@ -27,7 +62,8 @@ class Preprocessing:
         self.idx = idx
         self.thr_dB = thr_dB
         self.magnification_dB = magnification_dB
-        self.thr_V = pow(10, self.thr_dB / 20) / pow(10, 6)
+        self.thr_μV = pow(10, self.thr_dB / 20)
+        self.thr_V = self.thr_μV / pow(10, 6)
         self.counts = 0
         self.duration = 0
         self.amplitude = 0
@@ -85,12 +121,8 @@ class Preprocessing:
                 "RiseT(s), Dur(s), Eny(aJ), RMS(μV), Frequency(Hz), Counts\n")
         pbar = tqdm(result, ncols=100)
         for idx, i in enumerate(pbar):
-            tmp, tmp_tra_1, tmp_tra_2, tmp_tra_3, tmp_tra_4 = i.get()
+            tmp = i.get()
             valid += tmp
-            tra_1.append(tmp_tra_1)
-            tra_2.append(tmp_tra_2)
-            tra_3.append(tmp_tra_3)
-            tra_4.append(tmp_tra_4)
             pbar.set_description("Exporting Data: {}/{}".format(idx + 1, self.processor))
 
         valid = sorted(valid, key=lambda s: float(s.split(',')[0]))
@@ -98,9 +130,9 @@ class Preprocessing:
             f.write(i)
         f.close()
         # print(valid_data)
-        return valid, tra_1, tra_2, tra_3, tra_4
+        return valid
 
-    def main(self, file_name, data=[], tra_1=[], tra_2=[], tra_3=[], tra_4=[], min_cnts=2):
+    def main(self, file_name, obj, load_wave=False, min_cnts=2, data=[]):
         pbar = tqdm(file_name, ncols=100)
         for name in pbar:
             with open(name, "r") as f:
@@ -118,20 +150,25 @@ class Preprocessing:
                 valid_wave_idx = np.where(abs(dataset) >= self.thr_V)[0]
                 # print(dataset[0], dataset[-1], len(dataset))
                 # print(valid_wave_idx, valid_wave_idx.shape)
-                if self.channel_num == 1:
-                    tra_1.append([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
-                elif self.channel_num == 2:
-                    tra_2.append([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
-                elif self.channel_num == 3:
-                    tra_3.append([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
-                elif self.channel_num == 4:
-                    tra_4.append([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
-
+                if load_wave:
+                    global share_lock
+                    share_lock.acquire()
+                    if self.channel_num == 1:
+                        obj.append_1([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
+                    elif self.channel_num == 2:
+                        obj.append_2([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
+                    elif self.channel_num == 3:
+                        obj.append_3([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
+                    elif self.channel_num == 4:
+                        obj.append_4([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
+                    share_lock.release()
                 if valid_wave_idx.shape[0] > 1:
                     valid_data = self.cal_features(dataset, time_label, valid_wave_idx)
+                    del dataset, time_label
                     self.cal_counts(valid_data)
                     if self.counts > min_cnts:
                         self.cal_freq(valid_data, valid_wave_idx)
+                        del valid_data
                         tmp_feature = '{}, {:.7f}, {}, {:.8f}, {:.1f}, {:.8f}, {:.1f}, {:.7f}, {:.7f}, {:.8f}, {:.8f}' \
                                       ', {:.8f}, {}\n'.format(self.hit_num, self.time, self.channel_num,
                                                               self.thr_V * pow(10, 6), self.thr_dB,
@@ -147,7 +184,7 @@ class Preprocessing:
             #     self.amplitude * pow(10, 6), self.rise_time * pow(10, 6), self.duration * pow(10, 6),
             #     self.energy * pow(10, 14), self.RMS * pow(10, 6), self.counts)
 
-        return data, tra_1, tra_2, tra_3, tra_4
+        return data
 
     def read_pac_data(self, file_name, tra_1=[], tra_2=[], tra_3=[], tra_4=[]):
         pbar = tqdm(file_name, ncols=100)
@@ -193,8 +230,37 @@ class Preprocessing:
             pbar.set_description("Process: %s | Calculating: %s" % (self.idx, ls[0]))
         return pri, chan_1, chan_2, chan_3, chan_4
 
+    def read_wave_realtime(self, file_list, file_idx, chan, hit_num, valid=True):
+        chan_idx = np.where(file_idx[:, 0] == chan)[0]
+        if not len(chan_idx):
+            print('Error: There is no data in channel %d!' % chan)
+            return
+        wave_idx = np.where(file_idx[chan_idx, 1] == hit_num)[0]
+        if not len(wave_idx):
+            print('Error: Can not find hit number %d in channel %d!' % (hit_num, chan))
+            return
+        with open(file_list[wave_idx[0]], 'r') as f:
+            self.skip_n_column(f)
+            self.sample_interval = float(f.readline()[29:])
+            self.skip_n_column(f)
+            points_num = int(f.readline()[36:])
+            self.channel_num = int(f.readline().strip()[16:])
+            self.hit_num = int(f.readline()[12:])
+            self.time = float(f.readline()[14:])
+            sig = np.array([float(i.strip("\n")) for i in f.readlines()[1:]]) / self.magnification * pow(10, 6)
+            time = np.linspace(0, self.sample_interval * (points_num - 1) * pow(10, 6), points_num)
 
-def convert_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
+            if valid:
+                valid_wave_idx = np.where(abs(sig) >= self.thr_μV)[0]
+                start = time[valid_wave_idx[0]]
+                end = time[valid_wave_idx[-1]]
+                duration = end - start
+                sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+                time = np.linspace(0, duration, sig.shape[0])
+        return sig, time
+
+
+def convert_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB, load_wave=False):
     # check existing file
     tar = data_path.split('/')[-1] + '.txt'
     if tar in file_list:
@@ -215,42 +281,43 @@ def convert_pac_data(file_list, data_path, processor, threshold_dB, magnificatio
     print("=" * 47 + " Start " + "=" * 46)
     start = time.time()
 
+    manager = BaseManager()
+    # 一定要在start前注册，不然就注册无效
+    manager.register('GlobalV', GlobalV)
+    manager.start()
+    obj = manager.GlobalV()
+
     # Multiprocessing acceleration
     pool = multiprocessing.Pool(processes=processor)
     for idx, i in enumerate(range(0, len(file_list), each_core)):
         process = Preprocessing(idx, threshold_dB, magnification_dB, data_path, processor)
-        result.append(pool.apply_async(process.main, (file_list[i:i + each_core],)))
+        result.append(pool.apply_async(process.main, (file_list[i:i + each_core], obj, load_wave,)))
 
-    pri, tra_1, tra_2, tra_3, tra_4 = process.save_features(result)
+    pri = process.save_features(result)
 
     pool.close()
     pool.join()
 
-    for idx, tra in enumerate([tra_1, tra_2, tra_3, tra_4]):
-        tra = [j for i in tra for j in i]
-        try:
-            data_tra.append(sorted(tra, key=lambda x: x[-1]))
-        except IndexError:
-            data_tra.append([])
-            print('Warning: There is no data in channel %d!' % idx)
-
-    pri = np.array([np.array(i.strip('\n').split(', ')).astype(np.float32) for i in pri])
-    chan_1 = pri[np.where(pri[:, 2] == 1)[0]]
-    chan_2 = pri[np.where(pri[:, 2] == 2)[0]]
-    chan_3 = pri[np.where(pri[:, 2] == 3)[0]]
-    chan_4 = pri[np.where(pri[:, 2] == 4)[0]]
+    data_pri = np.array([np.array(i.strip('\n').split(', ')).astype(np.float32) for i in pri])
+    del file_list, pri
+    chan_1 = data_pri[np.where(data_pri[:, 2] == 1)[0]]
+    chan_2 = data_pri[np.where(data_pri[:, 2] == 2)[0]]
+    chan_3 = data_pri[np.where(data_pri[:, 2] == 3)[0]]
+    chan_4 = data_pri[np.where(data_pri[:, 2] == 4)[0]]
 
     end = time.time()
 
     print("=" * 46 + " Report " + "=" * 46)
-    print("Calculation Info--Quantity of valid data: %s" % pri.shape[0])
-    print("Waveform Info--Channel 1: %d | Channel 2: %d | Channel 3: %d | Channel 4: %d" %
-          (len(data_tra[0]), len(data_tra[1]), len(data_tra[2]), len(data_tra[3])))
+    print("Calculation Info--Quantity of valid data: %s" % data_pri.shape[0])
+    if load_wave:
+        print("Waveform Info--Channel 1: %d | Channel 2: %d | Channel 3: %d | Channel 4: %d" %
+              (len(obj.get_1()), len(obj.get_2()), len(obj.get_3()), len(obj.get_4())))
     print("Features Info--All channel: %d | Channel 1: %d | Channel 2: %d | Channel 3: %d | Channel 4: %d" %
-          (pri.shape[0], chan_1.shape[0], chan_2.shape[0], chan_3.shape[0], chan_4.shape[0]))
+          (data_pri.shape[0], chan_1.shape[0], chan_2.shape[0], chan_3.shape[0], chan_4.shape[0]))
     print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
                                                                        (end - start) / 60))
-    return data_tra[0], data_tra[1], data_tra[2], data_tra[3], pri, chan_1, chan_2, chan_3, chan_4
+    return data_pri, obj, obj.get_1().sort(key=lambda x: x[-1]), obj.get_2().sort(key=lambda x: x[-1]), \
+           obj.get_3().sort(key=lambda x: x[-1]), obj.get_4().sort(key=lambda x: x[-1])
 
 
 def main_read_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
@@ -338,7 +405,7 @@ if __name__ == "__main__":
     file_list = os.listdir(opt.data_path)
     # print(file_list)
 
-    data_tra_1, data_tra_2, data_tra_3, data_tra_4, data_pri, chan_1, chan_2, chan_3, chan_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
+    # pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
 
     # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 
@@ -358,4 +425,6 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2])
 
-    # waveform = Waveform(color_1, color_2, data_tra_1, opt.path, 'test', status, 'pac', 24)
+    # waveform = Waveform(color_1, color_2, data_tra_1, opt.data_path, 'test', status, 'pac', opt.threshold_dB, opt.magnification_dB)
+
+    # file_list, file_idx = filelist_convert(opt.data_path)

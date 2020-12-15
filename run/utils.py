@@ -323,3 +323,16 @@ def smooth_curve(time, stress, window_length=99, polyorder=1, epoch=200, curoff=
     rest_idx = np.where(time > curoff[1])[0][0]
     res = np.concatenate((stress[:40], front[40:front_idx], y_smooth[front_idx:rest_idx], stress[rest_idx:]))
     return res
+
+
+def filelist_convert(data_path, tar=None):
+    file_list = os.listdir(data_path)
+    if tar:
+        tar += '.txt'
+    else:
+        tar = data_path.split('/')[-1] + '.txt'
+    if tar in file_list:
+        exist_idx = np.where(np.array(file_list) == tar)[0][0]
+        file_list.pop(exist_idx)
+    file_idx = np.array([np.array(i[:-4].split('_')[1:]).astype('int64') for i in file_list])
+    return file_list, file_idx
