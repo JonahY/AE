@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 class Waveform:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25):
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
@@ -16,6 +16,7 @@ class Waveform:
         self.color_2 = color_2
         self.status = status
         self.device = device
+        self.thr = pow(10, thr_dB / 20)
 
     def cal_wave(self, i, valid=True):
         if self.device == 'vallen':
@@ -32,10 +33,9 @@ class Waveform:
                 time = np.linspace(0, duration, sig.shape[0])
         elif self.device == 'pac':
             sig = i[-2]
-            time = np.linspace(0, i[2] * (i[-3] - 1), i[-3])
-            thr = 17.78279410
+            time = np.linspace(0, i[2] * (i[-3] - 1) * pow(10, 6), i[-3])
             if valid:
-                valid_wave_idx = np.where(abs(sig) >= thr)[0]
+                valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
                 start = time[valid_wave_idx[0]]
                 end = time[valid_wave_idx[-1]]
                 duration = end - start
@@ -65,7 +65,7 @@ class Waveform:
         ax.plot(valid_time, valid_data, lw=0.5, color=self.color_1)
         ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-        plot_norm(ax, xlabel='Time(μs)', ylabel='Amplitude(μV)', legend=False, grid=True)
+        plot_norm(ax, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
         ax2 = fig.add_subplot(1, 2, 2)
         i = self.data_tra[TRAI_select_2 - 1]
@@ -76,7 +76,7 @@ class Waveform:
         ax2.plot(valid_time, valid_data, lw=0.5, color=self.color_2)
         ax2.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-        plot_norm(ax2, xlabel='Time(μs)', ylabel='Amplitude(μV)', legend=False, grid=True)
+        plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
     def plot_wave_TRAI(self, k, valid=True):
         # Waveform with specific TRAI
@@ -85,12 +85,16 @@ class Waveform:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], k))
         time, sig = self.cal_wave(i, valid=valid)
 
-        fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI:%d' % k)
+        fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI:%d (%s)' % (k, valid))
         ax = fig.add_subplot(1, 1, 1)
-        ax.plot(time, sig)
-        plt.axhline(abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
-        plt.axhline(-abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
-        plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', title='TRAI:%d' % k, legend=False, grid=True)
+        ax.plot(time, sig, lw=1)
+        if self.device == 'vallen':
+            plt.axhline(abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
+            plt.axhline(-abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
+        elif self.device == 'pac':
+            plt.axhline(abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
+            plt.axhline(-abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
+        plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % k, legend=False, grid=True)
 
     def save_wave(self, TRAI, pop):
         # Save waveform
@@ -105,20 +109,31 @@ class Waveform:
 
 
 class Frequency:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, size=500):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=500):
         self.data_tra = data_tra
-        self.waveform = Waveform(color_1, color_2, data_tra, path, path_pri)
+        self.waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, device, thr_dB)
         self.size = size
         self.grid = np.linspace(0, pow(10, 6), self.size)
+        self.status = status
+        self.device = device
+        self.thr = pow(10, thr_dB / 20)
 
     def cal_frequency(self, k, valid=True):
-        i = self.data_tra[k]
-        sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
-        thr, Fs = i[2], i[3]
-        Ts = 1 / Fs
-        if valid:
-            valid_wave_idx = np.where(abs(sig) >= thr)[0]
-            sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+        if self.device == 'vallen':
+            i = self.data_tra[k]
+            sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            thr, Fs = i[2], i[3]
+            # Ts = 1 / Fs
+            if valid:
+                valid_wave_idx = np.where(abs(sig) >= thr)[0]
+                sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
+        elif self.device == 'pac':
+            i = self.data_tra[k]
+            Fs = 1 / i[2]
+            sig = i[-2]
+            if valid:
+                valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
+                sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
         N = sig.shape[0]
         fft_y = fft(sig)
         abs_y = np.abs(fft_y)
@@ -156,7 +171,7 @@ class Frequency:
             ax.plot(valid_time, valid_data)
             ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
             ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax, 'Time(μs)', 'Amplitude(μV)', legend=False, grid=True)
+            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', legend=False, grid=True)
 
             ax = fig.add_subplot(5, 2, 2 + idx * 2)
             ax.plot(half_frq, normalization_half)
@@ -168,14 +183,14 @@ class Frequency:
         ax.plot(self.grid, Res / N)
         plot_norm(ax, xlabel='Freq (Hz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
 
-    def plot_freq_TRAI(self, k):
+    def plot_freq_TRAI(self, k, valid=False):
         # Frequency with specific TRAI
-        half_frq, normalization_half = self.cal_frequency(k, valid=False)
+        half_frq, normalization_half = self.cal_frequency(k-1, valid=valid)
 
-        fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d' % (k + 1))
+        fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d (%s)' % (k, valid))
         ax = plt.subplot()
         ax.plot(half_frq, normalization_half)
-        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], title='TRAI:%d' % (k + 1), legend=False)
+        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], title='TRAI:%d' % k, legend=False)
 
     def plot_2cls_freq(self, TRAI_1, TRAI_2, same):
         fig = plt.figure(figsize=(6.5, 10), num='Frequency with same %s' % same)

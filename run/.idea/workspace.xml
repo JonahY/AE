@@ -57,7 +57,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="preprocess" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="preprocess" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="run" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -128,6 +128,7 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.preprocess" />
         <item itemvalue="Python.features" />
         <item itemvalue="Python.utils" />
         <item itemvalue="Python.vallen" />
@@ -147,7 +148,8 @@
       <workItem from="1606709682111" duration="18048000" />
       <workItem from="1607842098642" duration="7729000" />
       <workItem from="1607866161450" duration="7203000" />
-      <workItem from="1607907013638" duration="11170000" />
+      <workItem from="1607907013638" duration="12979000" />
+      <workItem from="1607953129973" duration="5375000" />
     </task>
     <servers />
   </component>
@@ -213,10 +215,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="968" height="533" key="XDebugger.FullValuePopup/0.0.1920.1050@0.0.1920.1050" timestamp="1606705430495" />
-    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1607915490416">
+    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1607995288046">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607915490416" />
+    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607995288046" />
     <state x="554" y="135" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1606724246408">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -229,11 +231,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/vallen.py</url>
-          <line>111</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/vallen.py</url>
           <line>86</line>
