@@ -38,7 +38,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/preprocess.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -193,7 +193,8 @@
       <workItem from="1607996097157" duration="6317000" />
       <workItem from="1608004034879" duration="6590000" />
       <workItem from="1608019074989" duration="2551000" />
-      <workItem from="1608023435306" duration="188000" />
+      <workItem from="1608023435306" duration="6156000" />
+      <workItem from="1608097026858" duration="3103000" />
     </task>
     <servers />
   </component>
@@ -206,10 +207,10 @@
     </state>
     <state x="532" y="196" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1608003356259" />
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1606704602459" />
-    <state x="858" y="308" key="FileChooserDialogImpl" timestamp="1607869704930">
+    <state x="858" y="308" key="FileChooserDialogImpl" timestamp="1608023894308">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="858" y="308" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1607869704930" />
+    <state x="858" y="308" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1608023894308" />
     <state width="1877" height="285" key="GridCell.Tab.0.bottom" timestamp="1608003969787">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

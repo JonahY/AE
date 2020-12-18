@@ -405,7 +405,7 @@ if __name__ == "__main__":
     file_list = os.listdir(opt.data_path)
     # print(file_list)
 
-    # pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
+    pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
 
     # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 

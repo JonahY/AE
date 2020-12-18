@@ -399,10 +399,8 @@ class Features:
         # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1,
-                                                                                      self.color_2], ['Whole',
-                                                                                                      'Population 1',
-                                                                                                      'Population 2']
+        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], \
+                                     ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
         for [time, marker, color, label] in zip(TIME[select[0]:select[1]], MARKER[select[0]:select[1]],
                                                 COLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
             res = []
@@ -415,9 +413,8 @@ class Features:
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval, interval_num, select=[0, 3]):
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
-        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
-                                                                                                           eny_lim), self.cal_OmiroLaw_helper(
-            tmp_2, eny_lim)
+        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), \
+                                   self.cal_OmiroLaw_helper(tmp_1, eny_lim), self.cal_OmiroLaw_helper(tmp_2, eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
         for idx, [tmp, title] in enumerate(zip(TMP[select[0]:select[1]], TITLE[select[0]:select[1]])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
