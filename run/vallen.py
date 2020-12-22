@@ -20,7 +20,7 @@ import sys
 
 if __name__ == '__main__':
     path = r'E:\data\vallen'
-    fold = '2020.11.10-PM-self'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -32,16 +32,16 @@ if __name__ == '__main__':
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
-    reload = Reload(path_pri, path_tra, fold)
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_data(lower=2)
-    time = [0, 1600, 3044, 4177, 5997, 8285, 11592, 16240, 18000]
-    t, chan_1, chan_2, chan_3, chan_4 = reload.read_with_time(time)
-    # print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
-    #                                                                              chan_3.shape[0], chan_4.shape[0]))
-    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # chan = chan_2
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
-    #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
+    # reload = Reload(path_pri, path_tra, fold)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_data(lower=2)
+    # time = [0, 1600, 3044, 4177, 5997, 8285, 11592, 16240, 18000]
+    # t, chan_1, chan_2, chan_3, chan_4 = reload.read_with_time(time)
+    print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
+                                                                                 chan_3.shape[0], chan_4.shape[0]))
+    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    chan = chan_2
+    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
+                                              chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
     # Export waveforms to txt
     # export = Export(chan, data_tra, features_path)
@@ -49,12 +49,11 @@ if __name__ == '__main__':
     # export.export_waveform(chan)    # Use one thread to export
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # feature_idx = [Amp, Dur, Time]
-    # xlabelz = ['Amplitude(μV)', 'Duration(μs)', 'Energy(aJ)']
-    # ylabelz = ['PDF(A)', 'PDF(D)', 'PDF(E)']
-    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # features = Features(color_1, color_2, Time, feature_idx, 8)
+    feature_idx = [Amp, Dur, Time]
+    xlabelz = ['Amplitude(μV)', 'Duration(μs)', 'Energy(aJ)']
+    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    features = Features(color_1, color_2, Time, feature_idx, 'Ni-pure')
     # interz, midz = features.cal_interval()
 
     # # ICA and Kernel K-Means

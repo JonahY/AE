@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
 from preprocess import Preprocessing
+import pywt
 
 
 class Waveform:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, magnification_dB=60):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25):
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
@@ -17,8 +18,7 @@ class Waveform:
         self.color_2 = color_2
         self.status = status
         self.device = device
-        self.thr_μV = pow(10, thr_dB / 20)
-        self.process = Preprocessing(None, thr_dB, magnification_dB, path, None)
+        self.thr = pow(10, thr_dB / 20)
 
     def cal_wave(self, i, valid=True):
         if self.device == 'vallen':
@@ -37,7 +37,7 @@ class Waveform:
             sig = i[-2]
             time = np.linspace(0, i[2] * (i[-3] - 1) * pow(10, 6), i[-3])
             if valid:
-                valid_wave_idx = np.where(abs(sig) >= self.thr_μV)[0]
+                valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
                 start = time[valid_wave_idx[0]]
                 end = time[valid_wave_idx[-1]]
                 duration = end - start
@@ -80,14 +80,16 @@ class Waveform:
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k, valid=False):
+    def plot_wave_TRAI(self, k, valid=True):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[-1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], k))
         time, sig = self.cal_wave(i, valid=valid)
 
-        fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI:%d (%s)' % (k, valid))
+        fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI %d (%s)' % (k, valid))
+        fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+                 horizontalalignment="right")
         ax = fig.add_subplot(1, 1, 1)
         ax.plot(time, sig, lw=1)
         if self.device == 'vallen':
@@ -97,19 +99,6 @@ class Waveform:
             plt.axhline(abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
             plt.axhline(-abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % k, legend=False, grid=True)
-
-    def plot_wave_realtime(self, k, file_list, file_idx, chan, valid=False):
-        try:
-            sig, time = self.process.read_wave_realtime(file_list, file_idx, chan, k, valid)
-        except TypeError:
-            return
-
-        fig = plt.figure(figsize=(6, 4.1), num='Waveform--Hit number:%d (%s)' % (k, valid))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.plot(time, sig, lw=1)
-        plt.axhline(abs(self.thr_μV), 0, sig.shape[0], linewidth=1, color="black")
-        plt.axhline(-abs(self.thr_μV), 0, sig.shape[0], linewidth=1, color="black")
-        plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Hit number:%d' % k, legend=False, grid=True)
 
     def save_wave(self, TRAI, pop):
         # Save waveform
@@ -175,22 +164,80 @@ class Frequency:
             Res += np.array(tmp)
         return Res
 
-    def plot_wave_frequency(self, TRAI_select, pop):
-        fig = plt.figure(figsize=(6.5, 10), num='Waveform & Frequency--pop%s' % pop)
-        for idx, j in enumerate(TRAI_select):
-            i = self.data_tra[j - 1]
-            valid_time, valid_data = self.waveform.cal_wave(i, valid=False)
-            half_frq, normalization_half = self.cal_frequency(j - 1, valid=False)
+    def cla_wtpacket(self, signal, w, n, plot=False):
+        w = pywt.Wavelet(w)
+        wp = pywt.WaveletPacket(data=signal, wavelet=w, mode='symmetric', maxlevel=n)
 
-            ax = fig.add_subplot(5, 2, 1 + idx * 2)
-            ax.plot(valid_time, valid_data)
-            ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', legend=False, grid=True)
+        map = {}
+        map[1] = signal
+        for row in range(1, n + 1):
+            lev = []
+            for i in [node.path for node in wp.get_level(row, 'freq')]:
+                map[i] = wp[i].data
 
-            ax = fig.add_subplot(5, 2, 2 + idx * 2)
-            ax.plot(half_frq, normalization_half)
-            plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
+        re = []
+        for i in [node.path for node in wp.get_level(n, 'freq')]:
+            re.append(wp[i].data)
+        energy = []
+        for i in re:
+            energy.append(pow(np.linalg.norm(i, ord=None), 2))
+
+        if plot:
+            plt.figure(dpi=100)
+            plt.subplot(n + 1, 1, 1)
+            plt.plot(map[1])
+            for i in range(2, n + 2):
+                level_num = pow(2, i - 1)
+                # ['aaa', 'aad', 'add', 'ada', 'dda', 'ddd', 'dad', 'daa']
+                re = [node.path for node in wp.get_level(i - 1, 'freq')]
+                for j in range(1, level_num + 1):
+                    plt.subplot(n + 1, level_num, level_num * (i - 1) + j)
+                    plt.plot(map[re[j - 1]])
+            plt.figure(dpi=100)
+            values = [i / sum(energy) for i in energy]
+            index = np.arange(pow(2, n))
+            p2 = plt.bar(index, values, 0.45, label="num", color="#87CEFA")
+            plt.xlabel('clusters')
+            plt.ylabel('number of reviews')
+            plt.title('Cluster Distribution')
+            plt.xticks(index, ('7', '8', '9', '10', '11', '12', '13', '14'))
+            plt.legend(loc="upper right")
+        return map, wp, energy
+
+    def plot_wave_frequency(self, TRAI, valid=False, n=3, wtpacket=False, wtpacket_eng=False):
+        fig = plt.figure(figsize=(9.2, 3), num='Waveform & Frequency--TRAI %d' % TRAI)
+        i = self.data_tra[TRAI - 1]
+        valid_time, valid_data = self.waveform.cal_wave(i, valid=valid)
+        half_frq, normalization_half = self.cal_frequency(TRAI - 1, valid=valid)
+
+        ax = fig.add_subplot(1, 2, 1)
+        ax.plot(valid_time, valid_data)
+        ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', legend=False, grid=True)
+
+        ax = fig.add_subplot(1, 2, 2)
+        ax.plot(half_frq, normalization_half)
+        plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
+
+        if wtpacket:
+            fig = plt.figure(figsize=(15, 7), num='WaveletPacket--TRAI %d' % TRAI)
+            map, wp, energy = self.cla_wtpacket(valid_data, 'db8', n)
+            for i in range(2, n + 2):
+                level_num = pow(2, i - 1)
+                # ['aaa', 'aad', 'add', 'ada', 'dda', 'ddd', 'dad', 'daa']
+                re = [node.path for node in wp.get_level(i - 1, 'freq')]
+                for j in range(1, level_num + 1):
+                    ax = fig.add_subplot(n, level_num, level_num * (i - 2) + j)
+                    ax.plot(map[re[j - 1]])
+                    plot_norm(ax, '', '', legend=False)
+            if wtpacket_eng:
+                fig = plt.figure(figsize=(4.6, 3), num='WaveletPacket Energy--TRAI %d' % TRAI)
+                ax = fig.add_subplot()
+                values = [i / sum(energy) for i in energy]
+                index = np.arange(pow(2, n))
+                ax.bar(index, values, 0.45, color="#87CEFA")
+                plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
     def plot_ave_freq(self, Res, N, title):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
@@ -200,7 +247,7 @@ class Frequency:
 
     def plot_freq_TRAI(self, k, valid=False):
         # Frequency with specific TRAI
-        half_frq, normalization_half = self.cal_frequency(k-1, valid=valid)
+        half_frq, normalization_half = self.cal_frequency(k - 1, valid=valid)
 
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d (%s)' % (k, valid))
         ax = plt.subplot()
@@ -219,3 +266,28 @@ class Frequency:
             ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
             ax2.plot(half_frq, normalization_half)
             plot_norm(ax2, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
+
+    def cal_freq_max(self, ALL_TRAI, status='peak'):
+        freq, stage_idx = [], []
+        for trai in tqdm(ALL_TRAI):
+            half_frq, normalization_half = self.cal_frequency(trai - 1)
+            if status == 'peak':
+                freq.append(half_frq[np.argmax(normalization_half)])
+            elif status == 'three peaks':
+                freq_max = []
+                idx_1 = np.where(half_frq < 300000)
+                idx_2 = np.where((half_frq >= 300000) & (half_frq < 500000))
+                idx_3 = np.where(half_frq >= 500000)
+                normalization_max = 0
+                if idx_1.shape[0] != 0 and idx_2.shape[0] != 0 and idx_3.shape[0] != 0:
+                    for i, idx in enumerate([idx_1, idx_2, idx_3]):
+                        if max(normalization_half[idx]) > normalization_max:
+                            idx_max = idx
+                            tmp = i + 1
+                            normalization_max = max(normalization_half[idx])
+                            freq_max = half_frq[idx_max][np.argmax(normalization_half[idx_max])]
+                freq.append(freq_max)
+                stage_idx.append(tmp)
+        freq = np.array(freq)
+        stage_idx = np.array(stage_idx)
+        return freq, stage_idx

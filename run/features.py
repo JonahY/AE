@@ -437,7 +437,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'E:\data\vallen'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -461,10 +461,9 @@ if __name__ == "__main__":
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     feature_idx = [Amp, Dur, Eny]
     xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    ylabelz = ['PDF(A)', 'PDF(D)', 'PDF(E)']
     color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
     color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    status = fold.split('-')[0] + ' ' + fold.split('-')[2]
+    status = fold.split('-')[0] + '-' + fold.split('-')[2]
     features = Features(color_1, color_2, Time, feature_idx, status)
 
     # ICA and Kernel K-Means
@@ -475,4 +474,7 @@ if __name__ == "__main__":
     for i in range(2):
         cls_KKM.append(pred == i)
     # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+
+    waveform = Waveform(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
+    frequency = Frequency(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
 
