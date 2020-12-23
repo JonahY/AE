@@ -291,11 +291,14 @@ def val_TRAI(data_pri, TRAI):
         validation(i - 1)
 
 
-def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM):
-    df_1 = pd.DataFrame({'time': Time[cls_1_KKM], 'energy': Eny[cls_1_KKM]})
-    df_2 = pd.DataFrame({'time': Time[cls_2_KKM], 'energy': Eny[cls_2_KKM]})
-    df_1.to_csv('E-T_pure_pop1.csv')
-    df_2.to_csv('E-T_pure_pop2.csv')
+def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM, time, displace, smooth_load, strain, smooth_stress):
+    df_1 = pd.DataFrame({'time_pop1': Time[cls_KKM[0]], 'energy_pop1': Eny[cls_KKM[0]]})
+    df_2 = pd.DataFrame({'time_pop2': Time[cls_KKM[1]], 'energy_pop2': Eny[cls_KKM[1]]})
+    df_3 = pd.DataFrame(
+        {'time': time, 'displace': displace, 'load': smooth_load, 'strain': strain, 'stress': smooth_stress})
+    df_1.to_csv('E-T_electrolysis_pop1.csv')
+    df_2.to_csv('E-T_electrolysis_pop2.csv')
+    df_3.to_csv('E-T_electrolysis_RawData.csv')
 
 
 def load_stress(path_curve):

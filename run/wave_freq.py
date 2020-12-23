@@ -275,9 +275,9 @@ class Frequency:
                 freq.append(half_frq[np.argmax(normalization_half)])
             elif status == 'three peaks':
                 freq_max = []
-                idx_1 = np.where(half_frq < 300000)
-                idx_2 = np.where((half_frq >= 300000) & (half_frq < 500000))
-                idx_3 = np.where(half_frq >= 500000)
+                idx_1 = np.where(half_frq < 300000)[0]
+                idx_2 = np.where((half_frq >= 300000) & (half_frq < 500000))[0]
+                idx_3 = np.where(half_frq >= 500000)[0]
                 normalization_max = 0
                 if idx_1.shape[0] != 0 and idx_2.shape[0] != 0 and idx_3.shape[0] != 0:
                     for i, idx in enumerate([idx_1, idx_2, idx_3]):

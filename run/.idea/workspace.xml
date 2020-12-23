@@ -38,7 +38,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../AE_GUI" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -192,7 +192,9 @@
       <workItem from="1608019074989" duration="2551000" />
       <workItem from="1608023435306" duration="6156000" />
       <workItem from="1608097026858" duration="3103000" />
-      <workItem from="1608626993010" duration="5692000" />
+      <workItem from="1608626993010" duration="6758000" />
+      <workItem from="1608641879678" duration="85000" />
+      <workItem from="1608715267092" duration="3757000" />
     </task>
     <servers />
   </component>
@@ -205,10 +207,10 @@
     </state>
     <state x="532" y="196" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1608627880225" />
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1606704602459" />
-    <state x="858" y="308" key="FileChooserDialogImpl" timestamp="1608023894308">
+    <state x="858" y="308" key="FileChooserDialogImpl" timestamp="1608641958931">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="858" y="308" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1608023894308" />
+    <state x="858" y="308" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1608641958931" />
     <state width="1877" height="285" key="GridCell.Tab.0.bottom" timestamp="1608003969787">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

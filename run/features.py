@@ -85,7 +85,7 @@ class Features:
         # 取区间终点作为该段的横坐标
         for idx in range(len(x) - 1):
             xx[idx] = (x[idx] + x[idx + 1]) / 2
-        xx[-1] = x[-1]
+        xx[-1] = x[-1] + pow(10, len(str(int(x[-1])))) * (0.9 / interval_num) / 2
 
         # 计算分段区间长度，从而求得概率密度值
         interval = []
@@ -132,32 +132,39 @@ class Features:
                 for i in range(main_peak.shape[0] - 1):
                     for j in range(main_peak[i] + 1, main_peak[i + 1] + 1):
                         if tmp[j] < eny_lim[idx][1]:
-                            k = Time[j] - Time[main_peak[i]]
+                            k = self.time[j] - self.time[main_peak[i]]
                             res[idx].append(k)
                         else:
                             break
                 if main_peak[-1] < tmp.shape[0] - 1:
                     for j in range(main_peak[-1] + 1, tmp.shape[0]):
-                        k = Time[j] - Time[main_peak[-1]]
+                        k = self.time[j] - self.time[main_peak[-1]]
                         res[idx].append(k)
         return res
 
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
-                INTERVAL_NUM=[6] * 3,
-                select=[0, 3], FIT=False):
+                INTERVAL_NUM=[6] * 3, select=[0, 3], FIT=False):
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
         # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
                                                                                                 'Population 2']
+        if LIM[0][1] == None:
+            method = 'index'
+        elif LIM[0][1] == float('inf'):
+            method = 'value'
         for tmp, color, label, num, lim in zip(TMP[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]],
                                                INTERVAL_NUM[select[0]:select[1]], LIM[select[0]:select[1]]):
             inter, mid = self.cal_interval(tmp, num)
             xx, yy = self.cal_linear(tmp, inter, mid, num)
             if FIT:
-                fit = np.polyfit(np.log10(xx[lim[0]:lim[1]]), np.log10(yy[lim[0]:lim[1]]), 1)
+                if method == 'value':
+                    lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
+                    fit = np.polyfit(np.log10(xx[lim[0]:lim[-1]]), np.log10(yy[lim[0]:lim[-1]]), 1)
+                elif method == 'index':
+                    fit = np.polyfit(np.log10(xx[lim[0]:lim[1]]), np.log10(yy[lim[0]:lim[1]]), 1)
                 alpha, b = fit[0], fit[1]
                 fit_x = np.linspace(xx[lim[0]], xx[-1], 100)
                 fit_y = self.convert(fit_x, alpha, b)
@@ -176,7 +183,6 @@ class Features:
                  select=[0, 3], FIT=False):
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
-        # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, N, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], ['black', self.color_1, self.color_2], [
@@ -212,8 +218,9 @@ class Features:
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
-        TMP, N, LAYER = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 2, 3]
-        COLOR, LABEL = ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        TMP, N, LAYER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 2, 3], ['black', self.color_1,
+                                                                                                  self.color_2], [
+                                          'Whole', 'Population 1', 'Population 2']
         for tmp, N, layer, color, label in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
                                                LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]]):
@@ -274,7 +281,7 @@ class Features:
             ct = ax.contourf(X, Y, height, levels, colors=colors, extend='max')
         #             cbar = plt.colorbar(ct)
         else:
-            ct = plt.contour(X, Y, height, levels, colors=colors, linewidths=1, linestyles=linestyles)
+            ct = ax.contour(X, Y, height, levels, colors=colors, linewidths=1, linestyles=linestyles)
         #             cbar = plt.colorbar(ct)
         if clabel:
             ax.clabel(ct, inline=True, colors='k', fmt='%.1f')
@@ -356,6 +363,7 @@ class Features:
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, select=[0, 3]):
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
+        # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, MARKER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h'], ['black', self.color_1,
@@ -373,23 +381,18 @@ class Features:
             for k in range(x.shape[0]):
                 if k != x.shape[0] - 1:
                     N, Naft = self.cal_N_Naft(tmp, [x[k], x[k + 1]])
-                    if Naft != 0 and N != 0:
-                        y.append(np.log10(N / Naft))
-                    else:
-                        y.append(float('inf'))
                 else:
                     N, Naft = self.cal_N_Naft(tmp, [x[k], float('inf')])
-                    if Naft != 0 and N != 0:
-                        y.append(np.log10(N / Naft))
-                    else:
-                        y.append(float('inf'))
-
+                if Naft != 0 and N != 0:
+                    y.append(np.log10(N / Naft))
+                else:
+                    y.append(float('inf'))
             y = np.array(y)
             x, y = x[y != float('inf')], y[y != float('inf')]
             x_eny = np.zeros(x.shape[0])
             for idx in range(len(x) - 1):
                 x_eny[idx] = (x[idx] + x[idx + 1]) / 2
-            x_eny[-1] = x[-1] + pow(10, len(str(x[-1]))) * (0.9 / interval_num) / 2
+            x_eny[-1] = x[-1] + pow(10, len(str(int(x[-1])))) * (0.9 / interval_num) / 2
             ax.semilogx(x_eny, y, color=color, marker=marker, markersize=8, mec=color, mfc='none', label=label)
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
@@ -399,8 +402,10 @@ class Features:
         # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], \
-                                     ['black', self.color_1, self.color_2], ['Whole', 'Population 1', 'Population 2']
+        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1,
+                                                                                      self.color_2], ['Whole',
+                                                                                                      'Population 1',
+                                                                                                      'Population 2']
         for [time, marker, color, label] in zip(TIME[select[0]:select[1]], MARKER[select[0]:select[1]],
                                                 COLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
             res = []
@@ -413,8 +418,9 @@ class Features:
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval, interval_num, select=[0, 3]):
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
-        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), \
-                                   self.cal_OmiroLaw_helper(tmp_1, eny_lim), self.cal_OmiroLaw_helper(tmp_2, eny_lim)
+        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
+                                                                                                           eny_lim), self.cal_OmiroLaw_helper(
+            tmp_2, eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
         for idx, [tmp, title] in enumerate(zip(TMP[select[0]:select[1]], TITLE[select[0]:select[1]])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
@@ -473,8 +479,39 @@ if __name__ == "__main__":
     cls_KKM = []
     for i in range(2):
         cls_KKM.append(pred == i)
-    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+    cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
 
     waveform = Waveform(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
     frequency = Frequency(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
 
+    # # Al-alloy
+    # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
+    # LIM_CCDF = [[[0, float('inf')], [15, 100], [20, 300]], [[0, float('inf')], [100, 2500], [30, 250]],
+    #             [[0, float('inf')], [0.5, 10], [0.2, 10]]]
+    # INTERVAL_NUM = [[8, 16, 16], [8, 15, 20], [8, 8, 10]]
+
+    # # Ni-electrolysis: 8, 10, 7
+    # LIM_PDF = [[[0, None], [1, None], [1, -2]], [[0, None], [11, -2], [10, -1]], [[0, None], [2, -2], [1, -2]]]
+    # LIM_CCDF = [[[0, float('inf')], [0, 1000], [0, 3000]], [[0, float('inf')], [100, 3600], [80, 600]], [[0, float('inf')], [1, 3000], [0.5, 1500]]]
+    # INTERVAL_NUM = [[8, 16, 16], [8, 16, 8], [8, 5, 6]]
+    #
+    # # Ni-pure
+    # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
+    # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]
+    # INTERVAL_NUM = [[8, 11, 8], [8, 10, 9], [8, 5, 9]]
+    #
+    # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
+    #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
+    #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, select=[1, None], FIT=True)
+    #     features.cal_ML(tmp, tmp_1, tmp_2, xlabelz[idx], 'ML (%s)' % xlabelz[idx][0], features_path, select=[1, None])
+    #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
+    #
+    # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
+    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', 9, select=[1, None])
+    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', 0.9/23, 23, select=[1, None])
+    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', 0.9/7, 7, select=[1, None])
+    # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
+    #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
+    # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
+    # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
+    # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
