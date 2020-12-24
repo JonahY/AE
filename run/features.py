@@ -145,7 +145,7 @@ class Features:
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
                 INTERVAL_NUM=[6] * 3, select=[0, 3], FIT=False):
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
-        # fig = plt.figure(figsize=[6, 3.9])
+        #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
@@ -362,8 +362,8 @@ class Features:
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, select=[0, 3]):
-        fig = plt.figure(figsize=[6, 3.9], num='Bath law')
-        # fig = plt.figure(figsize=[6, 3.9])
+        #         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
+        fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, MARKER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h'], ['black', self.color_1,
@@ -397,9 +397,10 @@ class Features:
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, interval, interval_num, select=[0, 3]):
-        fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
-        # fig = plt.figure(figsize=[6, 3.9])
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, interval, interval_num, select=[0, 3],
+                        FIT=False):
+        #         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
+        fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1,
@@ -413,18 +414,29 @@ class Features:
                 res.append(time[i + 1] - time[i])
             inter, mid = self.cal_negtive_interval(res, interval)
             xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
-            ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+            if FIT:
+                xx, yy = np.array(xx), np.array(yy)
+                fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
+                alpha, b = fit[0], fit[1]
+                fit_x = np.linspace(xx[0], xx[-1], 100)
+                fit_y = self.convert(fit_x, alpha, b)
+                ax.plot(fit_x, fit_y, '-.', lw=1, color=color)
+                ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color,
+                          label='{}--{:.2f}'.format(label, abs(alpha)))
+            else:
+                ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval, interval_num, select=[0, 3]):
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval, interval_num, select=[0, 3], FIT=False):
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
+        #         eny_lim = [[0.001, 0.01], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
         tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
                                                                                                            eny_lim), self.cal_OmiroLaw_helper(
             tmp_2, eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
         for idx, [tmp, title] in enumerate(zip(TMP[select[0]:select[1]], TITLE[select[0]:select[1]])):
-            fig = plt.figure(figsize=[6, 3.9], num=title)
-            # fig = plt.figure(figsize=[6, 3.9])
+            #             fig = plt.figure(figsize=[6, 3.9], num=title)
+            fig = plt.figure(figsize=[6, 3.9])
             fig.text(0.16, 0.21, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
             for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'],
@@ -437,7 +449,18 @@ class Features:
                 if len(tmp[i]):
                     inter, mid = self.cal_negtive_interval(tmp[i], interval)
                     xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid, interval_num)
-                    ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+                    if FIT:
+                        xx, yy = np.array(xx), np.array(yy)
+                        #                         fit_lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
+                        fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
+                        alpha, b = fit[0], fit[1]
+                        fit_x = np.linspace(xx[0], xx[-1], 100)
+                        fit_y = self.convert(fit_x, alpha, b)
+                        ax.plot(fit_x, fit_y, '-.', lw=1, color=color)
+                        ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color,
+                                  label='{}--{:.2f}'.format(label, abs(alpha)))
+                    else:
+                        ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
 
