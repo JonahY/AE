@@ -34,7 +34,7 @@ class Features:
         self.convert = lambda x, a, b: pow(x, a) * pow(10, b)
         self.status = status
 
-    def cal_interval(self, tmp, interval):
+    def cal_linear_interval(self, tmp, interval):
         tmp_max = int(max(tmp))
         tmp_min = int(min(tmp))
         if tmp_min <= 0:
@@ -46,6 +46,12 @@ class Features:
             mid = [interval * pow(10, i) for i in range(len(str(tmp_min)),
                                                         len(str(tmp_max)) + 1)]
         return inter, mid
+
+    def cal_log_interval(self, tmp):
+        tmp_min = math.floor(np.log10(min(tmp)))
+        tmp_max = math.ceil(np.log10(max(tmp)))
+        inter = [i for i in range(tmp_min, tmp_max + 1)]
+        return inter
 
     def cal_negtive_interval(self, res, interval):
         tmp = sorted(np.array(res))
@@ -107,6 +113,35 @@ class Features:
         #     fit_y = np.polyval(fit, fit_x)
         return xx, yy
 
+    def cal_log(self, tmp, inter, interval_num, idx=0):
+        x, xx, interval = np.array([]), np.array([]), np.array([])
+        for i in inter:
+            logspace = np.logspace(i, i + 1, interval_num, endpoint=False)
+            tmp_inter = [logspace[i + 1] - logspace[i] for i in range(len(logspace) - 1)]
+            tmp_xx = [(logspace[i + 1] + logspace[i]) / 2 for i in range(len(logspace) - 1)]
+            tmp_inter.append(10 * logspace[0] - logspace[-1])
+            tmp_xx.append((10 * logspace[0] + logspace[-1]) / 2)
+            x = np.append(x, logspace)
+            interval = np.append(interval, np.array(tmp_inter))
+            xx = np.append(xx, np.array(tmp_xx))
+
+        y = np.zeros(x.shape[0])
+        for i, n in Counter(tmp).items():
+            while True:
+                try:
+                    if x[idx] <= i < x[idx + 1]:
+                        y[idx] += n
+                        break
+                except IndexError:
+                    if x[idx] <= i:
+                        y[idx] += n
+                        break
+                idx += 1
+
+        xx, y, interval = xx[y != 0], y[y != 0], interval[y != 0]
+        yy = y / (sum(y) * interval)
+        return xx, yy
+
     def cal_N_Naft(self, tmp, eny_lim):
         N_ms, N_as = 0, 0
         main_peak = np.where(eny_lim[0] < tmp)[0]
@@ -143,9 +178,9 @@ class Features:
         return res
 
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
-                INTERVAL_NUM=[6] * 3, select=[0, 3], FIT=False):
-        fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
-        #         fig = plt.figure(figsize=[6, 3.9])
+                INTERVAL_NUM=[6] * 3, bin_method='log', select=[0, 3], FIT=False):
+        #         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s'%xlabel)
+        fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
@@ -157,8 +192,12 @@ class Features:
         for tmp, color, label, num, lim in zip(TMP[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]],
                                                INTERVAL_NUM[select[0]:select[1]], LIM[select[0]:select[1]]):
-            inter, mid = self.cal_interval(tmp, num)
-            xx, yy = self.cal_linear(tmp, inter, mid, num)
+            if bin_method == 'linear':
+                inter, mid = self.cal_linear_interval(tmp, num)
+                xx, yy = self.cal_linear(tmp, inter, mid, num)
+            elif bin_method == 'log':
+                inter = self.cal_log_interval(tmp)
+                xx, yy = self.cal_log(tmp, inter, num)
             if FIT:
                 if method == 'value':
                     lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
@@ -361,7 +400,7 @@ class Features:
         ax.set_yticks([-1, 0, 1, 2, 3])
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
-    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, select=[0, 3]):
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, bin_method='log', select=[0, 3]):
         #         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -373,11 +412,23 @@ class Features:
         for tmp, marker, color, label in zip(TMP[select[0]:select[1]], MARKER[select[0]:select[1]],
                                              COLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
             tmp_max = int(max(tmp))
-            inter = [pow(10, i) for i in range(0, len(str(tmp_max)))]
-            x = np.array([])
+            if bin_method == 'linear':
+                x = np.array([])
+                inter = [pow(10, i) for i in range(0, len(str(tmp_max)))]
+                for i in inter:
+                    x = np.append(x, np.linspace(i, i * 10, interval_num, endpoint=False))
+            elif bin_method == 'log':
+                x, x_eny = np.array([]), np.array([])
+                inter = self.cal_log_interval(tmp)
+                for i in inter:
+                    if i < 0:
+                        continue
+                    logspace = np.logspace(i, i + 1, interval_num, endpoint=False)
+                    x = np.append(x, logspace)
+                    tmp_xx = [(logspace[i + 1] + logspace[i]) / 2 for i in range(len(logspace) - 1)]
+                    tmp_xx.append((10 * logspace[0] + logspace[-1]) / 2)
+                    x_eny = np.append(x_eny, np.array(tmp_xx))
             y = []
-            for i in inter:
-                x = np.append(x, np.linspace(i, i * 10, interval_num, endpoint=False))
             for k in range(x.shape[0]):
                 if k != x.shape[0] - 1:
                     N, Naft = self.cal_N_Naft(tmp, [x[k], x[k + 1]])
@@ -388,17 +439,20 @@ class Features:
                 else:
                     y.append(float('inf'))
             y = np.array(y)
-            x, y = x[y != float('inf')], y[y != float('inf')]
-            x_eny = np.zeros(x.shape[0])
-            for idx in range(len(x) - 1):
-                x_eny[idx] = (x[idx] + x[idx + 1]) / 2
-            x_eny[-1] = x[-1] + pow(10, len(str(int(x[-1])))) * (0.9 / interval_num) / 2
+            if bin_method == 'linear':
+                x, y = x[y != float('inf')], y[y != float('inf')]
+                x_eny = np.zeros(x.shape[0])
+                for idx in range(len(x) - 1):
+                    x_eny[idx] = (x[idx] + x[idx + 1]) / 2
+                x_eny[-1] = x[-1] + pow(10, len(str(int(x[-1])))) * (0.9 / interval_num) / 2
+            elif bin_method == 'log':
+                x_eny, y = x_eny[y != float('inf')], y[y != float('inf')]
             ax.semilogx(x_eny, y, color=color, marker=marker, markersize=8, mec=color, mfc='none', label=label)
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, interval, interval_num, select=[0, 3],
-                        FIT=False):
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, interval_num, bin_method='log',
+                        select=[0, 3], FIT=False):
         #         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -412,8 +466,12 @@ class Features:
             res = []
             for i in range(time.shape[0] - 1):
                 res.append(time[i + 1] - time[i])
-            inter, mid = self.cal_negtive_interval(res, interval)
-            xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
+            if bin_method == 'linear':
+                inter, mid = self.cal_negtive_interval(res, 0.9 / interval_num)
+                xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
+            elif bin_method == 'log':
+                inter = self.cal_log_interval(res)
+                xx, yy = self.cal_log(sorted(np.array(res)), inter, interval_num)
             if FIT:
                 xx, yy = np.array(xx), np.array(yy)
                 fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
@@ -427,7 +485,8 @@ class Features:
                 ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval, interval_num, select=[0, 3], FIT=False):
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, bin_method='log', select=[0, 3],
+                     FIT=False):
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
         #         eny_lim = [[0.001, 0.01], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
         tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
@@ -447,8 +506,12 @@ class Features:
                                                             '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{2}aJ$',
                                                             '$10^{2}aJ<E_{MS}<10^{3}aJ$'])):
                 if len(tmp[i]):
-                    inter, mid = self.cal_negtive_interval(tmp[i], interval)
-                    xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid, interval_num)
+                    if bin_method == 'linear':
+                        inter, mid = self.cal_negtive_interval(tmp[i], 0.9 / interval_num)
+                        xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid, interval_num)
+                    elif bin_method == 'log':
+                        inter = self.cal_log_interval(tmp[i])
+                        xx, yy = self.cal_log(sorted(np.array(tmp[i])), inter, interval_num)
                     if FIT:
                         xx, yy = np.array(xx), np.array(yy)
                         #                         fit_lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
@@ -483,7 +546,7 @@ if __name__ == "__main__":
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    chan = chan_2
+    chan = chan_4
     Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
                                               chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
@@ -525,14 +588,14 @@ if __name__ == "__main__":
     #
     # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
     #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
-    #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, select=[1, None], FIT=True)
+    #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, bin_method='log', select=[1, None], FIT=True)
     #     features.cal_ML(tmp, tmp_1, tmp_2, xlabelz[idx], 'ML (%s)' % xlabelz[idx][0], features_path, select=[1, None])
     #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
     #
     # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
-    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', 9, select=[1, None])
-    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', 0.9/23, 23, select=[1, None])
-    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', 0.9/7, 7, select=[1, None])
+    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', 9, bin_method='log', select=[1, None])
+    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', 23, bin_method='log', select=[1, None], FIT=True)
+    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', 7, bin_method='log', select=[1, None], FIT=Tr
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
