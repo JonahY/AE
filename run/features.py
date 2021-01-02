@@ -528,12 +528,14 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\data\vallen'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    path = r'H:\VALLEN'
+    fold = 'Cu-3D-compression-1106-before900s'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # Cu-3D-compression-1106-before900s
+    # Cu-annealing-tension-1126
     # 2020.11.10-PM-self
     # 6016_CR_1
     # 316L-1.5-z3-AE-3 sensor-20200530
@@ -542,33 +544,33 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, t_cut=900)
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    chan = chan_4
-    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
-                                              chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
-
-    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    feature_idx = [Amp, Dur, Eny]
-    xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    status = fold.split('-')[0] + '-' + fold.split('-')[2]
-    features = Features(color_1, color_2, Time, feature_idx, status)
-
-    # ICA and Kernel K-Means
-    S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
-    km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
-    pred = km.fit_predict(S_)
-    cls_KKM = []
-    for i in range(2):
-        cls_KKM.append(pred == i)
-    cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
-
-    waveform = Waveform(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
-    frequency = Frequency(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
+    # chan = chan_4
+    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
+    #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
+    #
+    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    # feature_idx = [Amp, Dur, Eny]
+    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
+    # features = Features(color_1, color_2, Time, feature_idx, status)
+    #
+    # # ICA and Kernel K-Means
+    # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
+    # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
+    # pred = km.fit_predict(S_)
+    # cls_KKM = []
+    # for i in range(2):
+    #     cls_KKM.append(pred == i)
+    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+    #
+    # waveform = Waveform(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
+    # frequency = Frequency(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
 
     # # Al-alloy
     # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
