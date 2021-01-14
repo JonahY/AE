@@ -52,9 +52,6 @@
       <module name="run" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -201,7 +198,7 @@
       <workItem from="1609984783640" duration="2560000" />
       <workItem from="1609991208477" duration="5918000" />
       <workItem from="1610541450187" duration="1202000" />
-      <workItem from="1610585438470" duration="988000" />
+      <workItem from="1610585438470" duration="2825000" />
     </task>
     <servers />
   </component>

@@ -535,8 +535,8 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\data\vallen'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    path = r'H:\VALLEN'
+    fold = '316L-1.5-z3-AE-3 sensor-20200530'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
