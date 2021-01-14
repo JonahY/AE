@@ -390,10 +390,10 @@ def main_read_pac_features(data_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", "--data_path", type=str,
-                        default=r"D:\data\3D porous TC4-8mA-compression test-z1-0.01-20201010",
+                        default=r"C:\Users\Yuan\Desktop\316L-1.5-annealed-AE-3 sensor-20201228",
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
-    parser.add_argument("-mag", "--magnification_dB", type=int, default=60, help="Magnification /dB")
+    parser.add_argument("-mag", "--magnification_dB", type=int, default=40, help="Magnification /dB")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-cnts", "--min_cnts", type=int, default=2, help="Number of Threads")
     opt = parser.parse_args()
@@ -402,25 +402,25 @@ if __name__ == "__main__":
 
     opt.data_path = opt.data_path.replace('\\', '/')
     os.chdir(opt.data_path)
-    file_list = os.listdir(opt.data_path)
+    # file_list = os.listdir(opt.data_path)
     # print(file_list)
+    print("=" * 42 + " Read Files Done " + "=" * 41)
 
-    pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
+    # pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, False)
 
     # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 
-    # data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, 6)
+    data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path)
 
-    # chan = chan_1
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), chan[:, 8] * pow(10, 6), \
-    #                                           chan[:, 9], chan[:, 10], chan[:, -1]
-    # feature_idx = [Amp, Dur, Eny]
-    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    # ylabelz = ['PDF(A)', 'PDF(D)', 'PDF(E)']
-    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = 'test'
-    # features = Features(color_1, color_2, Time, feature_idx, status)
+    chan = chan_1
+    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), chan[:, 8] * pow(10, 6), \
+                                              chan[:, 9], chan[:, 10], chan[:, -1]
+    feature_idx = [Amp, Dur, Eny]
+    xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    status = 'test'
+    features = Features(color_1, color_2, Time, feature_idx, status)
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2])
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2])

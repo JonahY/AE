@@ -18,7 +18,6 @@ import warnings
 from matplotlib.pylab import mpl
 
 
-
 warnings.filterwarnings("ignore")
 mpl.rcParams['axes.unicode_minus'] = False  #显示负号
 plt.rcParams['xtick.direction'] = 'in'
@@ -161,7 +160,7 @@ class Features:
 
     def cal_OmiroLaw_helper(self, tmp, eny_lim):
         res = [[] for _ in range(len(eny_lim))]
-        for idx in tqdm(range(len(eny_lim))):
+        for idx in range(len(eny_lim)):
             main_peak = np.where((eny_lim[idx][0] < tmp) & (tmp < eny_lim[idx][1]))[0]
             if len(main_peak):
                 for i in range(main_peak.shape[0] - 1):
@@ -179,8 +178,8 @@ class Features:
 
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
                 INTERVAL_NUM=[6] * 3, bin_method='log', select=[0, 3], FIT=False):
-        #         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s'%xlabel)
-        fig = plt.figure(figsize=[6, 3.9])
+        fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
+        #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
@@ -264,8 +263,8 @@ class Features:
                                                LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]]):
             ML_y, Error_bar = [], []
-            for j in tqdm(range(N)):
-                valid_x = sorted(tmp)[j:]
+            for j in range(N):
+                valid_x = tmp[j:]
                 E0 = valid_x[0]
                 Sum = np.sum(np.log(valid_x / E0))
                 N_prime = N - j
@@ -273,12 +272,12 @@ class Features:
                 error_bar = (alpha - 1) / pow(N_prime, 0.5)
                 ML_y.append(alpha)
                 Error_bar.append(error_bar)
-            ax.errorbar(sorted(tmp), ML_y, yerr=Error_bar, fmt='o', ecolor=color, color=color, elinewidth=1, capsize=2,
-                        ms=3, label=label, zorder=layer)
+            ax.errorbar(tmp, ML_y, yerr=Error_bar, fmt='o', ecolor=color, color=color, elinewidth=1, capsize=2, ms=3,
+                        label=label, zorder=layer)
             with open(features_path[:-4] + '_{}_'.format(label) + 'ML(%s).txt' % xlabel[0], 'w') as f:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
-                    f.write('{}, {}, {}\n'.format(sorted(tmp)[j], ML_y[j], Error_bar[j]))
+                    f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
         plot_norm(ax, xlabel, ylabel, y_lim=[1.25, 3])
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
@@ -343,7 +342,7 @@ class Features:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
             plot_norm(ax, xlabel, ylabel)
         else:
-            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='g')
+            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='b')
             plot_norm(ax, xlabel, ylabel, legend=False)
 
         if fit:
@@ -389,28 +388,33 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_feature_time(self, tmp, ylabel):
+    def plot_feature_time(self, tmp, ylabel, method='scatter', bar_width=25):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_yscale("log", nonposy='clip')
-        ax.scatter(self.time, tmp)
-        ax.set_xticks(np.linspace(0, 40000, 9))
-        ax.set_yticks([-1, 0, 1, 2, 3])
+        if method == 'scatter':
+            ax.scatter(self.time, tmp)
+        else:
+            ax.bar(Time, Eny, width=bar_width)
+        # ax.set_xticks(np.linspace(0, 40000, 9))
+        # ax.set_yticks([-1, 0, 1, 2, 3])
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
-    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, bin_method='log', select=[0, 3]):
-        #         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
-        fig = plt.figure(figsize=[6, 3.9])
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
+                    select=[0, 3]):
+        fig = plt.figure(figsize=[6, 3.9], num='Bath law')
+        #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, MARKER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h'], ['black', self.color_1,
                                                                                   self.color_2], ['Whole',
                                                                                                   'Population 1',
                                                                                                   'Population 2']
-        for tmp, marker, color, label in zip(TMP[select[0]:select[1]], MARKER[select[0]:select[1]],
-                                             COLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
+        for tmp, interval_num, marker, color, label in zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]],
+                                                           MARKER[select[0]:select[1]], COLOR[select[0]:select[1]],
+                                                           LABEL[select[0]:select[1]]):
             tmp_max = int(max(tmp))
             if bin_method == 'linear':
                 x = np.array([])
@@ -451,18 +455,20 @@ class Features:
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, interval_num, bin_method='log',
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
                         select=[0, 3], FIT=False):
-        #         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
-        fig = plt.figure(figsize=[6, 3.9])
+        fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
+        #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1,
                                                                                       self.color_2], ['Whole',
                                                                                                       'Population 1',
                                                                                                       'Population 2']
-        for [time, marker, color, label] in zip(TIME[select[0]:select[1]], MARKER[select[0]:select[1]],
-                                                COLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
+        for [time, interval_num, marker, color, label] in zip(TIME[select[0]:select[1]],
+                                                              INTERVAL_NUM[select[0]:select[1]],
+                                                              MARKER[select[0]:select[1]], COLOR[select[0]:select[1]],
+                                                              LABEL[select[0]:select[1]]):
             res = []
             for i in range(time.shape[0] - 1):
                 res.append(time[i + 1] - time[i])
@@ -485,26 +491,27 @@ class Features:
                 ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, interval_num, bin_method='log', select=[0, 3],
-                     FIT=False):
-        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
-        #         eny_lim = [[0.001, 0.01], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
+                     select=[0, 3], FIT=False):
+        #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
+        eny_lim = [[0.01, 0.1], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
         tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
                                                                                                            eny_lim), self.cal_OmiroLaw_helper(
             tmp_2, eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
-        for idx, [tmp, title] in enumerate(zip(TMP[select[0]:select[1]], TITLE[select[0]:select[1]])):
-            #             fig = plt.figure(figsize=[6, 3.9], num=title)
-            fig = plt.figure(figsize=[6, 3.9])
+        for idx, [tmp, interval_num, title] in enumerate(
+                zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]], TITLE[select[0]:select[1]])):
+            fig = plt.figure(figsize=[6, 3.9], num=title)
+            #             fig = plt.figure(figsize=[6, 3.9])
             fig.text(0.16, 0.21, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
             for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'],
                                                            [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0],
                                                             [0.5, 0.5, 0.5]],
                                                            ['$10^{-2}aJ<E_{MS}<10^{-1}aJ$',
-                                                            '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
-                                                            '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{2}aJ$',
-                                                            '$10^{2}aJ<E_{MS}<10^{3}aJ$'])):
+                                                            '$10^{-2}aJ<E_{MS}<10^{-1}aJ$',
+                                                            '$10^{-1}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{3}aJ$',
+                                                            '$10^{3}aJ<E_{MS}<10^{4}aJ$'])):
                 if len(tmp[i]):
                     if bin_method == 'linear':
                         inter, mid = self.cal_negtive_interval(tmp[i], 0.9 / interval_num)
@@ -528,8 +535,8 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'H:\VALLEN'
-    fold = 'Cu-3D-compression-1106-before900s'
+    path = r'E:\data\vallen'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -544,7 +551,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, t_cut=900)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2)
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
@@ -559,7 +566,7 @@ if __name__ == "__main__":
     # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
     # status = fold.split('-')[0] + '-' + fold.split('-')[2]
     # features = Features(color_1, color_2, Time, feature_idx, status)
-    #
+
     # # ICA and Kernel K-Means
     # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
     # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
