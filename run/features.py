@@ -400,7 +400,7 @@ class Features:
             ax.bar(Time, Eny, width=bar_width)
         # ax.set_xticks(np.linspace(0, 40000, 9))
         # ax.set_yticks([-1, 0, 1, 2, 3])
-        plot_norm(ax, 'Time(s)', ylabel, legend=False)
+        plot_norm(ax, 'Time (s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
                     select=[0, 3]):

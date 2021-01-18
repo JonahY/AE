@@ -47,11 +47,14 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.features">
+  <component name="RunManager" selected="Python.pac">
     <configuration name="features" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="run" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -164,8 +167,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.features" />
         <item itemvalue="Python.pac" />
+        <item itemvalue="Python.features" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.preprocess" />
         <item itemvalue="Python.utils" />
@@ -198,7 +201,8 @@
       <workItem from="1609984783640" duration="2560000" />
       <workItem from="1609991208477" duration="5918000" />
       <workItem from="1610541450187" duration="1202000" />
-      <workItem from="1610585438470" duration="2825000" />
+      <workItem from="1610585438470" duration="31625000" />
+      <workItem from="1610935494656" duration="603000" />
     </task>
     <servers />
   </component>
@@ -211,6 +215,10 @@
     </state>
     <state x="532" y="196" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1609985177613" />
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1606704602459" />
+    <state x="640" y="259" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1610935159720">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="640" y="259" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1610935159720" />
     <state x="858" y="308" key="FileChooserDialogImpl" timestamp="1610541478175">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -272,10 +280,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="968" height="533" key="XDebugger.FullValuePopup/0.0.1920.1050@0.0.1920.1050" timestamp="1606705430495" />
-    <state x="458" y="289" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1610197878492">
+    <state x="786" y="335" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1610712164083">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="458" y="289" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1610197878492" />
+    <state x="786" y="335" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1610712164083" />
     <state x="554" y="135" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1606724246408">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

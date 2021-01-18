@@ -390,7 +390,7 @@ def main_read_pac_features(data_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", "--data_path", type=str,
-                        default=r"C:\Users\Yuan\Desktop\316L-1.5-annealed-AE-3 sensor-20201228",
+                        default=r"E:\data\pac\316L-1.5-annealed-AE-3 sensor-20201228",
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("-mag", "--magnification_dB", type=int, default=40, help="Magnification /dB")
@@ -419,7 +419,7 @@ if __name__ == "__main__":
     xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
     color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
     color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    status = 'test'
+    status = '316L'
     features = Features(color_1, color_2, Time, feature_idx, status)
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2])
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0])
