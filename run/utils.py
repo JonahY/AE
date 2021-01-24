@@ -62,34 +62,37 @@ class Reload:
         chan_4 = np.array(chan_4)
         return t, chan_1, chan_2, chan_3, chan_4
 
-    def read_vallen_data(self, lower=2, t_cut=float('inf')):
-        conn_tra = sqlite3.connect(self.path_tra)
-        conn_pri = sqlite3.connect(self.path_pri)
-        result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
-        result_pri = conn_pri.execute(
-            "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+    def read_vallen_data(self, lower=2, t_cut=float('inf'), mode='all'):
         data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
-        N_pri = self.sqlite_read(self.path_pri)
-        N_tra = self.sqlite_read(self.path_tra)
-        for _ in tqdm(range(N_tra), ncols=80):
-            i = result_tra.fetchone()
-            if i[0] > t_cut:
-                continue
-            data_tra.append(i)
-        for _ in tqdm(range(N_pri), ncols=80):
-            i = result_pri.fetchone()
-            if i[0] > t_cut:
-                continue
-            if i[-2] is not None and i[-2] > lower and i[-1] > 0:
-                data_pri.append(i)
-                if i[2] == 1:
-                    chan_1.append(i)
-                if i[2] == 2:
-                    chan_2.append(i)
-                elif i[2] == 3:
-                    chan_3.append(i)
-                elif i[2] == 4:
-                    chan_4.append(i)
+        if mode == 'all' or mode == 'tra only':
+            conn_tra = sqlite3.connect(self.path_tra)
+            result_tra = conn_tra.execute(
+                "Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
+            N_tra = self.sqlite_read(self.path_tra)
+            for _ in tqdm(range(N_tra), ncols=80):
+                i = result_tra.fetchone()
+                if i[0] > t_cut:
+                    continue
+                data_tra.append(i)
+        if mode == 'all' or mode == 'pri only':
+            conn_pri = sqlite3.connect(self.path_pri)
+            result_pri = conn_pri.execute(
+                "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+            N_pri = self.sqlite_read(self.path_pri)
+            for _ in tqdm(range(N_pri), ncols=80):
+                i = result_pri.fetchone()
+                if i[0] > t_cut:
+                    continue
+                if i[-2] is not None and i[-2] > lower and i[-1] > 0:
+                    data_pri.append(i)
+                    if i[2] == 1:
+                        chan_1.append(i)
+                    if i[2] == 2:
+                        chan_2.append(i)
+                    elif i[2] == 3:
+                        chan_3.append(i)
+                    elif i[2] == 4:
+                        chan_4.append(i)
         data_tra = sorted(data_tra, key=lambda x: x[-1])
         data_pri = np.array(data_pri)
         chan_1 = np.array(chan_1)

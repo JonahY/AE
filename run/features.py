@@ -176,6 +176,24 @@ class Features:
                         res[idx].append(k)
         return res
 
+    def cal_OmiroLaw_timeSeq_helper(self, tmp, cls_idx):
+        res = []
+        main_peak = np.where(cls_idx == True)[0]
+        eny_lim = [min(tmp[cls_idx]), max(tmp[cls_idx])]
+        if len(main_peak):
+            for i in range(main_peak.shape[0] - 1):
+                for j in range(main_peak[i] + 1, main_peak[i + 1] + 1):
+                    if tmp[j] < eny_lim[1]:
+                        k = self.time[j] - self.time[main_peak[i]]
+                        res.append(k)
+                    else:
+                        break
+            if main_peak[-1] < tmp.shape[0] - 1:
+                for j in range(main_peak[-1] + 1, tmp.shape[0]):
+                    k = self.time[j] - self.time[main_peak[-1]]
+                    res.append(k)
+        return res
+
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
                 INTERVAL_NUM=[6] * 3, bin_method='log', select=[0, 3], FIT=False):
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
@@ -342,7 +360,7 @@ class Features:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
             plot_norm(ax, xlabel, ylabel)
         else:
-            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='b')
+            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='g')
             plot_norm(ax, xlabel, ylabel, legend=False)
 
         if fit:
@@ -388,19 +406,16 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_feature_time(self, tmp, ylabel, method='scatter', bar_width=25):
+    def plot_feature_time(self, tmp, ylabel):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_yscale("log", nonposy='clip')
-        if method == 'scatter':
-            ax.scatter(self.time, tmp)
-        else:
-            ax.bar(Time, Eny, width=bar_width)
-        # ax.set_xticks(np.linspace(0, 40000, 9))
-        # ax.set_yticks([-1, 0, 1, 2, 3])
-        plot_norm(ax, 'Time (s)', ylabel, legend=False)
+        ax.scatter(self.time, tmp)
+        ax.set_xticks(np.linspace(0, 40000, 9))
+        ax.set_yticks([-1, 0, 1, 2, 3])
+        plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
                     select=[0, 3]):
@@ -533,10 +548,39 @@ class Features:
                         ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
+    def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=[3] * 2, bin_method='log', FIT=False):
+        res_1 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_1)
+        res_2 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_2)
+        for res, interval_num, ylabel, title in zip([res_1, res_2], INTERVAL_NUM,
+                                                    [r'$\mathbf{n_1^{2}\;(t)}$', r'$\mathbf{n_2^{1}\;(t)}$'],
+                                                    ['Time sequence_Population 1 as Mainshock',
+                                                     'Time sequence_Population 2 as Mainshock']):
+            fig = plt.figure(figsize=[6, 3.9], num=title)
+            fig.text(0.16, 0.21, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+            ax = plt.subplot()
+            if len(res):
+                if bin_method == 'linear':
+                    inter, mid = self.cal_negtive_interval(res, 0.9 / interval_num)
+                    xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
+                elif bin_method == 'log':
+                    inter = self.cal_log_interval(res)
+                    xx, yy = self.cal_log(sorted(np.array(res)), inter, interval_num)
+                if FIT:
+                    xx, yy = np.array(xx), np.array(yy)
+                    fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
+                    alpha, b = fit[0], fit[1]
+                    fit_x = np.linspace(xx[0], xx[-1], 100)
+                    fit_y = self.convert(fit_x, alpha, b)
+                    ax.plot(fit_x, fit_y, '-.', lw=1, color='g', label='Slope = {:.2f}'.format(abs(alpha)))
+                    ax.loglog(xx, yy, markersize=8, marker='o', mec='g', mfc='none', color='g')
+                else:
+                    ax.loglog(xx, yy, markersize=8, marker='o', mec='g', mfc='none', color='g')
+            plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right')
+
 
 if __name__ == "__main__":
-    path = r'H:\VALLEN'
-    fold = '316L-1.5-z3-AE-3 sensor-20200530'
+    path = r'E:\data\vallen'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -551,33 +595,33 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all')
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # chan = chan_4
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
-    #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
-    #
-    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # feature_idx = [Amp, Dur, Eny]
-    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
-    # features = Features(color_1, color_2, Time, feature_idx, status)
+    chan = chan_2
+    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
+                                              chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
 
-    # # ICA and Kernel K-Means
-    # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
-    # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
-    # pred = km.fit_predict(S_)
-    # cls_KKM = []
-    # for i in range(2):
-    #     cls_KKM.append(pred == i)
-    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
-    #
-    # waveform = Waveform(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
-    # frequency = Frequency(color_1, color_2, data_tra, path, path_pri, 'Ni-pure', 'vallen')
+    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    feature_idx = [Amp, Dur, Eny]
+    xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    status = fold.split('-')[0] + '-' + fold.split('-')[2]
+    features = Features(color_1, color_2, Time, feature_idx, status)
+
+    # ICA and Kernel K-Means
+    S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
+    km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
+    pred = km.fit_predict(S_)
+    cls_KKM = []
+    for i in range(2):
+        cls_KKM.append(pred == i)
+    cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+
+    waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
+    frequency = Frequency(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
 
     # # Al-alloy
     # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
@@ -605,6 +649,7 @@ if __name__ == "__main__":
     # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', 9, bin_method='log', select=[1, None])
     # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', 23, bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', 7, bin_method='log', select=[1, None], FIT=Tr
+    # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])

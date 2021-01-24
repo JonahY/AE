@@ -123,9 +123,11 @@ class Frequency:
         self.thr = pow(10, thr_dB / 20)
 
     def cal_frequency(self, k, valid=True):
+
         if self.device == 'vallen':
             i = self.data_tra[k]
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
             thr, Fs = i[2], i[3]
             # Ts = 1 / Fs
             if valid:
@@ -135,6 +137,7 @@ class Frequency:
             i = self.data_tra[k]
             Fs = 1 / i[2]
             sig = i[-2]
+            time = np.linspace(0, i[2] * (i[-3] - 1) * pow(10, 6), i[-3])
             if valid:
                 valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
                 sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
@@ -145,13 +148,15 @@ class Frequency:
         normalization_half = normalization[range(int(N / 2))]
         frq = (np.arange(N) / N) * Fs
         half_frq = frq[range(int(N / 2))]
-        return half_frq, normalization_half
+        return half_frq, normalization_half, time
 
-    def cal_ave_freq(self, TRAI):
+    def cal_ave_freq(self, TRAI, valid=False, t_lim=100):
         Res = np.array([0 for _ in range(self.size)]).astype('float64')
-
+        num = 0
         for j in TRAI:
-            half_frq, normalization_half = self.cal_frequency(j - 1, valid=False)
+            half_frq, normalization_half, time = self.cal_frequency(j - 1, valid=valid)
+            if time[-1] < t_lim:
+                continue
             valid_idx = int((pow(10, 6) / max(half_frq)) * half_frq.shape[0])
             tmp = [0 for _ in range(self.size)]
             i = 1
@@ -162,7 +167,8 @@ class Frequency:
                         break
                     i += 1
             Res += np.array(tmp)
-        return Res
+            num += 1
+        return Res, num
 
     def cla_wtpacket(self, signal, w, n, plot=False):
         w = pywt.Wavelet(w)
@@ -204,12 +210,14 @@ class Frequency:
             plt.legend(loc="upper right")
         return map, wp, energy
 
-    def plot_wave_frequency(self, TRAI, valid=False, n=3, wtpacket=False, wtpacket_eng=False):
-        fig = plt.figure(figsize=(9.2, 3), num='Waveform & Frequency--TRAI %d' % TRAI)
+    def plot_wave_frequency(self, TRAI, valid=False, t_lim=100, n=3, wtpacket=False, wtpacket_eng=False):
         i = self.data_tra[TRAI - 1]
         valid_time, valid_data = self.waveform.cal_wave(i, valid=valid)
-        half_frq, normalization_half = self.cal_frequency(TRAI - 1, valid=valid)
+        half_frq, normalization_half, time = self.cal_frequency(TRAI - 1, valid=valid)
+        if time[-1] < t_lim:
+            return
 
+        fig = plt.figure(figsize=(9.2, 3), num='Waveform & Frequency--TRAI %d' % TRAI)
         ax = fig.add_subplot(1, 2, 1)
         ax.plot(valid_time, valid_data)
         ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
@@ -267,17 +275,20 @@ class Frequency:
             ax2.plot(half_frq, normalization_half)
             plot_norm(ax2, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
-    def cal_freq_max(self, ALL_TRAI, status='peak'):
+    def cal_freq_max(self, ALL_TRAI, status='peak', t_lim=0, value=[300000, 500000]):
         freq, stage_idx = [], []
-        for trai in tqdm(ALL_TRAI):
-            half_frq, normalization_half = self.cal_frequency(trai - 1)
+        for idx, trai in enumerate(ALL_TRAI):
+            half_frq, normalization_half, time = self.cal_frequency(trai - 1)
+            if time[-1] < t_lim:
+                continue
             if status == 'peak':
                 freq.append(half_frq[np.argmax(normalization_half)])
+                stage_idx.append(idx)
             elif status == 'three peaks':
-                freq_max = []
-                idx_1 = np.where(half_frq < 300000)[0]
-                idx_2 = np.where((half_frq >= 300000) & (half_frq < 500000))[0]
-                idx_3 = np.where(half_frq >= 500000)[0]
+                freq_max = 0
+                idx_1 = np.where(half_frq < value[0])[0]
+                idx_2 = np.where((half_frq >= value[0]) & (half_frq < value[1]))[0]
+                idx_3 = np.where(half_frq >= value[1])[0]
                 normalization_max = 0
                 if idx_1.shape[0] != 0 and idx_2.shape[0] != 0 and idx_3.shape[0] != 0:
                     for i, idx in enumerate([idx_1, idx_2, idx_3]):
