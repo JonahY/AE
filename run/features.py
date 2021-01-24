@@ -500,10 +500,10 @@ class Features:
                 fit_x = np.linspace(xx[0], xx[-1], 100)
                 fit_y = self.convert(fit_x, alpha, b)
                 ax.plot(fit_x, fit_y, '-.', lw=1, color=color)
-                ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color,
+                ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color,
                           label='{}--{:.2f}'.format(label, abs(alpha)))
             else:
-                ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+                ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
@@ -572,9 +572,9 @@ class Features:
                     fit_x = np.linspace(xx[0], xx[-1], 100)
                     fit_y = self.convert(fit_x, alpha, b)
                     ax.plot(fit_x, fit_y, '-.', lw=1, color='g', label='Slope = {:.2f}'.format(abs(alpha)))
-                    ax.loglog(xx, yy, markersize=8, marker='o', mec='g', mfc='none', color='g')
+                    ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
                 else:
-                    ax.loglog(xx, yy, markersize=8, marker='o', mec='g', mfc='none', color='g')
+                    ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
             plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right')
 
 

@@ -219,13 +219,13 @@ class Frequency:
 
         fig = plt.figure(figsize=(9.2, 3), num='Waveform & Frequency--TRAI %d' % TRAI)
         ax = fig.add_subplot(1, 2, 1)
-        ax.plot(valid_time, valid_data)
+        ax.plot(valid_time, valid_data, lw=1)
         ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', legend=False, grid=True)
 
         ax = fig.add_subplot(1, 2, 2)
-        ax.plot(half_frq, normalization_half)
+        ax.plot(half_frq, normalization_half, lw=1)
         plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
         if wtpacket:
@@ -250,7 +250,7 @@ class Frequency:
     def plot_ave_freq(self, Res, N, title):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid, Res / N)
+        ax.plot(self.grid, Res / N, lw=1)
         plot_norm(ax, xlabel='Freq (Hz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
 
     def plot_freq_TRAI(self, k, valid=False):
@@ -259,7 +259,7 @@ class Frequency:
 
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d (%s)' % (k, valid))
         ax = plt.subplot()
-        ax.plot(half_frq, normalization_half)
+        ax.plot(half_frq, normalization_half, lw=1)
         plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], title='TRAI:%d' % k, legend=False)
 
     def plot_2cls_freq(self, TRAI_1, TRAI_2, same):
@@ -267,15 +267,15 @@ class Frequency:
         for idx, k in enumerate(TRAI_1):
             half_frq, normalization_half = self.cal_frequency(k - 1)
             ax = fig.add_subplot(5, 2, 1 + idx * 2)
-            ax.plot(half_frq, normalization_half)
+            ax.plot(half_frq, normalization_half, lw=1)
             plot_norm(ax, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
             half_frq, normalization_half = self.cal_frequency(TRAI_2[idx] - 1)
             ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
-            ax2.plot(half_frq, normalization_half)
+            ax2.plot(half_frq, normalization_half, lw=1)
             plot_norm(ax2, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
-    def cal_freq_max(self, ALL_TRAI, status='peak', t_lim=0, value=[300000, 500000]):
+    def cal_freq_max(self, ALL_TRAI, t_lim=0, status='peak', value=[300000, 500000]):
         freq, stage_idx = [], []
         for idx, trai in enumerate(ALL_TRAI):
             half_frq, normalization_half, time = self.cal_frequency(trai - 1)
