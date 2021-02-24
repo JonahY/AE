@@ -202,9 +202,9 @@ class Features:
         ax = plt.subplot()
         TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
                                                                                                 'Population 2']
-        if LIM[0][1] == None:
+        if LIM[0][1] == None or LIM[0][1] < 0:
             method = 'index'
-        elif LIM[0][1] == float('inf'):
+        elif LIM[0][1] == float('inf') or LIM[0][1] > 0:
             method = 'value'
         for tmp, color, label, num, lim in zip(TMP[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]],
@@ -580,7 +580,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'E:\VALLEN'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -655,7 +655,12 @@ if __name__ == "__main__":
     # LIM_PDF = [[[0, None], [1, None], [1, -2]], [[0, None], [11, -2], [10, -1]], [[0, None], [2, -2], [1, -2]]]
     # LIM_CCDF = [[[0, float('inf')], [0, 1000], [0, 3000]], [[0, float('inf')], [100, 3600], [80, 600]], [[0, float('inf')], [1, 3000], [0.5, 1500]]]
     # INTERVAL_NUM = [[8, 16, 16], [8, 16, 8], [8, 5, 6]]
-    #
+
+    # # Ni-electrolysis_P2E
+    # lim_pdf = [[2, -2], [3, -1], [3, -1]]
+    # lim_ccdf = [[1, 3000], [0.3, float('inf')], [0, float('inf')]]
+    # inerval_num = [5, 8, 4]
+
     # # Ni-pure
     # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
     # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]

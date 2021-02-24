@@ -250,7 +250,7 @@ class Frequency:
     def plot_ave_freq(self, Res, N, title):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid / 1000, Res / N, lw=1)
+        ax.plot(self.grid / 1000, Res / N, lw=1, color=self.color_2)
         plot_norm(ax, xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
 
     def plot_freq_TRAI(self, k, valid=False):
