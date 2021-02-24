@@ -274,7 +274,7 @@ class Features:
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
-        TMP, N, LAYER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 2, 3], ['black', self.color_1,
+        TMP, N, LAYER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 3, 2], ['black', self.color_1,
                                                                                                   self.color_2], [
                                           'Whole', 'Population 1', 'Population 2']
         for tmp, N, layer, color, label in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
@@ -296,7 +296,7 @@ class Features:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
                     f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
-        plot_norm(ax, xlabel, ylabel, y_lim=[1.25, 3])
+        plot_norm(ax, xlabel, ylabel, y_lim=[1.25, 3], legend_loc='upper right')
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
@@ -360,7 +360,7 @@ class Features:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
             plot_norm(ax, xlabel, ylabel)
         else:
-            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='g')
+            ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='b')
             plot_norm(ax, xlabel, ylabel, legend=False)
 
         if fit:
@@ -406,15 +406,15 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_feature_time(self, tmp, ylabel):
+    def plot_feature_time(self, tmp_1, tmp_2, ylabel, mode='scatter', width=55):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
-        ax.set_yscale("log", nonposy='clip')
-        ax.scatter(self.time, tmp)
-        ax.set_xticks(np.linspace(0, 40000, 9))
-        ax.set_yticks([-1, 0, 1, 2, 3])
+        if mode == 'bar':
+            ax.bar(tmp_1, tmp_2, color='b', width=width, log=True)
+        elif mode == 'scatter':
+            ax.semilogy(tmp_1, tmp_2, '.', Marker='.', color='b')
         plot_norm(ax, 'Time(s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
@@ -579,12 +579,17 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\data\vallen'
+    path = r'E:\VALLEN'
     fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # Nano Ni-compression text-1-0.003-20200919
+    # Nano Ni-compression text-2-0.003-20200920
+    # Nano Ni-compression text-2-0.003-20200920‘
+    # Nano Ni-compression text-3-0.003-20200920
+    # Nano Ni-compression text-4-0.003-20200921
     # Cu-3D-compression-1106-before900s
     # Cu-annealing-tension-1126
     # 2020.11.10-PM-self
@@ -598,30 +603,47 @@ if __name__ == "__main__":
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all')
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
-    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    chan = chan_2
-    Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
-                                              chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
+    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    # chan = chan_2
+    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
+    #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
+    #
+    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+    # feature_idx = [Amp, Dur, Eny]
+    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
+    # features = Features(color_1, color_2, Time, feature_idx, status)
+    #
+    # # ICA and Kernel K-Means
+    # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
+    # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
+    # pred = km.fit_predict(S_)
+    # cls_KKM = []
+    # for i in range(2):
+    #     cls_KKM.append(pred == i)
+    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
 
-    # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    feature_idx = [Amp, Dur, Eny]
-    xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    status = fold.split('-')[0] + '-' + fold.split('-')[2]
-    features = Features(color_1, color_2, Time, feature_idx, status)
+    # waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
+    # frequency = Frequency(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
 
-    # ICA and Kernel K-Means
-    S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
-    km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
-    pred = km.fit_predict(S_)
-    cls_KKM = []
-    for i in range(2):
-        cls_KKM.append(pred == i)
-    cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+    # PackEny = []
+    # for trai in tqdm(chan[:, -1].astype(int)):
+    #     _, sig = waveform.cal_wave(data_tra[trai - 1])
+    #     _, _, energy = frequency.cla_wtpacket(sig, 'db8', 3, False)
+    #     PackEny.append([i / sum(energy) for i in energy])
+    # PackEny = np.array(PackEny)
 
-    waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
-    frequency = Frequency(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
+    # freq, stage_idx = frequency.cal_freq_max(chan[:, -1].astype(int), 0, status='peak')
+
+    # df = pd.DataFrame(
+    #     {'Amp': Amp, 'RiseT': RiseT, 'Dur': Dur, 'Eny': Eny, 'RMS': RMS, 'Counts': Counts, 'PeakFreq': freq,
+    #      'PackEny1': PackEny[:, 0], 'PackEny2': PackEny[:, 1], 'PackEny3': PackEny[:, 2], 'PackEny4': PackEny[:, 3],
+    #      'PackEny5': PackEny[:, 4], 'PackEny6': PackEny[:, 5], 'PackEny7': PackEny[:, 6], 'PackEny8': PackEny[:, 7],
+    #      'Pop': cls_KKM[0].astype(int)})
+
+    # df.to_csv('Ni_electrolysis_chan2.csv', index=None)
 
     # # Al-alloy
     # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
@@ -646,9 +668,10 @@ if __name__ == "__main__":
     #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
     #
     # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
-    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', 9, bin_method='log', select=[1, None])
-    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', 23, bin_method='log', select=[1, None], FIT=True)
-    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', 7, bin_method='log', select=[1, None], FIT=Tr
+    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
+    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
+    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
+    # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 2], bin_method='log', FIT=True)
     # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
