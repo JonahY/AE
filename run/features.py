@@ -16,6 +16,7 @@ from utils import *
 from wave_freq import *
 import warnings
 from matplotlib.pylab import mpl
+from matplotlib.ticker import FuncFormatter
 
 
 warnings.filterwarnings("ignore")
@@ -406,6 +407,19 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
+    def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, title=''):
+        fig = plt.figure(figsize=[6, 3.9], num='3D Correlation--%s & %s %s' % (xlabel, ylabel, zlabel))
+        ax = plt.subplot(projection='3d')
+        if cls_1 is not None and cls_2 is not None:
+            ax.scatter3D(np.log10(tmp_1)[cls_1], np.log10(tmp_2)[cls_1], np.log10(tmp_3)[cls_1], s=15, color=self.color_1)
+            ax.scatter3D(np.log10(tmp_1)[cls_2], np.log10(tmp_2)[cls_2], np.log10(tmp_3)[cls_2], s=15, color=self.color_2)
+        else:
+            ax.scatter3D(np.log10(tmp_1), np.log10(tmp_2), np.log10(tmp_3), s=15, color=self.color_1)
+        ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+        ax.yaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+        ax.zaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+        plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False)
+
     def plot_feature_time(self, tmp_1, tmp_2, ylabel, mode='scatter', width=55):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
@@ -579,12 +593,13 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    path = r'H:\VALLEN'
+    fold = '316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224
     # Nano Ni-compression text-1-0.003-20200919
     # Nano Ni-compression text-2-0.003-20200920
     # Nano Ni-compression text-2-0.003-20200920‘
@@ -600,7 +615,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all')
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=3, mode='all')
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
