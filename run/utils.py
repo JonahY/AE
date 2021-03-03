@@ -72,7 +72,7 @@ class Reload:
             for _ in tqdm(range(N_tra), ncols=80):
                 i = result_tra.fetchone()
                 if i[0] > t_cut:
-                    continue
+                    break
                 data_tra.append(i)
         if mode == 'all' or mode == 'pri only':
             conn_pri = sqlite3.connect(self.path_pri)
@@ -81,8 +81,8 @@ class Reload:
             N_pri = self.sqlite_read(self.path_pri)
             for _ in tqdm(range(N_pri), ncols=80):
                 i = result_pri.fetchone()
-                if i[0] > t_cut:
-                    continue
+                if i[1] > t_cut:
+                    break
                 if i[-2] is not None and i[-2] > lower and i[-1] > 0:
                     data_pri.append(i)
                     if i[2] == 1:
@@ -323,11 +323,11 @@ def load_stress(path_curve):
 
 
 def smooth_curve(time, stress, window_length=99, polyorder=1, epoch=200, curoff=[2500, 25000]):
-    y_smooth = savgol_filter(stress, window_length, polyorder, mode= 'nearest')
+    y_smooth = savgol_filter(stress, window_length, polyorder, mode='nearest')
     for i in range(epoch):
         if i == 5:
             front = y_smooth
-        y_smooth = savgol_filter(y_smooth, window_length, polyorder, mode= 'nearest')
+        y_smooth = savgol_filter(y_smooth, window_length, polyorder, mode='nearest')
 
     front_idx = np.where(time < curoff[0])[0][-1]
     rest_idx = np.where(time > curoff[1])[0][0]

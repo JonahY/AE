@@ -278,7 +278,7 @@ class Frequency:
     def cal_freq_max(self, ALL_TRAI, t_lim=0, status='peak', value=[300000, 500000]):
         freq, stage_idx = [], []
         for idx, trai in enumerate(tqdm(ALL_TRAI)):
-            half_frq, normalization_half, time = self.cal_frequency(trai - 1)
+            half_frq, normalization_half, time = self.cal_frequency(trai - 1, valid=False)
             if time[-1] < t_lim:
                 continue
             if status == 'peak':

@@ -355,9 +355,9 @@ class Features:
                       label='Population 2')
             ax.loglog(tmp_1[cls_1], tmp_2[cls_1], '.', marker='.', markersize=8, color=self.color_1,
                       label='Population 1')
-            if idx_1:
+            if idx_1 is not None:
                 ax.loglog(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', marker='.', markersize=8, color='black')
-            if idx_2:
+            if idx_2 is not None:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
             plot_norm(ax, xlabel, ylabel)
         else:
@@ -407,12 +407,17 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, title=''):
+    def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, idx_1=None,
+                            idx_2=None, title=''):
         fig = plt.figure(figsize=[6, 3.9], num='3D Correlation--%s & %s %s' % (xlabel, ylabel, zlabel))
         ax = plt.subplot(projection='3d')
         if cls_1 is not None and cls_2 is not None:
             ax.scatter3D(np.log10(tmp_1)[cls_1], np.log10(tmp_2)[cls_1], np.log10(tmp_3)[cls_1], s=15, color=self.color_1)
             ax.scatter3D(np.log10(tmp_1)[cls_2], np.log10(tmp_2)[cls_2], np.log10(tmp_3)[cls_2], s=15, color=self.color_2)
+            if idx_1 is not None:
+                ax.scatter3D(np.log10(tmp_1)[cls_1][idx_1], np.log10(tmp_2)[cls_1][idx_1], np.log10(tmp_3)[cls_1][idx_1], s=15, color='black')
+            if idx_2 is not None:
+                ax.scatter3D(np.log10(tmp_1)[cls_2][idx_2], np.log10(tmp_2)[cls_2][idx_2], np.log10(tmp_3)[cls_2][idx_2], s=15, color='black')
         else:
             ax.scatter3D(np.log10(tmp_1), np.log10(tmp_2), np.log10(tmp_3), s=15, color=self.color_1)
         ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
@@ -420,16 +425,33 @@ class Features:
         ax.zaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
         plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False)
 
-    def plot_feature_time(self, tmp_1, tmp_2, ylabel, mode='scatter', width=55):
+    def plot_feature_time(self, tmp_1, tmp_2, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None
+                          , mode='scatter', width=55):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         if mode == 'bar':
-            ax.bar(tmp_1, tmp_2, color='b', width=width, log=True)
+            if cls_1 is not None and cls_2 is not None:
+                ax.bar(tmp_1[cls_1], tmp_2[cls_1], color=self.color_1, width=width, log=True)
+                ax.bar(tmp_1[cls_2], tmp_2[cls_2], color=self.color_2, width=width, log=True)
+                if idx_1 is not None:
+                    ax.bar(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], color='black', width=width, log=True)
+                if idx_2 is not None:
+                    ax.bar(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], color='black', width=width, log=True)
+            else:
+                ax.bar(tmp_1, tmp_2, color='b', width=width, log=True)
         elif mode == 'scatter':
-            ax.semilogy(tmp_1, tmp_2, '.', Marker='.', color='b')
-        plot_norm(ax, 'Time(s)', ylabel, legend=False)
+            if cls_1 is not None and cls_2 is not None:
+                ax.semilogy(tmp_1[cls_1], tmp_2[cls_1], '.', Marker='.', color=self.color_1)
+                ax.semilogy(tmp_1[cls_2], tmp_2[cls_2], '.', Marker='.', color=self.color_2)
+                if idx_1 is not None:
+                    ax.semilogy(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', Marker='.', color='black')
+                if idx_2 is not None:
+                    ax.semilogy(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', Marker='.', color='black')
+            else:
+                ax.semilogy(tmp_1, tmp_2, '.', Marker='.', color='b')
+        plot_norm(ax, 'Time (s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
                     select=[0, 3]):
@@ -599,6 +621,10 @@ if __name__ == "__main__":
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # Ni 2-compression text-4-0.003-20201012
+    # Ni 2-compression text-2-0.003-20201002
+    # Ni 2-compression text-1-0.003-20200928
+    # Ni 1-compression text-1-0.003-20201004
     # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224
     # Nano Ni-compression text-1-0.003-20200919
     # Nano Ni-compression text-2-0.003-20200920
@@ -657,7 +683,6 @@ if __name__ == "__main__":
     #      'PackEny1': PackEny[:, 0], 'PackEny2': PackEny[:, 1], 'PackEny3': PackEny[:, 2], 'PackEny4': PackEny[:, 3],
     #      'PackEny5': PackEny[:, 4], 'PackEny6': PackEny[:, 5], 'PackEny7': PackEny[:, 6], 'PackEny8': PackEny[:, 7],
     #      'Pop': cls_KKM[0].astype(int)})
-
     # df.to_csv('Ni_electrolysis_chan2.csv', index=None)
 
     # # Al-alloy
@@ -698,3 +723,15 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
+
+    fig = plt.figure(figsize=[6, 3.9])
+    ax = plt.subplot(projection='3d')
+    ax.scatter3D(np.log10(Amp)[cls_1], np.log10(Eny)[cls_1], np.log10(Dur)[cls_1], s=15, color=color_1)
+    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
+    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
+    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
+    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+    ax.yaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+    ax.zaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
+    plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False)
