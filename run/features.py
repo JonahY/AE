@@ -616,7 +616,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'H:\VALLEN'
-    fold = '316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -641,7 +641,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=3, mode='all')
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all')
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
@@ -724,14 +724,3 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
 
-    fig = plt.figure(figsize=[6, 3.9])
-    ax = plt.subplot(projection='3d')
-    ax.scatter3D(np.log10(Amp)[cls_1], np.log10(Eny)[cls_1], np.log10(Dur)[cls_1], s=15, color=color_1)
-    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
-    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
-    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
-    ax.scatter3D(np.log10(Amp)[cls_2], np.log10(Eny)[cls_2], np.log10(Dur)[cls_2], s=15, color=color_2)
-    ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
-    ax.yaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
-    ax.zaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
-    plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False)
