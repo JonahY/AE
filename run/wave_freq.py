@@ -7,6 +7,8 @@ import os
 from tqdm import tqdm
 from preprocess import Preprocessing
 import pywt
+import librosa
+from librosa import display
 
 
 class Waveform:
@@ -115,6 +117,8 @@ class Waveform:
 class Frequency:
     def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=500):
         self.data_tra = data_tra
+        self.color_1 = color_1
+        self.color_2 = color_2
         self.waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, device, thr_dB)
         self.size = size
         self.grid = np.linspace(0, pow(10, 6), self.size)
@@ -247,10 +251,10 @@ class Frequency:
                 ax.bar(index, values, 0.45, color="#87CEFA")
                 plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
-    def plot_ave_freq(self, Res, N, title):
+    def plot_ave_freq(self, Res, N, title, color='blue'):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid / 1000, Res / N, lw=1, color=self.color_2)
+        ax.plot(self.grid / 1000, Res / N, lw=1, color=color)
         plot_norm(ax, xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
 
     def plot_freq_TRAI(self, k, valid=False):
@@ -302,3 +306,46 @@ class Frequency:
         freq = np.array(freq)
         stage_idx = np.array(stage_idx)
         return freq, stage_idx
+
+    def plot_tf_stft(self, TRAI, hop_length=128, save_path=None):
+        if self.device == 'vallen':
+            i = self.data_tra[int(TRAI - 1)]
+            sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            D = librosa.stft(sig, hop_length=hop_length)
+            S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+            fig, ax = plt.subplots(figsize=(5.12, 5.12))
+            img = librosa.display.specshow(S_db, sr=i[3], hop_length=hop_length, x_axis='time', y_axis='linear', ax=ax)
+            ax.set(title='Now with labeled axes!')
+            ax.set_ylim(0, 1000000)
+            if save_path:
+                plt.gca().xaxis.set_major_locator(plt.NullLocator())
+                plt.gca().yaxis.set_major_locator(plt.NullLocator())
+                plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+                plt.margins(0, 0)
+                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
+
+    def plot_tf_cwt(self, TRAI, wavelet_name='morl', save_path=None):
+        if self.device == 'vallen':
+            i = self.data_tra[int(TRAI - 1)]
+            sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
+            scales = pywt.central_frequency(wavelet_name) * 1e3 / np.arange(1, 1e3, 1e0)
+            [cwtmatr_new, frequencies_new] = pywt.cwt(sig, scales, wavelet_name, 1.0 / i[3])
+            plt.figure(figsize=(5.12, 5.12))
+            plt.contourf(time, frequencies_new / 1000, abs(cwtmatr_new))
+            plt.ylim(20, 1000)
+            plt.xlabel('Time (μs)')
+            plt.ylabel('Frequency (kHz)')
+            if save_path:
+                plt.gca().xaxis.set_major_locator(plt.NullLocator())
+                plt.gca().yaxis.set_major_locator(plt.NullLocator())
+                plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+                plt.margins(0, 0)
+                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches = 0)
+
+    def plot_XXX_Freq(self, freq, feature, ylabel, marker='o', markersize=10, color='blue'):
+        fig = plt.figure(figsize=[6, 3.9])
+        ax = fig.add_subplot()
+        ax.set_yscale("log", nonposy='clip')
+        plt.scatter(freq, feature, marker=marker, s=markersize, color=color)
+        plot_norm(ax, 'Peak Frequency (kHz)', ylabel, x_lim=[0, 800], legend=False)

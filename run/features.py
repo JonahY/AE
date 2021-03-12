@@ -616,7 +616,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'H:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -684,6 +684,10 @@ if __name__ == "__main__":
     #      'PackEny5': PackEny[:, 4], 'PackEny6': PackEny[:, 5], 'PackEny7': PackEny[:, 6], 'PackEny8': PackEny[:, 7],
     #      'Pop': cls_KKM[0].astype(int)})
     # df.to_csv('Ni_electrolysis_chan2.csv', index=None)
+
+    # for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
+    #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
+    #     frequency.plot_ave_freq(Res, N, title)
 
     # # Al-alloy
     # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
