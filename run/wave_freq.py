@@ -349,3 +349,16 @@ class Frequency:
         ax.set_yscale("log", nonposy='clip')
         plt.scatter(freq, feature, marker=marker, s=markersize, color=color)
         plot_norm(ax, 'Peak Frequency (kHz)', ylabel, x_lim=[0, 800], legend=False)
+
+    def plot_freqDomain(self, ALL_TRAI, t_lim=100, lw=1):
+        fig = plt.figure(figsize=[6, 3.9], num='Frequency domain')
+        z = 0
+        ax = fig.add_subplot(111, projection='3d')
+        for i in ALL_TRAI:
+            half_frq, normalization_half, t = self.cal_frequency(i - 1)
+            if t[-1] < t_lim:
+                continue
+            valid_idx = np.where((half_frq / 1000) < 1000)[0]
+            ax.plot(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx], lw=lw)
+            z += 1
+        plot_norm(ax, 'Freq (kHz)', 'Points', '|Y(freq)|', x_lim=[0, 1000], y_lim=[0, z], legend=False)
