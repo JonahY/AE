@@ -4,6 +4,12 @@ from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.metrics.pairwise import pairwise_kernels
 from sklearn.utils import check_random_state
 import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+import seaborn as sns
+from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
 
 
 class KernelKMeans(BaseEstimator, ClusterMixin):
@@ -115,3 +121,35 @@ def ICA(dim, *args):
     S_ = ica.fit_transform(x_nor)  # 重构信号
     A_ = ica.mixing_  # 获得估计混合后的矩阵
     return S_, A_
+
+
+def plot_confmat(tn, fp, fn, tp):
+    cm = np.zeros([2, 2])
+    cm[0][0], cm[0][1], cm[1][0], cm[1][1] = tn, fp, fn, tp
+    f, ax=plt.subplots(figsize=(2.5, 2))
+    sns.heatmap(cm,annot=True, ax=ax, fmt='.20g') #画热力图
+    ax.xaxis.set_ticks_position('top')
+    ax.yaxis.set_ticks_position('left')
+    ax.tick_params(bottom=False,top=False,left=False,right=False)
+
+
+def print_res(model, x_pred, y_true):
+    target_pred = model.predict(x_pred)
+    true = np.sum(target_pred == y_true)
+    print('预测对的结果数目为：', true)
+    print('预测错的的结果数目为：', y_true.shape[0]-true)
+    print('使用SVM预测的准确率为：',
+          accuracy_score(y_true, target_pred))
+    print('使用SVM预测的精确率为：',
+          precision_score(y_true, target_pred))
+    print('使用SVM预测的召回率为：',
+          recall_score(y_true, target_pred))
+    print('使用SVM预测的F1值为：',
+          f1_score(y_true, target_pred))
+    print('使用SVM预测b的Cohen’s Kappa系数为：',
+          cohen_kappa_score(y_true, target_pred))
+    print('使用SVM预测的分类报告为：','\n',
+          classification_report(y_true, target_pred))
+    tn, fp, fn, tp = confusion_matrix(y_true, target_pred).ravel()
+    plot_confmat(tn, fp, fn, tp)
+    return target_pred

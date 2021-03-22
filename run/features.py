@@ -11,7 +11,7 @@ from tqdm import tqdm
 import array
 import csv
 import sqlite3
-from kmeans import KernelKMeans, ICA
+from kmeans import *
 from utils import *
 from wave_freq import *
 import warnings
@@ -407,6 +407,27 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
+    def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=[3, 1], color=None,
+                               sharex=True, sharey=True):
+        if not color:
+            color = [self.color_1, self.color_2, 'purple']
+        else:
+            assert len(fig_loc) == len(color), \
+                print("Length of parameter 'fig_loc' should be equal to length of parameter 'color'.")
+        fig, axes = plt.subplots(fig_loc[0], fig_loc[1], sharex=sharex, sharey=sharey, figsize=(6, 9))
+        if axes.ndim == 1:
+            for idx, ax in enumerate(axes):
+                ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
+                            label='Pop %d' % (idx + 1))
+                plot_norm(ax, xlabel, ylabel, legend=True)
+        else:
+            for idx, axs in enumerate(axes):
+                for idy, ax in enumerate(axs):
+                    ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
+                                label='Pop %d' % (idx * fig_loc[1] + idy + 1))
+                    plot_norm(ax, xlabel, ylabel, legend=True)
+        plt.subplots_adjust(wspace=0, hspace=0)
+
     def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, idx_1=None,
                             idx_2=None, title=''):
         fig = plt.figure(figsize=[6, 3.9], num='3D Correlation--%s & %s %s' % (xlabel, ylabel, zlabel))
@@ -616,7 +637,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'H:\VALLEN'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    fold = '316L-1.5-annealed-z2-AE-3 sensors-20210125'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -626,10 +647,9 @@ if __name__ == "__main__":
     # Ni 2-compression text-1-0.003-20200928
     # Ni 1-compression text-1-0.003-20201004
     # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224
-    # Nano Ni-compression text-1-0.003-20200919
-    # Nano Ni-compression text-2-0.003-20200920
-    # Nano Ni-compression text-2-0.003-20200920‘
-    # Nano Ni-compression text-3-0.003-20200920
+    # Nano Ni-compression text-1-0.003-20200919  [np.where(chan_3[:, 1] < 14700)[0]]
+    # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
+    # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
     # Nano Ni-compression text-4-0.003-20200921
     # Cu-3D-compression-1106-before900s
     # Cu-annealing-tension-1126
@@ -648,7 +668,7 @@ if __name__ == "__main__":
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
     #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
-    #
+
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # feature_idx = [Amp, Dur, Eny]
     # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
@@ -656,7 +676,7 @@ if __name__ == "__main__":
     # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
     # status = fold.split('-')[0] + '-' + fold.split('-')[2]
     # features = Features(color_1, color_2, Time, feature_idx, status)
-    #
+
     # # ICA and Kernel K-Means
     # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
     # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
@@ -709,13 +729,13 @@ if __name__ == "__main__":
     # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
     # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]
     # INTERVAL_NUM = [[8, 11, 8], [8, 10, 9], [8, 5, 9]]
-    #
+
     # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
     #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
     #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, bin_method='log', select=[1, None], FIT=True)
     #     features.cal_ML(tmp, tmp_1, tmp_2, xlabelz[idx], 'ML (%s)' % xlabelz[idx][0], features_path, select=[1, None])
     #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
-    #
+
     # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
     # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
     # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
@@ -727,4 +747,3 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
-

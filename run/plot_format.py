@@ -29,7 +29,8 @@ def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y
     if z_lim:
         ax.set_zlim(z_lim[0], z_lim[1])
     if legend:
-        plt.legend(loc=legend_loc, prop=font_legend)
+        ax.legend(loc=legend_loc, prop=font_legend)
+        # plt.legend(loc=legend_loc, prop=font_legend)
     if grid:
         ax.grid(ls='-.')
     if xlabel:
