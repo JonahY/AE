@@ -341,7 +341,7 @@ class Frequency:
                 plt.gca().yaxis.set_major_locator(plt.NullLocator())
                 plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
                 plt.margins(0, 0)
-                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches = 0)
+                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
     def plot_XXX_Freq(self, freq, feature, ylabel, marker='o', markersize=10, color='blue'):
         fig = plt.figure(figsize=[6, 3.9])

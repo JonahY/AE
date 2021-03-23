@@ -9,6 +9,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="Yuanbincheng@115.154.225.172:22 password (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/Yuanbincheng/project/dislocation_cls" local="$PROJECT_DIR$/cls" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
     </serverData>
   </component>
 </project>

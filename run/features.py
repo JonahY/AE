@@ -637,8 +637,8 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\VALLEN'
-    fold = '316L-1.5-annealed-z2-AE-3 sensors-20210125'
+    path = r'H:\VALLEN'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -661,8 +661,8 @@ if __name__ == "__main__":
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
-    reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=3, mode='all', t_cut=30000)
+    reload = Reload(path_pri, path_tra, fold) # float('inf')
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
