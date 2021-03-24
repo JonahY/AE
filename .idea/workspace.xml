@@ -68,7 +68,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/cls" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Others/Untitled.ipynb" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -225,7 +225,7 @@
       <workItem from="1607063709015" duration="14265000" />
       <workItem from="1607323159908" duration="25463000" />
       <workItem from="1607648267717" duration="14687000" />
-      <workItem from="1616488985122" duration="6214000" />
+      <workItem from="1616488985122" duration="13281000" />
     </task>
     <servers />
   </component>
@@ -249,18 +249,18 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="552" y="183" key="#Deployment/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491191674" />
-    <state x="359" y="302" key="FileChooserDialogImpl" timestamp="1616491144355">
+    <state x="359" y="302" key="FileChooserDialogImpl" timestamp="1616506246309">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="359" y="302" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491144355" />
+    <state x="359" y="302" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616506246309" />
     <state x="461" y="169" key="SettingsEditor" timestamp="1616491095271">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491095271" />
-    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1616495272724">
+    <state x="2190" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1616509039074">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2117" y="139" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616495272724" />
+    <state x="2190" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616509039074" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
