@@ -41,7 +41,7 @@ class TrainVal():
         # for param in self.model.parameters():
         #     param.requires_grad = False
 
-        self.model.fc = nn.Linear(1024, config.class_num)
+        self.model.fc = nn.Sequential(nn.Linear(1024, config.class_num), nn.Sigmoid())
         # for param in self.model.fc.parameters():
         #     param.requires_grad = True
 
@@ -104,7 +104,7 @@ class TrainVal():
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.module.parameters()), self.lr,
                                weight_decay=self.weight_decay)
         lr_scheduler = optim.lr_scheduler.StepLR(optimizer, 25, gamma=0.99)
-        global_step = 1
+        global_step, global_threshold, global_threshold_pop1, global_threshold_pop2, global_threshold_pop3 = 1, 1, 1, 1, 1
 
         for fold_index in range(self.splits):
             train_dataset = torchvision.datasets.ImageFolder(root='3cls/train_%d' % (fold_index + 1), transform=self.train_transform)
@@ -133,9 +133,26 @@ class TrainVal():
                     self.solver.backword(optimizer, loss)
 
                     # tmp = (labels_predict > 0.2).float()
-                    labels_predict = torch.max(labels_predict, 1)[1].cpu()
-                    num_correct += (labels_predict == labels).sum().item()
-                    num_pred += labels_predict.size(0)
+
+                    labels_predictIdx, labels_predictMax = torch.max(labels_predict, 1)[1].cpu(), torch.max(labels_predict, 1)[0].cpu()
+                    correct_idx = labels_predictIdx == labels
+                    num_correct += correct_idx.sum().item()
+                    num_pred += labels_predictIdx.size(0)
+                    # for p, t in zip(labels_predictMax[correct_idx], labels[correct_idx]):
+                    for p in labels_predict.cpu()[correct_idx]:
+                        self.writer.add_scalar('threshold_pop1', p[0].item(), global_threshold)
+                        self.writer.add_scalar('threshold_pop2', p[1].item(), global_threshold)
+                        self.writer.add_scalar('threshold_pop3', p[2].item(), global_threshold)
+                        global_threshold += 1
+                        # if t == 0:
+                        #     self.writer.add_scalar('threshold_pop1', p.item(), global_threshold_pop1)
+                        #     global_threshold_pop1 += 1
+                        # elif t == 1:
+                        #     self.writer.add_scalar('threshold_pop2', p.item(), global_threshold_pop2)
+                        #     global_threshold_pop2 += 1
+                        # elif t == 2:
+                        #     self.writer.add_scalar('threshold_pop3', p.item(), global_threshold_pop3)
+                        #     global_threshold_pop3 += 1
 
                     self.writer.add_scalar('train_loss', loss.item(), global_step + i)
                     params_groups_lr = str()
@@ -184,11 +201,11 @@ class TrainVal():
                 loss_sum += loss.item()
 
                 # tmp = (labels_predict > 0.2).float()
-                labels_predict = torch.max(labels_predict, 1)[1].cpu()
-                num_correct += (labels_predict == labels).sum().item()
-                num_pred += labels_predict.size(0)
+                labels_predictIdx = torch.max(labels_predict, 1)[1].cpu()
+                num_correct += (labels_predictIdx == labels).sum().item()
+                num_pred += labels_predictIdx.size(0)
                 y_true.extend(labels.numpy().tolist())
-                y_pre.extend(labels_predict.numpy().tolist())
+                y_pre.extend(labels_predictIdx.numpy().tolist())
 
                 descript = "Val Loss: {:.7f}".format(loss.item())
                 tbar.set_description(desc=descript)
@@ -204,7 +221,7 @@ class TrainVal():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', type=int, default=32, help='batch size')
+    parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--epoch', type=int, default=50, help='epoch')
     parser.add_argument('--n_splits', type=int, default=10, help='n_splits_fold')
     parser.add_argument("--device", type=int, nargs='+', default=[i for i in range(torch.cuda.device_count())])

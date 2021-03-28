@@ -19,7 +19,7 @@ import torchvision.transforms as transforms
 class Predict():
     def __init__(self, config):
         self.model = models.shufflenet_v2_x1_0(pretrained=False)
-        self.model.fc = nn.Linear(1024, config.class_num)
+        self.model.fc = nn.Sequential(nn.Linear(1024, config.class_num), nn.Sigmoid())
 
         self.device = torch.device("cpu")
         if torch.cuda.is_available():
@@ -35,14 +35,19 @@ class Predict():
         self.model.train(False)
         checkpoint = torch.load(self.weight_path, map_location=self.device)
         self.model.load_state_dict(checkpoint['state_dict'])
+        other_idx = []
 
         with torch.no_grad():
             for i, (images, _) in tqdm(enumerate(dataset)):
                 labels_predict = self.solver.forward(images)
-                labels_predict = torch.max(labels_predict, 1)[1].cpu().numpy()
+                labels_predict = (labels_predict > 0.9).float()
+                for o_idx, tmp in enumerate(labels_predict):
+                    if not any(tmp):
+                        other_idx.append(o_idx + i * images.shape[0])
+                labels_predict = torch.max(labels_predict, 1)[1].cpu()
                 pre_res = labels_predict if not i else np.concatenate((pre_res, labels_predict))
 
-        return pre_res
+        return pre_res, other_idx
 
 
 if __name__ == "__main__":
@@ -74,4 +79,9 @@ if __name__ == "__main__":
 
     train_val = Predict(config)
     res = train_val.predict(pre_loader)
-    # print(res)
+
+    # pre_res[other_idx] = [-1] * len(other_idx)
+    # idx_1 = np.where(pre_res == 0)[0]
+    # idx_2 = np.where(pre_res == 1)[0]
+    # idx_3 = np.where(pre_res == 2)[0]
+    # idx_other = np.where(pre_res == -1)[0]
