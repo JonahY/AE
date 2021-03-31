@@ -74,20 +74,19 @@ def shortTermEny(signal, framelen, stride, fs, window='hamming'):
     frames = pad_signal[indices]
     allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
                   'bartlett': np.bartlett(framelen)}
-    d = np.zeros(nf)
     t = np.arange(0, nf) * (stride * 1.0 / fs)
+    res = np.zeros(nf)
 
     try:
         windows = allWindows[window]
     except:
         print("Please select window's function from: hamming, hanning, blackman and bartlett.")
-        return t, d
+        return t, res
 
     for i in range(0, nf):
-        a = frames[i:i + 1]
-        b = np.square(a[0]) * windows * 1.0 / fs
-        d[i] = np.sum(b)
-    return t, d
+        b = np.square(frames[i:i + 1][0]) * windows * 1.0 / fs
+        res[i] = np.sum(b)
+    return t, res
 
 
 def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
@@ -97,7 +96,7 @@ def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
     :param stride: length of translation per frame
     :param fs: sampling rate per millisecond
     :param window: window's function
-    :return:
+    :return: time_zcR, zcR
     """
     if signal.shape[0] <= framelen:
         nf = 1
@@ -112,43 +111,42 @@ def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
     allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
                   'bartlett': np.bartlett(framelen)}
     t = np.arange(0, nf) * (stride * 1.0 / fs)
-    c = np.zeros(nf)
+    res = np.zeros(nf)
 
     try:
         windows = allWindows[window]
     except:
         print("Please select window's function from: hamming, hanning, blackman and bartlett.")
-        return t, c
+        return t, res
 
     for i in range(nf):
-        a = frames[i:i + 1]
-        b = windows * a[0]
+        tmp = windows * frames[i:i + 1][0]
         for j in range(framelen - 1):
-            if b[j] * b[j + 1] <= 0:
-                c[i] += 1
-    return t, c / framelen
+            if tmp[j] * tmp[j + 1] <= 0:
+                res[i] += 1
+    return t, res / framelen
 
 
 def cal_deriv(x, y):
-    diff_x = []  # 用来存储x列表中的两数之差
+    diff_x = []
     for i, j in zip(x[0::], x[1::]):
         diff_x.append(j - i)
 
-    diff_y = []  # 用来存储y列表中的两数之差
+    diff_y = []
     for i, j in zip(y[0::], y[1::]):
         diff_y.append(j - i)
 
-    slopes = []  # 用来存储斜率
+    slopes = []
     for i in range(len(diff_y)):
         slopes.append(diff_y[i] / diff_x[i])
 
-    deriv = []  # 用来存储一阶导数
+    deriv = []
     for i, j in zip(slopes[0::], slopes[1::]):
-        deriv.append((0.5 * (i + j)))  # 根据离散点导数的定义，计算并存储结果
-    deriv.insert(0, slopes[0])  # (左)端点的导数即为与其最近点的斜率
-    deriv.append(slopes[-1])  # (右)端点的导数即为与其最近点的斜率
+        deriv.append((0.5 * (i + j)))
+    deriv.insert(0, slopes[0])
+    deriv.append(slopes[-1])
 
-    return deriv  # 返回存储一阶导数结果的列表
+    return deriv
 
 
 # def zerosCountRate(audio_1, N, move):
