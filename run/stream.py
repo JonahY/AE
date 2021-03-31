@@ -1,41 +1,44 @@
-def Windows(width, parameter):
-    function = np.zeros(width)
-    for n in range(width):
-        function[n] = (1 - parameter) - parameter * np.cos((2 * 3.14 * n) / (width - 1))
-    return function
+import numpy as np
 
 
-def framing(audio_1, N, move, hamming):
-    framing = np.zeros(1)
-    for i in tqdm(range(0, len(audio_1), move)):
-        if len(audio_1[i:i + N]) == N:
-            tmp = audio_1[i:i + N] * hamming
-            framing = np.append(framing, tmp)
-        else:
-            tmp = audio_1[i:i + N] * hamming[0:len(audio_1[i:i + N])]
-            framing = np.append(framing, tmp)
-    return framing
+# def Windows(width, parameter):
+#     function = np.zeros(width)
+#     for n in range(width):
+#         function[n] = (1 - parameter) - parameter * np.cos((2 * 3.14 * n) / (width - 1))
+#     return function
 
 
-def sgn(a):
-    if a >= 0:
-        return 1
-    else:
-        return -1
+# def framing(audio_1, N, move, hamming):
+#     framing = np.zeros(1)
+#     for i in tqdm(range(0, len(audio_1), move)):
+#         if len(audio_1[i:i + N]) == N:
+#             tmp = audio_1[i:i + N] * hamming
+#             framing = np.append(framing, tmp)
+#         else:
+#             tmp = audio_1[i:i + N] * hamming[0:len(audio_1[i:i + N])]
+#             framing = np.append(framing, tmp)
+#     return framing
 
 
-def shortTermEny(audio_1, N, move, fs, hamming):
-    short_power = np.zeros(1)
-    sample_interval = 1 / fs
-    for i in range(0, len(audio_1), move):
-        if len(audio_1[i:i + N]) == N:
-            tmp = np.sum(np.multiply(pow(np.abs(audio_1[i:i + N]), 2), sample_interval)) * hamming
-            short_power = np.append(short_power, tmp)
-        else:
-            tmp = np.sum(np.multiply(pow(np.abs(audio_1[i:i + N]), 2), sample_interval)) * hamming[
-                                                                                           0:len(audio_1[i:i + N])]
-            short_power = np.append(short_power, tmp)
-    return short_power
+# def sgn(a):
+#     if a >= 0:
+#         return 1
+#     else:
+#         return -1
+
+
+# def shortTermEny(audio_1, N, move, fs, hamming):
+#     short_power = np.zeros(1)
+#     sample_interval = 1 / fs
+#     for i in range(0, len(audio_1), move):
+#         if len(audio_1[i:i + N]) == N:
+#             tmp = np.sum(np.multiply(pow(np.abs(audio_1[i:i + N]), 2), sample_interval)) * hamming
+#             short_power = np.append(short_power, tmp)
+#         else:
+#             tmp = np.sum(np.multiply(pow(np.abs(audio_1[i:i + N]), 2), sample_interval)) * hamming[
+#                                                                                            0:len(audio_1[i:i + N])]
+#             short_power = np.append(short_power, tmp)
+#     return short_power
 
 
 # def shortTermEny(audio_1, N, move):
@@ -50,40 +53,142 @@ def shortTermEny(audio_1, N, move, fs, hamming):
 #     return short_power
 
 
-def zerosCountRate(audio_1, N, move):
-    count = np.zeros(1)
-    for i in range(0, len(audio_1), move):
-        Calculation = 0
-        if len(audio_1[i:i + N]) == N:
-            for j in range(N):
-                tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
-                Calculation += tmp
-            count = np.append(count, Calculation)
-        else:
-            for j in range(len(audio_1[i:i + N])):
-                tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
-                Calculation += tmp
-            count = np.append(count, Calculation)
-    return count
+def shortTermEny(signal, framelen, stride, fs, window='hamming'):
+    """
+    :param signal: raw signal of waveform, unit: μs
+    :param framelen: length of per frame, type: int
+    :param stride: length of translation per frame
+    :param fs: sampling rate per millisecond
+    :param window: window's function
+    :return: time_stE, stE
+    """
+    if signal.shape[0] <= framelen:
+        nf = 1
+    else:
+        nf = int(np.ceil((1.0 * signal.shape[0] - framelen + stride) / stride))
+    pad_length = int((nf - 1) * stride + framelen)
+    zeros = np.zeros((pad_length - signal.shape[0],))
+    pad_signal = np.concatenate((signal, zeros))
+    indices = np.tile(np.arange(0, framelen), (nf, 1)) + np.tile(np.arange(0, nf * stride, stride),
+                                                                 (framelen, 1)).T.astype(np.int32)
+    frames = pad_signal[indices]
+    allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
+                  'bartlett': np.bartlett(framelen)}
+    d = np.zeros(nf)
+    t = np.arange(0, nf) * (stride * 1.0 / fs)
+
+    try:
+        windows = allWindows[window]
+    except:
+        print("Please select window's function from: hamming, hanning, blackman and bartlett.")
+        return t, d
+
+    for i in range(0, nf):
+        a = frames[i:i + 1]
+        b = np.square(a[0]) * windows * 1.0 / fs
+        d[i] = np.sum(b)
+    return t, d
 
 
-# width_stE = int(tmp[3] * pow(10, -6) * 5)
-# width_zcR = int(tmp[3] * pow(10, -6) * 5)
-# hamming = Windows(width_stE, 0.46)
-#
-# stE = shortTermEny(sig, int(width_stE), int(width_stE) - 1, 20, hamming)
-# t_stE = np.linspace(time[0], time[-1], stE.shape[0])
-# # sig_zcR = framing(sig,int(width_stE),int(width_stE) - 1)
-# # zcR = zerosCountRate(sig_zcR, int(width_zcR), int(width_zcR) - 1)
-# zcR = zerosCountRate(sig, int(width_zcR), int(width_zcR) - 1)
-# t_zcR = np.linspace(time[0], time[-1], zcR.shape[0])
-# stE_dev1 = cal_deriv(t_stE, stE)
-#
-# plt.figure(0)
-# plt.plot(time, sig)
-# plt.figure(1)
-# plt.plot(t_stE, stE)
-# plt.figure(2)
-# plt.plot(t_zcR, zcR)
-# plt.figure(3)
-# plt.plot(t_stE, stE_dev1)
+def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
+    """
+    :param signal: raw signal of waveform, unit: μs
+    :param framelen: length of per frame, type: int
+    :param stride: length of translation per frame
+    :param fs: sampling rate per millisecond
+    :param window: window's function
+    :return:
+    """
+    if signal.shape[0] <= framelen:
+        nf = 1
+    else:
+        nf = int(np.ceil((1.0 * signal.shape[0] - framelen + stride) / stride))
+    pad_length = int((nf - 1) * stride + framelen)
+    zeros = np.zeros((pad_length - signal.shape[0],))
+    pad_signal = np.concatenate((signal, zeros))
+    indices = np.tile(np.arange(0, framelen), (nf, 1)) + np.tile(np.arange(0, nf * stride, stride),
+                                                                 (framelen, 1)).T.astype(np.int32)
+    frames = pad_signal[indices]
+    allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
+                  'bartlett': np.bartlett(framelen)}
+    t = np.arange(0, nf) * (stride * 1.0 / fs)
+    c = np.zeros(nf)
+
+    try:
+        windows = allWindows[window]
+    except:
+        print("Please select window's function from: hamming, hanning, blackman and bartlett.")
+        return t, c
+
+    for i in range(nf):
+        a = frames[i:i + 1]
+        b = windows * a[0]
+        for j in range(framelen - 1):
+            if b[j] * b[j + 1] <= 0:
+                c[i] += 1
+    return t, c / framelen
+
+
+def cal_deriv(x, y):
+    diff_x = []  # 用来存储x列表中的两数之差
+    for i, j in zip(x[0::], x[1::]):
+        diff_x.append(j - i)
+
+    diff_y = []  # 用来存储y列表中的两数之差
+    for i, j in zip(y[0::], y[1::]):
+        diff_y.append(j - i)
+
+    slopes = []  # 用来存储斜率
+    for i in range(len(diff_y)):
+        slopes.append(diff_y[i] / diff_x[i])
+
+    deriv = []  # 用来存储一阶导数
+    for i, j in zip(slopes[0::], slopes[1::]):
+        deriv.append((0.5 * (i + j)))  # 根据离散点导数的定义，计算并存储结果
+    deriv.insert(0, slopes[0])  # (左)端点的导数即为与其最近点的斜率
+    deriv.append(slopes[-1])  # (右)端点的导数即为与其最近点的斜率
+
+    return deriv  # 返回存储一阶导数结果的列表
+
+
+# def zerosCountRate(audio_1, N, move):
+#     count = np.zeros(1)
+#     for i in range(0, len(audio_1), move):
+#         Calculation = 0
+#         if len(audio_1[i:i + N]) == N:
+#             for j in range(N):
+#                 tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
+#                 Calculation += tmp
+#             count = np.append(count, Calculation)
+#         else:
+#             for j in range(len(audio_1[i:i + N])):
+#                 tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
+#                 Calculation += tmp
+#             count = np.append(count, Calculation)
+#     return count
+
+
+
+'''
+tmp = data_tra[int(6200 - 1)]
+sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+staLen, overlap, staWin = 2, 1, 'hamming'
+IZCRT, ITU, alpha = 0.7, None, 1
+
+width = int(tmp[3] * pow(10, -6) * staLen)
+stride = int(width) - overlap
+t_stE, stE = shortTermEny(sig, width, stride, 20)
+t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20)
+stE_dev = cal_deriv(t_stE, stE)
+x = [time, t_stE, t_stE, t_zcR]
+y = [sig, stE, stE_dev, zcR]
+color = ['b', 'green', 'gray', 'purple']
+ylabel = ['$Amplitude$ $(μV)$', '$STEnergy$ $(μV^2 \cdot μs)$', "$S\dot{T}E$ $(μV^2)$", '$ST\widehat{Z}CR$ $(\%)$']
+fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+for idx, ax in enumerate(axes):
+    ax.plot(x[idx], y[idx], color=color[idx])
+    ax.grid()
+    plot_norm(ax, 'Time (μs)', ylabel[idx], legend=False)
+'''
