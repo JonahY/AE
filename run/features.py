@@ -639,7 +639,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Nano Ni-compression text-3-0.003-20200920'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -663,7 +663,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold) # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=4, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
@@ -749,3 +749,44 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
+
+
+'''
+    from sklearn.svm import SVC
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.ensemble import RandomForestClassifier
+    import pandas as pd
+    import seaborn as sns
+    from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
+    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_pure.csv'
+    data = pd.read_csv(fold).astype(np.float32)
+    feature = data.iloc[:, :-1].values
+    label = np.array(data.iloc[:, -1].tolist()).reshape(-1, 1)
+    # ext = np.zeros([label.shape[0], 1]).astype(np.float32)
+    # ext[np.where(label == 0)[0]] = 1
+    # label = np.concatenate((label, ext), axis=1)
+    
+    df_temp = train_test_split(feature, label, test_size=0.2, stratify=label, random_state=69)
+    stdScaler = StandardScaler().fit(df_temp[0])
+    trainStd = stdScaler.transform(df_temp[0])
+    testStd = stdScaler.transform(df_temp[1])
+    
+    svm = SVC(max_iter=200, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+    print('建立的SVM模型为：\n', svm)
+    
+    rf = RandomForestClassifier(max_depth=10, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+    print('建立的RF模型为：\n', rf)
+    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan2_pop2.csv'
+    data = pd.read_csv(fold).astype(np.float32)
+    nano_ni = data.values
+    stdScaler = StandardScaler().fit(nano_ni)
+    trainStd = stdScaler.transform(nano_ni)
+    target_pred = svm.predict(trainStd)
+    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan3_pop2.csv'
+    data = pd.read_csv(fold).astype(np.float32)
+    nano_ni = data.values
+    stdScaler = StandardScaler().fit(nano_ni)
+    trainStd = stdScaler.transform(nano_ni)
+    target_pred = svm.predict(trainStd)
+    '''

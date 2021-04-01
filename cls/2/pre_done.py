@@ -78,7 +78,7 @@ if __name__ == "__main__":
     pre_loader = DataLoader(pre_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers)
 
     train_val = Predict(config)
-    res = train_val.predict(pre_loader)
+    pre_res, other_idx = train_val.predict(pre_loader)
 
     # pre_res[other_idx] = [-1] * len(other_idx)
     # idx_1 = np.where(pre_res == 0)[0]

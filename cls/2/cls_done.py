@@ -8,6 +8,7 @@ from tqdm import tqdm
 from solver import Solver
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import StratifiedKFold
 import torch.nn.functional as F
 import datetime
 import os
@@ -15,6 +16,8 @@ import codecs, json
 import time
 import argparse
 import numpy as np
+import pandas as pd
+import shutil
 
 from meter import Meter
 from set_seed import seed_torch
@@ -35,7 +38,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 class TrainVal():
     def __init__(self, config):
-        self.model = models.shufflenet_v2_x1_0(pretrained=False)
+        self.model = models.shufflenet_v2_x1_0(pretrained=True)
 
         # # freeze model parameters
         # for param in self.model.parameters():
@@ -63,6 +66,7 @@ class TrainVal():
         self.weight_decay = config.weight_decay
         self.epoch = config.epoch
         self.splits = config.n_splits
+        self.root = config.root
 
         self.solver = Solver(self.model, self.device)
 
@@ -88,17 +92,33 @@ class TrainVal():
 
     def train(self, create_data=False):
         if create_data:
+            df = pd.read_csv(os.path.join(self.root, 'train info_cwt_coarse.csv'), header=None)
+            labels_1dim = np.argmax(np.array(df), axis=1)
             print('<' * 20 + ' Start creating datasets ' + '>' * 20)
             skf = StratifiedKFold(n_splits=self.splits, shuffle=True, random_state=55)
             for idx, [train_df_index, val_df_index] in tqdm(enumerate(skf.split(df, labels_1dim), 1)):
                 for i in train_df_index:
-                    shutil.copy(os.path.join(config.root, 'train dataset_cwt/%s.jpg' % (i + 1)),
-                                os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/3cls',
-                                             'train_%d/%d/' % (idx, labels_1dim[i])))
+                    try:
+                        shutil.copy(os.path.join(config.root, 'Ni-coarse-cwt/%s.jpg' % (i + 1)),
+                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls',
+                                                 'train_%d/%d/%d.jpg' % (idx, labels_1dim[i], i + 1)))
+                    except FileNotFoundError:
+                        try:
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls', 'train_%d' % idx))
+                        except (FileNotFoundError, FileExistsError):
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls',
+                                                  'train_%d/%d' % (idx, labels_1dim[i])))
                 for i in val_df_index:
-                    shutil.copy(os.path.join(config.root, 'train dataset_cwt/%s.jpg' % (i + 1)),
-                                os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/3cls',
-                                             'test_%d/%d/' % (idx, labels_1dim[i])))
+                    try:
+                        shutil.copy(os.path.join(config.root, 'Ni-coarse-cwt/%s.jpg' % (i + 1)),
+                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls',
+                                                 'test_%d/%d/%d.jpg' % (idx, labels_1dim[i], i + 1)))
+                    except FileNotFoundError:
+                        try:
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls', 'test_%d' % idx))
+                        except (FileNotFoundError, FileExistsError):
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/2/4cls',
+                                                  'test_%d/%d' % (idx, labels_1dim[i])))
             print('<' * 20 + ' Finish creating datasets ' + '>' * 20)
 
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.module.parameters()), self.lr,
@@ -107,9 +127,9 @@ class TrainVal():
         global_step, global_threshold, global_threshold_pop1, global_threshold_pop2, global_threshold_pop3 = 1, 1, 1, 1, 1
 
         for fold_index in range(self.splits):
-            train_dataset = torchvision.datasets.ImageFolder(root='3cls/train_%d' % (fold_index + 1), transform=self.train_transform)
+            train_dataset = torchvision.datasets.ImageFolder(root='4cls/train_%d/' % (fold_index + 1), transform=self.train_transform)
             train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=config.num_workers)
-            val_dataset = torchvision.datasets.ImageFolder(root='3cls/test_%d' % (fold_index + 1), transform=self.test_transform)
+            val_dataset = torchvision.datasets.ImageFolder(root='4cls/test_%d/' % (fold_index + 1), transform=self.test_transform)
             val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=config.num_workers)
             self.model.train()
 
@@ -143,6 +163,7 @@ class TrainVal():
                         self.writer.add_scalar('threshold_pop1', p[0].item(), global_threshold)
                         self.writer.add_scalar('threshold_pop2', p[1].item(), global_threshold)
                         self.writer.add_scalar('threshold_pop3', p[2].item(), global_threshold)
+                        self.writer.add_scalar('threshold_pop4', p[3].item(), global_threshold)
                         global_threshold += 1
                         # if t == 0:
                         #     self.writer.add_scalar('threshold_pop1', p.item(), global_threshold_pop1)
@@ -184,9 +205,10 @@ class TrainVal():
                                             is_best, self.max_accuracy_valid)
                 self.writer.add_scalar('valid_loss', val_loss, epoch)
                 self.writer.add_scalar('valid_accuracy', val_accuracy, epoch)
-                self.writer.add_scalar('valid_class_0_f1', f1[0], epoch)
-                self.writer.add_scalar('valid_class_1_f1', f1[1], epoch)
-                self.writer.add_scalar('valid_class_2_f1', f1[2], epoch)
+                self.writer.add_scalar('valid_class_1_f1', f1[0], epoch)
+                self.writer.add_scalar('valid_class_2_f1', f1[1], epoch)
+                self.writer.add_scalar('valid_class_3_f1', f1[2], epoch)
+                self.writer.add_scalar('valid_class_4_f1', f1[3], epoch)
 
     def validation(self, valid_loader):
         self.model.eval()
@@ -211,8 +233,8 @@ class TrainVal():
                 tbar.set_description(desc=descript)
         loss_mean = loss_sum / len(tbar)
         res = confusion_matrix(y_true, y_pre)
-        precision = np.array([res[i][i] / np.sum(res, axis=0)[i] for i in range(3)])
-        recall = np.array([res[i][i] / np.sum(res, axis=1)[i] for i in range(3)])
+        precision = np.array([res[i][i] / np.sum(res, axis=0)[i] for i in range(config.class_num)])
+        recall = np.array([res[i][i] / np.sum(res, axis=1)[i] for i in range(config.class_num)])
         f1 = 2 * precision * recall / (precision + recall)
         for idx, [p, r, f] in enumerate(zip(precision, recall, f1)):
             print("Class_%d_precision: %0.4f | Recall: %0.4f | F1-score: %0.4f |" % (idx, p, r, f))
@@ -225,12 +247,13 @@ if __name__ == "__main__":
     parser.add_argument('--epoch', type=int, default=50, help='epoch')
     parser.add_argument('--n_splits', type=int, default=10, help='n_splits_fold')
     parser.add_argument("--device", type=int, nargs='+', default=[i for i in range(torch.cuda.device_count())])
+    parser.add_argument('--create_data', type=bool, default=False, help='For the first training')
     # model set
     parser.add_argument('--model_name', type=str, default='shufflenet',
                         help='unet_resnet34/unet_se_resnext50_32x4d/unet_efficientnet_b4'
                              '/unet_resnet50/unet_efficientnet_b4')
     # model hyper-parameters
-    parser.add_argument('--class_num', type=int, default=3)
+    parser.add_argument('--class_num', type=int, default=4)
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--lr', type=float, default=1e-4, help='init lr')
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='weight_decay in optimizer')
@@ -241,4 +264,4 @@ if __name__ == "__main__":
     print(config)
 
     train_val = TrainVal(config)
-    train_val.train(False)
+    train_val.train(config.create_data)
