@@ -40,7 +40,7 @@ class Predict():
         with torch.no_grad():
             for i, (images, _) in tqdm(enumerate(dataset)):
                 labels_predict = self.solver.forward(images)
-                labels_predict = (labels_predict > 0.9).float()
+                labels_predict = (labels_predict > 0.8).float()
                 for o_idx, tmp in enumerate(labels_predict):
                     if not any(tmp):
                         other_idx.append(o_idx + i * images.shape[0])

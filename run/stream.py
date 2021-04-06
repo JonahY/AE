@@ -166,6 +166,26 @@ def cal_deriv(x, y):
 #     return count
 
 
+def find_wave(stE, stE_dev, zcR, IZCRT=0.3, ITU=75):
+    start, end = [], []
+    last_end = 0
+    while last_end < stE.shape[0] - 1:
+        start_temp = last_end + np.where(stE[last_end + 1:] >= ITU)[0][0]
+        start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0][-1] if np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0].shape[0] else last_end
+        for j in range(start_temp + 1, stE.shape[0]):
+            if stE[j] < ITU:
+                end_temp = j
+                break
+        ITL = 0.368 * max(stE[start_true:end_temp+1])
+        for k in range(end_temp + 1, stE.shape[0]):
+            if (stE[k] < ITL) & (zcR[k] > IZCRT):
+                end_true = k
+                break
+        last_end = end_true
+        start.append(start_true)
+        end.append(end_true)
+    return start, end
+
 
 '''
 tmp = data_tra[int(6200 - 1)]

@@ -197,8 +197,14 @@ class Features:
                     res.append(k)
         return res
 
-    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, None]] * 3,
-                INTERVAL_NUM=[6] * 3, bin_method='log', select=[0, 3], FIT=False):
+    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
+                INTERVAL_NUM=None, bin_method='log', select=None, FIT=False):
+        if INTERVAL_NUM is None:
+            INTERVAL_NUM = [6] * 3
+        if select is None:
+            select = [0, 3]
+        if LIM is None:
+            LIM = [[0, None]] * 3
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
         #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -238,8 +244,12 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=[[0, float('inf')]] * 3,
-                 select=[0, 3], FIT=False):
+    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
+                 select=None, FIT=False):
+        if LIM is None:
+            LIM = [[0, float('inf')]] * 3
+        if select is None:
+            select = [0, 3]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -270,16 +280,20 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=[0, 3]):
+    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, LABEL=None):
+        if select is None:
+            select = [0, 3]
+        if LABEL is None:
+            LABEL = ['Whole', 'Population 1', 'Population 2']
+        if COLOR is None:
+            COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
         fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
-        TMP, N, LAYER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 3, 2], ['black', self.color_1,
-                                                                                                  self.color_2], [
-                                          'Whole', 'Population 1', 'Population 2']
+        TMP, N, LAYER = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 3, 2]
         for tmp, N, layer, color, label in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
                                                LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]]):
@@ -409,14 +423,16 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=[3, 1], color=None,
+    def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=None, color=None,
                                sharex=True, sharey=True):
+        if fig_loc is None:
+            fig_loc = [3, 1]
         if not color:
             color = [self.color_1, self.color_2, 'purple']
         else:
             assert len(fig_loc) == len(color), \
                 print("Length of parameter 'fig_loc' should be equal to length of parameter 'color'.")
-        fig, axes = plt.subplots(fig_loc[0], fig_loc[1], sharex=sharex, sharey=sharey, figsize=(6, 9))
+        fig, axes = plt.subplots(fig_loc[0], fig_loc[1], sharex=str(sharex), sharey=str(sharey), figsize=(6, 9))
         if axes.ndim == 1:
             for idx, ax in enumerate(axes):
                 ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
@@ -476,8 +492,12 @@ class Features:
                 ax.semilogy(tmp_1, tmp_2, '.', Marker='.', color='b')
         plot_norm(ax, 'Time (s)', ylabel, legend=False)
 
-    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
-                    select=[0, 3]):
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
+                    select=None):
+        if select is None:
+            select = [0, 3]
+        if INTERVAL_NUM is None:
+            INTERVAL_NUM = [8] * 3
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
         #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -529,8 +549,12 @@ class Features:
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
-                        select=[0, 3], FIT=False):
+    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
+                        select=None, FIT=False):
+        if INTERVAL_NUM is None:
+            INTERVAL_NUM = [8] * 3
+        if select is None:
+            select = [0, 3]
         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
         #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
@@ -565,9 +589,13 @@ class Features:
                 ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=[8] * 3, bin_method='log',
-                     select=[0, 3], FIT=False):
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
+                     select=None, FIT=False):
         #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
+        if select is None:
+            select = [0, 3]
+        if INTERVAL_NUM is None:
+            INTERVAL_NUM = [8] * 3
         eny_lim = [[0.01, 0.1], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
         tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
                                                                                                            eny_lim), self.cal_OmiroLaw_helper(
@@ -607,7 +635,9 @@ class Features:
                         ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=[3] * 2, bin_method='log', FIT=False):
+    def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False):
+        if INTERVAL_NUM is None:
+            INTERVAL_NUM = [3] * 2
         res_1 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_1)
         res_2 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_2)
         for res, interval_num, ylabel, title in zip([res_1, res_2], INTERVAL_NUM,
@@ -639,7 +669,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Nano Ni-compression text-2-0.003-20200920‘'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -648,7 +678,7 @@ if __name__ == "__main__":
     # Ni 2-compression text-2-0.003-20201002
     # Ni 2-compression text-1-0.003-20200928
     # Ni 1-compression text-1-0.003-20201004
-    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224
+    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  [np.where(chan_3[:, 1] < 95000)[0]]
     # Nano Ni-compression text-1-0.003-20200919  [np.where(chan_3[:, 1] < 14700)[0]]
     # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
     # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
@@ -663,7 +693,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold) # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=4, mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
@@ -750,43 +780,41 @@ if __name__ == "__main__":
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
 
-
-'''
-    from sklearn.svm import SVC
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.ensemble import RandomForestClassifier
-    import pandas as pd
-    import seaborn as sns
-    from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
-    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_pure.csv'
-    data = pd.read_csv(fold).astype(np.float32)
-    feature = data.iloc[:, :-1].values
-    label = np.array(data.iloc[:, -1].tolist()).reshape(-1, 1)
-    # ext = np.zeros([label.shape[0], 1]).astype(np.float32)
-    # ext[np.where(label == 0)[0]] = 1
-    # label = np.concatenate((label, ext), axis=1)
-    
-    df_temp = train_test_split(feature, label, test_size=0.2, stratify=label, random_state=69)
-    stdScaler = StandardScaler().fit(df_temp[0])
-    trainStd = stdScaler.transform(df_temp[0])
-    testStd = stdScaler.transform(df_temp[1])
-    
-    svm = SVC(max_iter=200, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
-    print('建立的SVM模型为：\n', svm)
-    
-    rf = RandomForestClassifier(max_depth=10, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
-    print('建立的RF模型为：\n', rf)
-    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan2_pop2.csv'
-    data = pd.read_csv(fold).astype(np.float32)
-    nano_ni = data.values
-    stdScaler = StandardScaler().fit(nano_ni)
-    trainStd = stdScaler.transform(nano_ni)
-    target_pred = svm.predict(trainStd)
-    fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan3_pop2.csv'
-    data = pd.read_csv(fold).astype(np.float32)
-    nano_ni = data.values
-    stdScaler = StandardScaler().fit(nano_ni)
-    trainStd = stdScaler.transform(nano_ni)
-    target_pred = svm.predict(trainStd)
-    '''
+    # ------------------------------------------------------------------------------------------------------------------
+    # from sklearn.svm import SVC
+    # from sklearn.model_selection import train_test_split
+    # from sklearn.preprocessing import StandardScaler
+    # from sklearn.ensemble import RandomForestClassifier
+    # import pandas as pd
+    # import seaborn as sns
+    # from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
+    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_pure.csv'
+    # data = pd.read_csv(fold).astype(np.float32)
+    # feature = data.iloc[:, :-1].values
+    # label = np.array(data.iloc[:, -1].tolist()).reshape(-1, 1)
+    # # ext = np.zeros([label.shape[0], 1]).astype(np.float32)
+    # # ext[np.where(label == 0)[0]] = 1
+    # # label = np.concatenate((label, ext), axis=1)
+    #
+    # df_temp = train_test_split(feature, label, test_size=0.2, stratify=label, random_state=69)
+    # stdScaler = StandardScaler().fit(df_temp[0])
+    # trainStd = stdScaler.transform(df_temp[0])
+    # testStd = stdScaler.transform(df_temp[1])
+    #
+    # svm = SVC(max_iter=200, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+    # print('建立的SVM模型为：\n', svm)
+    #
+    # rf = RandomForestClassifier(max_depth=10, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+    # print('建立的RF模型为：\n', rf)
+    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan2_pop2.csv'
+    # data = pd.read_csv(fold).astype(np.float32)
+    # nano_ni = data.values
+    # stdScaler = StandardScaler().fit(nano_ni)
+    # trainStd = stdScaler.transform(nano_ni)
+    # target_pred = svm.predict(trainStd)
+    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan3_pop2.csv'
+    # data = pd.read_csv(fold).astype(np.float32)
+    # nano_ni = data.values
+    # stdScaler = StandardScaler().fit(nano_ni)
+    # trainStd = stdScaler.transform(nano_ni)
+    # target_pred = svm.predict(trainStd)
