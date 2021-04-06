@@ -432,7 +432,7 @@ class Features:
         else:
             assert len(fig_loc) == len(color), \
                 print("Length of parameter 'fig_loc' should be equal to length of parameter 'color'.")
-        fig, axes = plt.subplots(fig_loc[0], fig_loc[1], sharex=str(sharex), sharey=str(sharey), figsize=(6, 9))
+        fig, axes = plt.subplots(fig_loc[0], fig_loc[1], sharex=sharex, sharey=sharey, figsize=(6, 9))
         if axes.ndim == 1:
             for idx, ax in enumerate(axes):
                 ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
@@ -669,7 +669,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Nano Ni-compression text-2-0.003-20200920‘'
+    fold = 'Nano Ni-compression text-3-0.003-20200920'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'

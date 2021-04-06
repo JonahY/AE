@@ -1,4 +1,6 @@
 import numpy as np
+import time
+from time import sleep
 
 
 # def Windows(width, parameter):
@@ -166,33 +168,55 @@ def cal_deriv(x, y):
 #     return count
 
 
-def find_wave(stE, stE_dev, zcR, IZCRT=0.3, ITU=75):
+def find_wave(stE, stE_dev, zcR, IZCRT=0.3, ITU=75, alpha=0.5):
     start, end = [], []
     last_end = 0
+    t0 = time.perf_counter()
     while last_end < stE.shape[0] - 1:
+
         start_temp = last_end + np.where(stE[last_end + 1:] >= ITU)[0][0]
-        start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0][-1] if np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0].shape[0] else last_end
+        start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0][-1] \
+            if np.where(np.array(stE_dev[last_end:start_temp]) < 0)[0].shape[0] else last_end
+
+        # Auto-adjust threshold
+        ITU_tmp = ITU + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
+            if last_end != start_true else ITU
+        IZCRT_tmp = np.mean(zcR[last_end:start_true]) + alpha * np.std(zcR[last_end:start_true]) \
+            if last_end != start_true else IZCRT
+        print(ITU_tmp, IZCRT_tmp)
+
         for j in range(start_temp + 1, stE.shape[0]):
-            if stE[j] < ITU:
+            if stE[j] < ITU_tmp:
                 end_temp = j
                 break
         ITL = 0.368 * max(stE[start_true:end_temp+1])
+
         for k in range(end_temp + 1, stE.shape[0]):
-            if (stE[k] < ITL) & (zcR[k] > IZCRT):
+            if ((stE[k] < ITL) & (zcR[k] > IZCRT_tmp)) | (k == stE.shape[0] - 1):
                 end_true = k
                 break
+
+        progressbar = "█" * int(last_end / 10)
+        space = " " * (int((stE.shape[0] - 1) / 10) - int(last_end / 10))
+        print("\r{:^3.0f}%|{}{}| [{:.2f}<?, ?it/s]".format((last_end / (stE.shape[0] - 1)) * 100, progressbar, space,
+                                                           time.perf_counter() - t0), end="")
+
+        if start_true >= end_true:
+            return start, end
+
         last_end = end_true
         start.append(start_true)
         end.append(end_true)
+
     return start, end
 
 
 '''
-tmp = data_tra[int(6200 - 1)]
+tmp = data_tra[int(167537 - 1)]
 sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
 time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
 
-staLen, overlap, staWin = 2, 1, 'hamming'
+staLen, overlap, staWin = 3, 1, 'hamming'
 IZCRT, ITU, alpha = 0.7, None, 1
 
 width = int(tmp[3] * pow(10, -6) * staLen)
@@ -209,4 +233,33 @@ for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], color=color[idx])
     ax.grid()
     plot_norm(ax, 'Time (μs)', ylabel[idx], legend=False)
+'''
+
+'''
+tmp = data_tra[int(167537 - 1)]
+sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+staLen, overlap, staWin = 3, 1, 'hamming'
+IZCRT, ITU, alpha = 0.7, None, 1
+
+width = int(tmp[3] * pow(10, -6) * staLen)
+stride = int(width) - overlap
+t_stE, stE = shortTermEny(sig, width, stride, 20)
+t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20)
+stE_dev = cal_deriv(t_stE, stE)
+x = [time, t_stE, t_stE, t_zcR]
+y = [sig, stE, stE_dev, zcR]
+color = ['b', 'green', 'gray', 'purple']
+ylabel = ['$Amplitude$ $(μV)$', '$STEnergy$ $(μV^2 \cdot μs)$', "$S\dot{T}E$ $(μV^2)$", '$ST\widehat{Z}CR$ $(\%)$']
+fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+for idx, ax in enumerate(axes):
+    ax.plot(x[idx], y[idx], color=color[idx])
+    if idx == 0:
+        for s, e in zip(start, end):
+            ax.plot(time[np.where((time >= t_stE[s]) & (time <= t_stE[e]))[0]],
+                    sig[np.where((time >= t_stE[s]) & (time <= t_stE[e]))[0]], lw=1, color=color_1)
+    ax.grid()
+    plot_norm(ax, 'Time (μs)', ylabel[idx], legend=False)
+
 '''

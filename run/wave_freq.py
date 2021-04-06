@@ -9,6 +9,7 @@ from preprocess import Preprocessing
 import pywt
 import librosa
 from librosa import display
+from stream import *
 
 
 class Waveform:
@@ -47,7 +48,8 @@ class Waveform:
                 time = np.linspace(0, duration, sig.shape[0])
         return time, sig
 
-    def find_wave(self, Dur, Eny, cls_KKM, chan, dur_lim, eny_lim):
+    @staticmethod
+    def find_wave(Dur, Eny, cls_KKM, chan, dur_lim, eny_lim):
         for i in np.where((np.log10(Dur)[cls_KKM] > dur_lim[0]) & (np.log10(Dur)[cls_KKM] < dur_lim[1]) &
                           (np.log10(Eny)[cls_KKM] > eny_lim[0]) & (np.log10(Eny)[cls_KKM] < eny_lim[1]))[0]:
             # Idx, Dur, Eny, TRAI
@@ -82,7 +84,7 @@ class Waveform:
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k, valid=True):
+    def plot_wave_TRAI(self, k, valid=False):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[-1] != k:
@@ -101,6 +103,36 @@ class Waveform:
             plt.axhline(abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
             plt.axhline(-abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % k, legend=False, grid=True)
+
+    def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', plot=True, classify=False, valid=False):
+        tmp = self.data_tra[int(k - 1)]
+        if tmp[-1] != k:
+            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (tmp[-1], k))
+        time, sig = self.cal_wave(tmp, valid=valid)
+
+        width = int(tmp[3] * pow(10, -6) * staLen)
+        stride = int(width) - overlap
+        t_stE, stE = shortTermEny(sig, width, stride, 20, staWin)
+        t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20, staWin)
+        stE_dev = cal_deriv(t_stE, stE)
+        start, end = find_wave(stE, stE_dev, zcR)
+        if plot:
+            x = [time, t_stE, t_stE, t_zcR]
+            y = [sig, stE, stE_dev, zcR]
+            color = ['black', 'green', 'gray', 'purple']
+            ylabel = [r'$Amplitude$ $(μV)$', r'$STEnergy$ $(μV^2 \cdot μs)$', r'$S\dot{T}E$ $(μV^2)$',
+                      r'$ST\widehat{Z}CR$ $(\%)$']
+            fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+            for idx, ax in enumerate(axes):
+                ax.plot(x[idx], y[idx], color=color[idx])
+                if classify:
+                    if idx == 0:
+                        for s, e in zip(start, end):
+                            ax.plot(time[np.where((time >= t_stE[s]) & (time <= t_stE[e]))[0]],
+                                    sig[np.where((time >= t_stE[s]) & (time <= t_stE[e]))[0]], lw=1, color='red')
+                ax.grid()
+                plot_norm(ax, r'$Time$ $(μs)$', ylabel[idx], legend=False)
+        return start, end, time, sig
 
     def save_wave(self, TRAI, pop):
         # Save waveform
