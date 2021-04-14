@@ -104,18 +104,23 @@ class Waveform:
             plt.axhline(-abs(self.thr), 0, sig.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % k, legend=False, grid=True)
 
-    def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', plot=True, classify=False, valid=False):
+    def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', IZCRT=0.3, ITU=150, alpha=1, t_backNoise=0,
+                    plot=True, classify=False, valid=False, t_str=0, t_end=float('inf')):
         tmp = self.data_tra[int(k - 1)]
         if tmp[-1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (tmp[-1], k))
         time, sig = self.cal_wave(tmp, valid=valid)
+        if t_str:
+            range_idx = np.where((time >= t_str) & (time < t_end))[0]
+            time = time[range_idx] - time[range_idx[0]]
+            sig = sig[range_idx]
 
         width = int(tmp[3] * pow(10, -6) * staLen)
         stride = int(width) - overlap
         t_stE, stE = shortTermEny(sig, width, stride, 20, staWin)
         t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20, staWin)
         stE_dev = cal_deriv(t_stE, stE)
-        start, end = find_wave(stE, stE_dev, zcR)
+        start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
         if plot:
             x = [time, t_stE, t_stE, t_zcR]
             y = [sig, stE, stE_dev, zcR]
@@ -132,7 +137,7 @@ class Waveform:
                                     sig[np.where((time >= t_stE[s]) & (time <= t_stE[e]))[0]], lw=1, color='red')
                 ax.grid()
                 plot_norm(ax, r'$Time$ $(μs)$', ylabel[idx], legend=False)
-        return start, end, time, sig
+        return start, end, time, sig, t_stE
 
     def save_wave(self, TRAI, pop):
         # Save waveform

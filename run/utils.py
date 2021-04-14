@@ -9,6 +9,7 @@ import multiprocessing
 import shutil
 import pandas as pd
 from scipy.signal import savgol_filter
+import sqlite3
 
 
 class Reload:
@@ -346,3 +347,84 @@ def filelist_convert(data_path, tar=None):
         file_list.pop(exist_idx)
     file_idx = np.array([np.array(i[:-4].split('_')[1:]).astype('int64') for i in file_list])
     return file_list, file_idx
+
+
+'''
+wave_ls = sorted(os.listdir('./wave/txt/'), key=lambda x: int(x.split('-')[0][5:]))
+channel = [3]
+SampleRate = 2 * pow(10, 7)
+tra_data, tra_params = [], []
+pri_data, pri_params = [], []
+tra_fieldinfo = [tuple(['Time', '[s]', '']), tuple(['SampleRate', '[Hz]', ''])]
+tra_globalinfo = [tuple(['TimeBase', SampleRate]), tuple(['BytesPerSample', 2]), tuple(['ValidSets', len(wave_ls)]),
+                 tuple(['TRAI', len(wave_ls)])]
+
+pri_fieldinfo = [tuple(['Time', '[s]', '']), tuple(['Amp', '[μV]', '']), tuple(['RiseT', '[μs]', '']), 
+                 tuple(['Dur', '[μs]', '']), tuple(['Eny', '[aJ]', ''])]
+pri_globalinfo = [tuple(['TimeBase', SampleRate]), tuple(['ValidSets', len(wave_ls)]), 
+                  tuple(['TRAI', len(wave_ls)])]
+
+for trai, dir in tqdm(enumerate(wave_ls, 1)):
+    ls_tra_tmp, ls_pri_tmp = [], []
+    with open('./wave/txt/%s' % dir, 'r') as f:
+        w = np.array([list(map(lambda x: float(x), i.strip("\n").split(', '))) for i in f.readlines()[1:]])
+    sig = w[:, 1]
+    time_label = np.linspace(0, 0 + (1 / 20) * (sig.shape[0] - 1), sig.shape[0])
+    max_idx = np.argmax(abs(sig))
+    start = time_label[0]
+    end = time_label[-1]
+
+    ls_tra_tmp.append(trai)
+    ls_tra_tmp.append(float(dir.split('-')[-1][:-4]))
+    ls_tra_tmp.append(3)
+    ls_tra_tmp.append(SampleRate)
+    ls_tra_tmp.append(1.08023954527964)
+    ls_tra_tmp.append((sig / 1.08023954527964).tobytes())
+
+    ls_pri_tmp.append(trai)
+    ls_pri_tmp.append(float(dir.split('-')[-1][:-4]))
+    ls_pri_tmp.append(3)
+    ls_pri_tmp.append(abs(sig[max_idx]))
+    ls_pri_tmp.append(time_label[max_idx] - start)
+    ls_pri_tmp.append(end - start)
+    ls_pri_tmp.append(np.sum(np.multiply(pow(sig, 2), 1 / 20)) / pow(10, 4))
+
+    tra_data.append(tuple(ls_tra_tmp))
+    pri_data.append(tuple(ls_pri_tmp))
+
+for id, chan in enumerate(channel, 1):
+    tra_params.append(tuple([id, chan, 1.08023954527964]))
+
+for id, chan in enumerate(channel, 1):
+    pri_params.append(tuple([id, chan, 1.08023954527964]))
+
+# Create '.tradb' database
+con_tra = sqlite3.connect('./test.tradb')
+cur_tra = con_tra.cursor()
+cur_tra.execute('CREATE TABLE fieldinfo (field TEXT PRIMARY KEY, Unit TEXT, Parameter TEXT)')
+cur_tra.executemany("INSERT INTO fieldinfo (field, Unit, Parameter) VALUES(?, ?, ?)", tra_fieldinfo)
+cur_tra.execute('CREATE TABLE globalinfo (Key TEXT PRIMARY KEY, Value BLOB)')
+cur_tra.executemany("INSERT INTO globalinfo (Key, Value) VALUES(?, ?)", tra_globalinfo)
+cur_tra.execute('CREATE TABLE params (ID INTEGER PRIMARY KEY, Channel INTEGER UNIQUE, TR_μV REAL)')
+cur_tra.executemany("INSERT INTO params (ID, Channel, TR_μV) VALUES(?, ?, ?)", tra_params)
+cur_tra.execute(
+    'CREATE TABLE data (TRAI INTEGER PRIMARY KEY, Time REAL, Channel INTEGER, SampleRate INTEGER, TR_μV REAL, Signal TEXT)')
+cur_tra.executemany("INSERT INTO data (TRAI, Time, Channel, SampleRate, TR_μV, Signal) VALUES(?, ?, ?, ?, ?, ?)", tra_data)
+con_tra.commit()
+con_tra.close()
+
+# Create '.pridb' database
+con_pri = sqlite3.connect('./test.pridb')
+cur_pri = con_pri.cursor()
+cur_pri.execute('CREATE TABLE fieldinfo (field TEXT PRIMARY KEY, Unit TEXT, Parameter TEXT)')
+cur_pri.executemany("INSERT INTO fieldinfo (field, Unit, Parameter) VALUES(?, ?, ?)", pri_fieldinfo)
+cur_pri.execute('CREATE TABLE globalinfo (Key TEXT PRIMARY KEY, Value BLOB)')
+cur_pri.executemany("INSERT INTO globalinfo (Key, Value) VALUES(?, ?)", pri_globalinfo)
+cur_pri.execute('CREATE TABLE params (ID INTEGER PRIMARY KEY, Channel INTEGER UNIQUE, TR_μV REAL)')
+cur_pri.executemany("INSERT INTO params (ID, Channel, TR_μV) VALUES(?, ?, ?)", pri_params)
+cur_pri.execute(
+    'CREATE TABLE data (TRAI INTEGER PRIMARY KEY, Time REAL, Channel INTEGER, Amp REAL, RiseT REAL, Dur REAL, Eny REAL)')
+cur_pri.executemany("INSERT INTO data (TRAI, Time, Channel, Amp, RiseT, Dur, Eny) VALUES(?, ?, ?, ?, ?, ?, ?)", pri_data)
+con_pri.commit()
+con_pri.close()
+'''

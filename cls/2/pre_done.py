@@ -84,4 +84,5 @@ if __name__ == "__main__":
     # idx_1 = np.where(pre_res == 0)[0]
     # idx_2 = np.where(pre_res == 1)[0]
     # idx_3 = np.where(pre_res == 2)[0]
+    # idx_4 = np.where(pre_res == 3)[0]
     # idx_other = np.where(pre_res == -1)[0]
