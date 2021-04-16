@@ -18,7 +18,7 @@ class Reload:
         self.path_tra = path_tra
         self.fold = fold
 
-    def sqlite_read(self, path):
+    def sqlite_read(self, path, mode='vallen'):
         """
         python读取sqlite数据库文件
         """
@@ -31,12 +31,16 @@ class Reload:
         Tables = cur.fetchall()  # Tables 为元组列表
 
         # 获取表结构的所有信息
-        if path[-5:] == 'pridb':
-            cur.execute("SELECT * FROM {}".format(Tables[3][0]))
-            res = cur.fetchall()[-2][1]
-        elif path[-5:] == 'tradb':
+        if mode == 'vallen':
+            if path[-5:] == 'pridb':
+                cur.execute("SELECT * FROM {}".format(Tables[3][0]))
+                res = cur.fetchall()[-2][1]
+            elif path[-5:] == 'tradb':
+                cur.execute("SELECT * FROM {}".format(Tables[1][0]))
+                res = cur.fetchall()[-3][1]
+        elif mode == 'stream':
             cur.execute("SELECT * FROM {}".format(Tables[1][0]))
-            res = cur.fetchall()[-3][1]
+            res = cur.fetchall()[-1][1]
         return int(res)
 
     def read_with_time(self, time):
@@ -67,8 +71,7 @@ class Reload:
         data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
         if mode == 'all' or mode == 'tra only':
             conn_tra = sqlite3.connect(self.path_tra)
-            result_tra = conn_tra.execute(
-                "Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
+            result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
             N_tra = self.sqlite_read(self.path_tra)
             for _ in tqdm(range(N_tra), ncols=80):
                 i = result_tra.fetchone()
@@ -77,8 +80,7 @@ class Reload:
                 data_tra.append(i)
         if mode == 'all' or mode == 'pri only':
             conn_pri = sqlite3.connect(self.path_pri)
-            result_pri = conn_pri.execute(
-                "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+            result_pri = conn_pri.execute("Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
             N_pri = self.sqlite_read(self.path_pri)
             for _ in tqdm(range(N_pri), ncols=80):
                 i = result_pri.fetchone()
@@ -88,7 +90,7 @@ class Reload:
                     data_pri.append(i)
                     if i[2] == 1:
                         chan_1.append(i)
-                    if i[2] == 2:
+                    elif i[2] == 2:
                         chan_2.append(i)
                     elif i[2] == 3:
                         chan_3.append(i)
@@ -101,6 +103,42 @@ class Reload:
         chan_3 = np.array(chan_3)
         chan_4 = np.array(chan_4)
         return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
+
+    def read_stream_data(self, t_cut=float('inf'), mode='all'):
+        data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
+        if mode == 'all' or mode == 'tra only':
+            conn_tra = sqlite3.connect(self.path_tra)
+            result_tra = conn_tra.execute("Select TRAI, Time, Channel, SampleRate, Samples, TR_μV, Signal FROM data")
+            N_tra = self.sqlite_read(self.path_tra, mode='stream')
+            for _ in tqdm(range(N_tra), ncols=80):
+                i = result_tra.fetchone()
+                if i[1] > t_cut:
+                    break
+                data_tra.append(i)
+        if mode == 'all' or mode == 'pri only':
+            conn_pri = sqlite3.connect(self.path_pri)
+            result_pri = conn_pri.execute("Select TRAI, Time, Channel, Amp, RiseT, Dur, Eny FROM data")
+            N_pri = self.sqlite_read(self.path_pri, mode='stream')
+            for _ in tqdm(range(N_pri), ncols=80):
+                i = result_pri.fetchone()
+                if i[1] > t_cut:
+                    break
+                data_pri.append(i)
+                if i[2] == 1:
+                    chan_1.append(i)
+                elif i[2] == 2:
+                    chan_2.append(i)
+                elif i[2] == 3:
+                    chan_3.append(i)
+                elif i[2] == 4:
+                    chan_4.append(i)
+        data_pri = np.array(data_pri)
+        chan_1 = np.array(chan_1)
+        chan_2 = np.array(chan_2)
+        chan_3 = np.array(chan_3)
+        chan_4 = np.array(chan_4)
+        return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
+
 
     def read_pac_data(self, path, lower=2):
         os.chdir(path)
@@ -409,6 +447,7 @@ for trai, dir in tqdm(enumerate(wave_ls, 1)):
     ls_tra_tmp.append(float(dir.split('-')[-1][:-4]))
     ls_tra_tmp.append(3)
     ls_tra_tmp.append(SampleRate)
+    ls_tra_tmp.append(sig.shape[0])
     ls_tra_tmp.append(1.08023954527964)
     ls_tra_tmp.append((sig / 1.08023954527964).tobytes())
 
@@ -439,8 +478,8 @@ cur_tra.executemany("INSERT INTO globalinfo (Key, Value) VALUES(?, ?)", tra_glob
 cur_tra.execute('CREATE TABLE params (ID INTEGER PRIMARY KEY, Channel INTEGER UNIQUE, TR_μV REAL)')
 cur_tra.executemany("INSERT INTO params (ID, Channel, TR_μV) VALUES(?, ?, ?)", tra_params)
 cur_tra.execute(
-    'CREATE TABLE data (TRAI INTEGER PRIMARY KEY, Time REAL, Channel INTEGER, SampleRate INTEGER, TR_μV REAL, Signal TEXT)')
-cur_tra.executemany("INSERT INTO data (TRAI, Time, Channel, SampleRate, TR_μV, Signal) VALUES(?, ?, ?, ?, ?, ?)", tra_data)
+    'CREATE TABLE data (TRAI INTEGER PRIMARY KEY, Time REAL, Channel INTEGER, SampleRate INTEGER, Samples INTEGER, TR_μV REAL, Signal TEXT)')
+cur_tra.executemany("INSERT INTO data (TRAI, Time, Channel, SampleRate, Samples, TR_μV, Signal) VALUES(?, ?, ?, ?, ?, ?, ?)", tra_data)
 con_tra.commit()
 con_tra.close()
 
@@ -483,7 +522,31 @@ plot_norm(ax, xlabelz[0], xlabelz[2], legend=True)
 for k, idx in enumerate([idx_1, idx_2, idx_3], 1):
     with open('%s-pop%d.txt' % (fold, k), 'w') as f:
         f.write('SetID, TRAI, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts\n')
-        for i in data_pri[idx]:
+        for i in data_pri[np.where((data_pri[:, 2] == 3) & (data_pri[:, 1] < 5600))[0]][idx]:
             f.write('{:.0f}, {:.0f}, {:.8f}, {:.0f}, {:.7f}, {:.7f}, {:.2f}, {:.2f}, {:.7f}, {:.3f}, {:.0f}\n'.format(
                 i[0], i[-1], i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9]))
+'''
+
+'''
+fig = plt.figure(figsize=[6, 3.9])
+ax = plt.subplot()
+for k in TRAI[cls_KKM[0]]:
+    tmp = data_tra[k - 1]
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    sig = (sig / max(sig))
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+    if time[-1] < 100:
+        continue
+    hx = fftpack.hilbert(sig)
+    ax.semilogy(time, np.sqrt(sig**2 + hx**2), '.', Marker='.', color=color_1)
+for k in TRAI[cls_KKM[1]]:
+    tmp = data_tra[k - 1]
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    sig = (sig / max(sig))
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+    if time[-1] < 100:
+        continue
+    hx = fftpack.hilbert(sig)
+    ax.semilogy(time, np.sqrt(sig**2 + hx**2), '.', Marker='.', color=color_2)
+plot_norm(ax, 'Time (μs)', 'Normalized A$^2$', legend=False)
 '''
