@@ -349,6 +349,37 @@ def filelist_convert(data_path, tar=None):
     return file_list, file_idx
 
 
+def cal_fitx(tmp, interval_num=1000):
+    tmp_min = math.floor(np.log10(min(tmp)))
+    tmp_max = math.ceil(np.log10(max(tmp)))
+    inter = [i for i in range(tmp_min, tmp_max + 1)]
+    for idx in range(1, len(inter)):
+        if idx == 1:
+            fit_x = np.logspace(inter[idx - 1], inter[idx], interval_num, endpoint=False)
+        else:
+            fit_x = np.append(fit_x, np.logspace(inter[idx - 1], inter[idx], interval_num, endpoint=False))
+
+    return fit_x
+
+
+def cal_label(tmp1, tmp2, formula, slope, intercept):
+    label = []
+    for point in tqdm(zip(tmp1, tmp2)):
+        if len(slope) == 2:
+            if point[1] >= formula(point[0], slope[0], intercept[0]):
+                label.append(0)
+            elif point[1] < formula(point[0], slope[1], intercept[1]):
+                label.append(2)
+            else:
+                label.append(1)
+        elif len(slope) == 1:
+            if point[1] >= formula(point[0], slope[0], intercept[0]):
+                label.append(0)
+            else:
+                label.append(1)
+    return label
+
+
 '''
 wave_ls = sorted(os.listdir('./wave/txt/'), key=lambda x: int(x.split('-')[0][5:]))
 channel = [3]
@@ -427,4 +458,32 @@ cur_pri.execute(
 cur_pri.executemany("INSERT INTO data (TRAI, Time, Channel, Amp, RiseT, Dur, Eny) VALUES(?, ?, ?, ?, ?, ?, ?)", pri_data)
 con_pri.commit()
 con_pri.close()
+'''
+
+'''
+formula = lambda x, a, b:  pow(x, a) * pow(10, b)
+fit_x = cal_fitx(Amp, 1000)
+fit_y1 = [formula(i, 2, -3) for i in fit_x]
+fit_y2 = [formula(i, 2, -2.3) for i in fit_x]
+label = cal_label(Amp, Eny, formula, [2, 2], [-2.3, -3])
+idx_1 = np.where(np.array(label) == 0)[0]
+idx_2 = np.where(np.array(label) == 1)[0]
+idx_3 = np.where(np.array(label) == 2)[0]
+
+fig = plt.figure(figsize=[6, 3.9])
+fig.text(0.96, 0.2, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+         horizontalalignment="right")
+ax = plt.subplot()
+ax.loglog(Amp[idx_1], Eny[idx_1], '.', Marker='.', markersize=3, color='pink', label='Pop 1')
+ax.loglog(Amp[idx_2], Eny[idx_2], '.', Marker='.', markersize=3, color='r', label='Pop 2')
+ax.loglog(Amp[idx_3], Eny[idx_3], '.', Marker='.', markersize=3, color='b', label='Pop 3')
+ax.loglog(fit_x, fit_y1, '.', Marker='.', markersize=0.5, color='black')
+ax.loglog(fit_x, fit_y2, '.', Marker='.', markersize=0.5, color='black')
+plot_norm(ax, xlabelz[0], xlabelz[2], legend=True)
+for k, idx in enumerate([idx_1, idx_2, idx_3], 1):
+    with open('%s-pop%d.txt' % (fold, k), 'w') as f:
+        f.write('SetID, TRAI, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts\n')
+        for i in data_pri[idx]:
+            f.write('{:.0f}, {:.0f}, {:.8f}, {:.0f}, {:.7f}, {:.7f}, {:.2f}, {:.2f}, {:.7f}, {:.3f}, {:.0f}\n'.format(
+                i[0], i[-1], i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8], i[9]))
 '''

@@ -61,7 +61,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="JupyterTrust" id="91697f68-892b-466a-978a-4a5fa145ee1a" />
+  <component name="JupyterTrust" id="f8a8568d-bb20-4db3-b97e-92ccf581f4a2" />
   <component name="ProjectId" id="1j87etv1ghWviOPWY6H22fwsITq" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -75,7 +75,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../blog" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -264,6 +264,7 @@
       <workItem from="1617201474250" duration="679000" />
       <workItem from="1617271466291" duration="12962000" />
       <workItem from="1617689718101" duration="80574000" />
+      <workItem from="1618383047974" duration="6201000" />
     </task>
     <servers />
   </component>
@@ -331,10 +332,11 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491095271" />
-    <state x="2175" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1618124721243">
-      <screen x="1920" y="0" width="1440" height="870" />
+    <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1618388635368">
+      <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="2175" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618124721243" />
+    <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1618388635368" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -352,10 +354,10 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/preprocess_py$features.coverage" NAME="features Coverage Results" MODIFIED="1607322903666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
+    <SUITE FILE_PATH="coverage/preprocess_py$cls_done.coverage" NAME="cls_done Coverage Results" MODIFIED="1616745780530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/2" />
     <SUITE FILE_PATH="coverage/preprocess_py$vallen.coverage" NAME="vallen Coverage Results" MODIFIED="1606287851714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/preprocess_py$vallen__1_.coverage" NAME="vallen (1) Coverage Results" MODIFIED="1606805034819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
-    <SUITE FILE_PATH="coverage/preprocess_py$cls_done.coverage" NAME="cls_done Coverage Results" MODIFIED="1616745780530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/2" />
+    <SUITE FILE_PATH="coverage/preprocess_py$features.coverage" NAME="features Coverage Results" MODIFIED="1607322903666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
     <SUITE FILE_PATH="coverage/preprocess_py$utils.coverage" NAME="utils Coverage Results" MODIFIED="1618124670793" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
     <SUITE FILE_PATH="coverage/preprocess_py$nanoindentation.coverage" NAME="nanoindentation Coverage Results" MODIFIED="1618197819816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../Others" />
   </component>
