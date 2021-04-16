@@ -29,9 +29,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cls/2/pre_done.py" beforeDir="false" afterPath="$PROJECT_DIR$/cls/2/pre_done.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run/stream.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/stream.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/wave_freq.py" afterDir="false" />
     </list>
@@ -82,7 +80,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="PyConsoleConfigurable.Python Console" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -263,7 +261,8 @@
       <workItem from="1617198170044" duration="56000" />
       <workItem from="1617201474250" duration="679000" />
       <workItem from="1617271466291" duration="12962000" />
-      <workItem from="1617689718101" duration="80574000" />
+      <workItem from="1617689718101" duration="82529000" />
+      <workItem from="1618451007086" duration="27474000" />
     </task>
     <servers />
   </component>
@@ -295,22 +294,22 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="359" y="302" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1617856916449" />
-    <state width="1877" height="182" key="GridCell.Tab.0.bottom" timestamp="1618198000498">
+    <state width="1877" height="182" key="GridCell.Tab.0.bottom" timestamp="1618383833792">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1877" height="182" key="GridCell.Tab.0.bottom/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618198000498" />
-    <state width="1877" height="182" key="GridCell.Tab.0.center" timestamp="1618198000497">
+    <state width="1877" height="182" key="GridCell.Tab.0.bottom/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618383833792" />
+    <state width="1877" height="182" key="GridCell.Tab.0.center" timestamp="1618383833792">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1877" height="182" key="GridCell.Tab.0.center/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618198000497" />
-    <state width="1877" height="182" key="GridCell.Tab.0.left" timestamp="1618198000497">
+    <state width="1877" height="182" key="GridCell.Tab.0.center/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618383833792" />
+    <state width="1877" height="182" key="GridCell.Tab.0.left" timestamp="1618383833791">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1877" height="182" key="GridCell.Tab.0.left/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618198000497" />
-    <state width="1877" height="182" key="GridCell.Tab.0.right" timestamp="1618198000498">
+    <state width="1877" height="182" key="GridCell.Tab.0.left/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618383833791" />
+    <state width="1877" height="182" key="GridCell.Tab.0.right" timestamp="1618383833792">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="1877" height="182" key="GridCell.Tab.0.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618198000498" />
+    <state width="1877" height="182" key="GridCell.Tab.0.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618383833792" />
     <state width="618" height="922" key="GridCell.Tab.1.bottom" timestamp="1616917234585">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -327,14 +326,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="618" height="922" key="GridCell.Tab.1.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616917234585" />
-    <state x="461" y="169" key="SettingsEditor" timestamp="1616491095271">
+    <state x="461" y="169" key="SettingsEditor" timestamp="1618451093260">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491095271" />
-    <state x="2175" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1618124721243">
+    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618451093260" />
+    <state x="2197" y="112" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1618567156925">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2175" y="163" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618124721243" />
+    <state x="2197" y="112" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1618567156925" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
