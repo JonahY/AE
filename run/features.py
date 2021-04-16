@@ -181,7 +181,7 @@ class Features:
 
     def cal_OmiroLaw_timeSeq_helper(self, tmp, cls_idx):
         res = []
-        main_peak = np.where(cls_idx == True)[0] if type(cls_idx[0]) == bool else cls_idx
+        main_peak = np.where(cls_idx == True)[0]
         eny_lim = [min(tmp[cls_idx]), max(tmp[cls_idx])]
         if len(main_peak):
             for i in range(main_peak.shape[0] - 1):
@@ -266,11 +266,7 @@ class Features:
             if FIT:
                 xx, yy = np.array(xx), np.array(yy)
                 fit_lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
-                try:
-                    fit = np.polyfit(np.log10(xx[fit_lim[0]:fit_lim[-1]]), np.log10(yy[fit_lim[0]:fit_lim[-1]]), 1)
-                except IndexError:
-                    print("Please select a correct range of 'lim_ccdf'.")
-                    return
+                fit = np.polyfit(np.log10(xx[fit_lim[0]:fit_lim[-1]]), np.log10(yy[fit_lim[0]:fit_lim[-1]]), 1)
                 alpha, b = fit[0], fit[1]
                 fit_x = np.linspace(xx[fit_lim[0]], xx[fit_lim[-1]], 100)
                 fit_y = self.convert(fit_x, alpha, b)
@@ -673,13 +669,12 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'TC21-900-600-tension text-z1-0.05-AE-20210125'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
-    # TC21-900-600-z2-0.01-AE-DIC-20210413  [np.where(chan_3[:, 1] < 4300)[0]]
-    # TC21-900-600-tension text-z1-0.05-AE-20210125  [np.where(chan_3[:, 1] < 5600)[0]]
+    # TC21-900-600-tension text-z1-0.05-AE-20210125
     # Ni 2-compression text-4-0.003-20201012
     # Ni 2-compression text-2-0.003-20201002
     # Ni 2-compression text-1-0.003-20200928
@@ -698,17 +693,14 @@ if __name__ == "__main__":
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
-    reload = Reload(path_pri, path_tra, fold)  # float('inf')
+    reload = Reload(path_pri, path_tra, fold) # float('inf')
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
     #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
-    # # TRAI, Time, Channel, Amp, RiseT, Dur, Eny = chan[:, 0], chan[:, 1], chan[:, 2], \
-    # #                                             chan[:, 3], chan[:, 4], chan[:, 5], chan[:, 6]
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # feature_idx = [Amp, Dur, Eny]
@@ -781,6 +773,7 @@ if __name__ == "__main__":
     # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
     # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
+    # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 2], bin_method='log', FIT=True)
     # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
@@ -820,4 +813,9 @@ if __name__ == "__main__":
     # stdScaler = StandardScaler().fit(nano_ni)
     # trainStd = stdScaler.transform(nano_ni)
     # target_pred = svm.predict(trainStd)
-
+    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan3_pop2.csv'
+    # data = pd.read_csv(fold).astype(np.float32)
+    # nano_ni = data.values
+    # stdScaler = StandardScaler().fit(nano_ni)
+    # trainStd = stdScaler.transform(nano_ni)
+    # target_pred = svm.predict(trainStd)

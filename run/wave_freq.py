@@ -46,11 +46,6 @@ class Waveform:
                 duration = end - start
                 sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
                 time = np.linspace(0, duration, sig.shape[0])
-        elif self.device == 'stream':
-            # TRAI, Time, Channel, SampleRate, TR_μV, Signal
-            sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
-            time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
-
         return time, sig
 
     @staticmethod
@@ -92,9 +87,8 @@ class Waveform:
     def plot_wave_TRAI(self, k, valid=False):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
-        if i[0 if self.device == 'stream' else -1] != k:
-            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
-                       (i[0 if self.device == 'stream' else -1], k))
+        if i[-1] != k:
+            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], k))
         time, sig = self.cal_wave(i, valid=valid)
 
         fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI %d (%s)' % (k, valid))
@@ -113,9 +107,8 @@ class Waveform:
     def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', IZCRT=0.3, ITU=150, alpha=1, t_backNoise=0,
                     plot=True, classify=False, valid=False, t_str=0, t_end=float('inf')):
         tmp = self.data_tra[int(k - 1)]
-        if tmp[0 if self.device == 'stream' else -1] != k:
-            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
-                       (tmp[0 if self.device == 'stream' else -1], k))
+        if tmp[-1] != k:
+            return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (tmp[-1], k))
         time, sig = self.cal_wave(tmp, valid=valid)
         if t_str:
             range_idx = np.where((time >= t_str) & (time < t_end))[0]
@@ -189,11 +182,6 @@ class Frequency:
             if valid:
                 valid_wave_idx = np.where(abs(sig) >= self.thr)[0]
                 sig = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
-        elif self.device == 'stream':
-            i = self.data_tra[k]
-            sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
-            time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
-            Fs = i[3]
         N = sig.shape[0]
         fft_y = fft(sig)
         abs_y = np.abs(fft_y)
@@ -273,9 +261,8 @@ class Frequency:
         fig = plt.figure(figsize=(9.2, 3), num='Waveform & Frequency--TRAI %d' % TRAI)
         ax = fig.add_subplot(1, 2, 1)
         ax.plot(valid_time, valid_data, lw=1)
-        if self.device != 'stream':
-            ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
-            ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        ax.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
+        ax.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', legend=False, grid=True)
 
         ax = fig.add_subplot(1, 2, 2)
@@ -358,47 +345,40 @@ class Frequency:
         return freq, stage_idx
 
     def plot_tf_stft(self, TRAI, hop_length=128, save_path=None):
-        i = self.data_tra[int(TRAI - 1)]
         if self.device == 'vallen':
+            i = self.data_tra[int(TRAI - 1)]
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
-        elif self.device == 'stream':
-            sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
-
-        D = librosa.stft(sig, hop_length=hop_length)
-        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        fig, ax = plt.subplots(figsize=(5.12, 5.12))
-        _ = librosa.display.specshow(S_db, sr=i[3], hop_length=hop_length, x_axis='time', y_axis='linear', ax=ax)
-        ax.set(title='Now with labeled axes!')
-        ax.set_ylim(0, 1000000)
-        if save_path:
-            plt.gca().xaxis.set_major_locator(plt.NullLocator())
-            plt.gca().yaxis.set_major_locator(plt.NullLocator())
-            plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-            plt.margins(0, 0)
-            plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
+            D = librosa.stft(sig, hop_length=hop_length)
+            S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+            fig, ax = plt.subplots(figsize=(5.12, 5.12))
+            img = librosa.display.specshow(S_db, sr=i[3], hop_length=hop_length, x_axis='time', y_axis='linear', ax=ax)
+            ax.set(title='Now with labeled axes!')
+            ax.set_ylim(0, 1000000)
+            if save_path:
+                plt.gca().xaxis.set_major_locator(plt.NullLocator())
+                plt.gca().yaxis.set_major_locator(plt.NullLocator())
+                plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+                plt.margins(0, 0)
+                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
     def plot_tf_cwt(self, TRAI, wavelet_name='morl', save_path=None):
-        i = self.data_tra[int(TRAI - 1)]
         if self.device == 'vallen':
+            i = self.data_tra[int(TRAI - 1)]
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
             time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
-        elif self.device == 'stream':
-            sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
-            time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
-
-        scales = pywt.central_frequency(wavelet_name) * 1e3 / np.arange(1, 1e3, 1e0)
-        [cwtmatr_new, frequencies_new] = pywt.cwt(sig, scales, wavelet_name, 1.0 / i[3])
-        plt.figure(figsize=(5.12, 5.12))
-        plt.contourf(time, frequencies_new / 1000, abs(cwtmatr_new))
-        plt.ylim(20, 1000)
-        plt.xlabel('Time (μs)')
-        plt.ylabel('Frequency (kHz)')
-        if save_path:
-            plt.gca().xaxis.set_major_locator(plt.NullLocator())
-            plt.gca().yaxis.set_major_locator(plt.NullLocator())
-            plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-            plt.margins(0, 0)
-            plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
+            scales = pywt.central_frequency(wavelet_name) * 1e3 / np.arange(1, 1e3, 1e0)
+            [cwtmatr_new, frequencies_new] = pywt.cwt(sig, scales, wavelet_name, 1.0 / i[3])
+            plt.figure(figsize=(5.12, 5.12))
+            plt.contourf(time, frequencies_new / 1000, abs(cwtmatr_new))
+            plt.ylim(20, 1000)
+            plt.xlabel('Time (μs)')
+            plt.ylabel('Frequency (kHz)')
+            if save_path:
+                plt.gca().xaxis.set_major_locator(plt.NullLocator())
+                plt.gca().yaxis.set_major_locator(plt.NullLocator())
+                plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+                plt.margins(0, 0)
+                plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
     def plot_XXX_Freq(self, freq, feature, ylabel, marker='o', markersize=10, color='blue'):
         fig = plt.figure(figsize=[6, 3.9])
