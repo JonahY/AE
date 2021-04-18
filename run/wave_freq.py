@@ -9,7 +9,9 @@ from preprocess import Preprocessing
 import pywt
 import librosa
 from librosa import display
+import signal_envelope as se
 from stream import *
+from utils import hl_envelopes_idx
 
 
 class Waveform:
@@ -145,6 +147,28 @@ class Waveform:
                 ax.grid()
                 plot_norm(ax, r'$Time$ $(μs)$', ylabel[idx], legend=False)
         return start, end, time, sig, t_stE
+
+    def plot_envelope(self, TRAI, COLOR, valid=False, method='hl'):
+        fig = plt.figure(figsize=[6, 3.9])
+        fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+                 horizontalalignment="right")
+        ax = plt.subplot()
+        for idx, [trai, color] in enumerate(zip(TRAI, COLOR)):
+            for k in tqdm(trai):
+                tmp = self.data_tra[k - 1]
+                time, sig = self.cal_wave(tmp, valid=valid)
+                if time[-1] < 50:
+                    continue
+                if method == 'se':
+                    sig = (sig / max(sig))
+                    X_pos_frontier, X_neg_frontier = se.get_frontiers(sig, 0)
+                    ax.semilogy(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2, '.',
+                                Marker='.', color=color)
+                else:
+                    sig = sig ** 2 / max(sig ** 2)
+                    high_idx, low_idx = hl_envelopes_idx(sig, dmin=60, dmax=60)
+                    ax.semilogy(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+        plot_norm(ax, 'Time (μs)', 'Normalized A$^2$', legend=False)
 
     def save_wave(self, TRAI, pop):
         # Save waveform
