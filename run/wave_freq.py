@@ -424,6 +424,28 @@ class Frequency:
             plt.margins(0, 0)
             plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
+    def plot_tf_wsst(self, TRAI, save_path=None):
+        i = self.data_tra[int(TRAI - 1)]
+        if self.device == 'vallen':
+            sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+            time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
+        elif self.device == 'stream':
+            sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
+            time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
+        Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=i[3], t=time)
+        fig = plt.figure(figsize=(5.12, 5.12))
+        # plt.imshow(np.abs(Twxo), aspect='auto', vmin=0, vmax=.2, cmap='jet')
+        plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+        plt.ylim(0, 1)
+        plt.xlabel(r'Time (μs)')
+        plt.ylabel(r'Frequency (kHz)')
+        if save_path:
+            plt.gca().xaxis.set_major_locator(plt.NullLocator())
+            plt.gca().yaxis.set_major_locator(plt.NullLocator())
+            plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+            plt.margins(0, 0)
+            plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
+
     def plot_XXX_Freq(self, freq, feature, ylabel, marker='o', markersize=10, color='blue'):
         fig = plt.figure(figsize=[6, 3.9])
         ax = fig.add_subplot()

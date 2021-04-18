@@ -292,7 +292,8 @@ class Features:
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
-        fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
+        # fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
+        fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
@@ -673,7 +674,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Cu-20210418-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
