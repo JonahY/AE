@@ -674,7 +674,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Cu-20210418-test1-tension-0.1mm-min'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'

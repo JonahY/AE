@@ -12,6 +12,7 @@ from librosa import display
 import signal_envelope as se
 from stream import *
 from utils import hl_envelopes_idx
+from ssqueezepy import ssq_cwt
 
 
 class Waveform:

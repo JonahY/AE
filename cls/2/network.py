@@ -3,6 +3,7 @@ import torch
 from torch.nn import Module
 from torch import nn
 import torch.nn.functional as F
+from torchsummary import summary
 
 
 class Model():
@@ -110,11 +111,17 @@ class ClassifyResNet(Module):
     def forward(self, x):
         # print(x.size())
         x1 = self.encoder(x)
-        # for i in x1:
-        #     print(i.size())
-        x = F.dropout(x1[1], 0.5, training=self.training)
+        for i in x1:
+            print(i.size())
+        x = F.dropout(x1[-1], 0.5, training=self.training)
         x = F.adaptive_avg_pool2d(x, 1)
         x = self.feature(x)
         x = self.logit(x)
         # print(x.squeeze(dim=2).squeeze(dim=2))
         return x
+
+
+if __name__ == "__main__":
+    model = ClassifyResNet('unet_resnet34', 2, False).to(torch.device('cpu'))
+    # model = AutoEncoder().to(torch.device('cpu'))
+    summary(model, (3, 224, 224))
