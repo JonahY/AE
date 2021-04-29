@@ -23,14 +23,14 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import models
 from tqdm import tqdm
 from PIL import Image
-from network import U_Net
+from network import *
 
 warnings.filterwarnings('ignore', category=FutureWarning)
 
 
 class Predict():
     def __init__(self, config):
-        self.model = U_Net()
+        self.model = UNetMulti()
 
         self.device = torch.device("cpu")
         if torch.cuda.is_available():
@@ -49,7 +49,7 @@ class Predict():
 
         with torch.no_grad():
             for i, (images, _) in enumerate(tbar):
-                encode, decoded = self.model(images)
+                encode, _, decoded = self.model(images)
                 # print(encode.shape)
                 res.append(decoded)
                 features.append(encode.cpu().numpy())
@@ -63,18 +63,18 @@ if __name__ == "__main__":
     parser.add_argument('--epoch', type=int, default=10, help='epoch')
     parser.add_argument("--device", type=int, nargs='+', default=[i for i in range(torch.cuda.device_count())])
     # model set
-    parser.add_argument('--model_name', type=str, default='unet',
+    parser.add_argument('--model_name', type=str, default='unet_Multi',
                         help='unet_resnet34/unet_se_resnext50_32x4d/unet_efficientnet_b4'
                              '/unet_resnet50/unet_efficientnet_b4')
     # model hyper-parameters
     parser.add_argument('--num_workers', type=int, default=0)
     # dataset
-    parser.add_argument('--load_path', type=str, default='./2021-04-19T11-41-25-classify-fold2_best_0.0000480.pth')
-    parser.add_argument('--img_path', type=str, default=r'F:\VALLEN\Ni-tension test-electrolysis-1-0.01-AE-20201031\train dataset_wsst')
+    parser.add_argument('--load_path', type=str, default='./2021-04-27T15-31-43-classify-fold0_best_0.0003023.pth')
+    parser.add_argument('--img_path', type=str, default=r'F:\VALLEN\316L-1.5-z3-AE-3 sensor-20200530\train dataset_wsst')
     config = parser.parse_args()
     print(config)
 
-    loader = transforms.Compose([transforms.Resize(224), transforms.ToTensor()])
+    loader = transforms.Compose([transforms.Resize(112), transforms.ToTensor()])
     # loader = transforms.Compose([transforms.ToTensor()])
     unloader = transforms.ToPILImage()
     dataset = []
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     df.to_csv('./features_112_112.csv', index=None)
 
     # for i in tqdm(range(len(dataset))):
-    #     fig = plt.figure(figsize=[5.12*2, 5.12], num='1')
+    #     fig = plt.figure(figsize=[2.56*2, 2.56], num='1')
     #     ax1 = plt.subplot(121)
     #     ax1.imshow(unloader(dataset[i][0].squeeze(0)))
     #     ax2 = plt.subplot(122)

@@ -6,7 +6,7 @@ def formatnum(x, pos):
     return '$10^{}$'.format(int(x))
 
 
-def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], z_lim=[], legend=True, grid=False,
+def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], z_lim=[], legend=True, grid=False, frameon=True,
               legend_loc='upper left', font_color='black', legendsize=11, labelsize=14, titlesize=15, ticksize=13, linewidth=2):
     ax.spines['bottom'].set_linewidth(linewidth)
     ax.spines['left'].set_linewidth(linewidth)
@@ -29,7 +29,7 @@ def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y
     if z_lim:
         ax.set_zlim(z_lim[0], z_lim[1])
     if legend:
-        ax.legend(loc=legend_loc, prop=font_legend)
+        ax.legend(loc=legend_loc, prop=font_legend, frameon=frameon)
         # plt.legend(loc=legend_loc, prop=font_legend)
     if grid:
         ax.grid(ls='-.')

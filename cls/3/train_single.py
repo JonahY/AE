@@ -28,7 +28,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 class TrainVal():
     def __init__(self, config):
-        self.model = UNetMulti2()
+        self.model = UNetMulti()
 
         # # freeze model parameters
         # for param in self.model.parameters():
@@ -60,7 +60,6 @@ class TrainVal():
 
         self.criterion_reBuild = nn.MSELoss()
         self.criterion_constrain = nn.CrossEntropyLoss()
-        self.softmax = nn.Softmax(dim=1)
 
         self.TIME = "{0:%Y-%m-%dT%H-%M-%S}-classify".format(datetime.datetime.now())
         self.model_path = os.path.join(config.root, config.save_path, config.model_name, self.TIME)
@@ -141,40 +140,33 @@ class TrainVal():
                 epoch += self.epoch * fold_index
                 epoch_loss, num_correct, num_pred = 0, 0, 0
 
-                tbar = tqdm(train_loader, ncols=100)
-                for i, (images, _) in enumerate(tbar):
+                tbar = tqdm(train_loader)
+                for i, (images, labels) in enumerate(tbar):
                     _, constrain, decoded = self.model(images)
-                    # constrain = torch.cat([constrain, constrain_tmp], 0) if i else constrain_tmp
-                    # decoded = torch.cat([decoded, decoded_tmp], 0) if i else decoded_tmp
-                    # allImages = torch.cat([allImages, images], 0) if i else images
+                    loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
+                    print(constrain.size())
+                    print(decoded.size())
+                    loss_constrain = self.criterion_constrain(constrain,
+                                                              torch.from_numpy(np.array([[1], [0]])).to(self.device))
+                    loss = loss_reBuild * 0.5 + loss_constrain * 0.5
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                    epoch_loss += loss.item()
 
-                cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
-                                 torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
-                loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
-                # loss_constrain = self.criterion_constrain(torch.cat([cal, 1 - cal], 1),
-                #                                           torch.tensor([1, 0]).to(self.device))
-                loss_constrain = self.criterion_constrain(cal, torch.tensor([1, 0]).to(self.device))
-                loss = loss_reBuild * 0.7 + loss_constrain * 0.3
-                epoch_loss += loss.item()
-
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-                self.writer.add_scalar('train_loss', loss.item(), global_step)
-                self.writer.add_scalar('train_loss_constrain', loss_constrain.item(), global_step)
-                self.writer.add_scalar('train_loss_reBuild', loss_reBuild.item(), global_step)
-                params_groups_lr = str()
-                for group_ind, param_group in enumerate(optimizer.param_groups):
-                    params_groups_lr = params_groups_lr + 'params_group_%d' % group_ind + ': %.12f, ' % (
-                        param_group['lr'])
-                print("\033[31mFold: %d, Train Loss: %.7f (%.5f|%.5f), lr: %s\033[0m" % (
-                    fold_index, loss.item(), loss_constrain.item(), loss_reBuild.item(), params_groups_lr))
+                    self.writer.add_scalar('train_loss', loss.item(), global_step + i)
+                    params_groups_lr = str()
+                    for group_ind, param_group in enumerate(optimizer.param_groups):
+                        params_groups_lr = params_groups_lr + 'params_group_%d' % group_ind + ': %.12f, ' % (
+                            param_group['lr'])
+                    descript = "Fold: %d, Train Loss: %.7f (%.5f|%.5f), lr: %s" % (
+                        fold_index, loss.item(), loss_constrain.item(), loss_reBuild.item(), params_groups_lr)
+                    tbar.set_description(desc=descript)
 
                 lr_scheduler.step()
                 global_step += len(train_loader)
                 val_loss = self.validation(val_loader)
-                print("\033[34mFinish Epoch [%d/%d] | Average training Loss: %.7f | Average validation Loss: %.7f\033[0m" % (
+                print('Finish Epoch [%d/%d] | Average training Loss: %.7f | Average validation Loss: %.7f |' % (
                     epoch, self.epoch * config.n_splits, epoch_loss / len(tbar), val_loss))
 
                 if val_loss <= self.min_loss:
@@ -192,32 +184,27 @@ class TrainVal():
                 save_path = os.path.join(self.model_path, TIMESTAMP, TIMESTAMP + '.pth')
                 torch.save(state, save_path)
                 if is_best:
-                    print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Saving Best Model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+                    print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Saving Best Model >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
                     save_best_path = save_path.replace('.pth', '_best_{:.7f}.pth'.format(val_loss))
                     shutil.copyfile(save_path, save_best_path)
                 self.writer.add_scalar('valid_loss', val_loss, epoch)
 
     def validation(self, valid_loader):
         self.model.eval()
+        tbar = tqdm(valid_loader)
         loss_sum = 0
-        tbar = tqdm(valid_loader, ncols=100)
+
         with torch.no_grad():
             for i, (images, labels) in enumerate(tbar):
                 _, constrain, decoded = self.model(images)
-                # constrain = torch.cat([constrain, constrain_tmp], 0) if i else constrain_tmp
-                # decoded = torch.cat([decoded, decoded_tmp], 0) if i else decoded_tmp
-                # allImages = torch.cat([allImages, images], 0) if i else images
+                loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
+                loss_constrain = self.criterion_constrain(decoded,
+                                                          torch.from_numpy(np.array([[1], [0]])).to(self.device))
+                loss = loss_reBuild * 0.5 + loss_constrain * 0.5
+                loss_sum += loss.item()
 
-            cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
-                             torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
-            loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
-            # loss_constrain = self.criterion_constrain(torch.cat([cal, 1 - cal], 1),
-            #                                           torch.tensor([1, 0]).to(self.device))
-            loss_constrain = self.criterion_constrain(cal, torch.tensor([1, 0]).to(self.device))
-            loss = loss_reBuild * 0.7 + loss_constrain * 0.3
-            loss_sum += loss.item()
-
-            print("\033[33mValidation Loss: {:.7f} ({:.5f}|{:.5f})\033[0m".format(loss.item(), loss_constrain.item(), loss_reBuild.item()))
+                descript = "Val Loss: {:.7f} (%.5f|%.5f)".format(loss.item(), loss_constrain.item(), loss_reBuild.item())
+                tbar.set_description(desc=descript)
         loss_mean = loss_sum / len(tbar)
 
         return loss_mean
@@ -226,12 +213,12 @@ class TrainVal():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=146, help='batch size')
-    parser.add_argument('--epoch', type=int, default=500, help='epoch')
+    parser.add_argument('--epoch', type=int, default=50, help='epoch')
     parser.add_argument('--n_splits', type=int, default=10, help='n_splits_fold')
     parser.add_argument("--device", type=int, nargs='+', default=[i for i in range(torch.cuda.device_count())])
     parser.add_argument('--create_data', type=bool, default=False, help='For the first training')
     # model set
-    parser.add_argument('--model_name', type=str, default='unet_Multi2',
+    parser.add_argument('--model_name', type=str, default='unet_Multi',
                         help='unet_resnet34/unet_se_resnext50_32x4d/unet_efficientnet_b4'
                              '/unet_resnet50/unet_efficientnet_b4')
     # model hyper-parameters
@@ -242,7 +229,7 @@ if __name__ == "__main__":
     # dataset
     parser.add_argument('--save_path', type=str, default='./checkpoints')
     parser.add_argument('--root', type=str, default='/home/Yuanbincheng/data/316L-1.5-z3-AE-3 sensor-20200530')
-    parser.add_argument('--load_path', type=str, default='./2021-04-28T11-25-27-classify-fold0_best_0.3297101.pth')
+    parser.add_argument('--load_path', type=str, default='')
     config = parser.parse_args()
     print(config)
 

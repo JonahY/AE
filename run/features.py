@@ -674,7 +674,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = '316L-1.5-z3-AE-3 sensor-20200530'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -685,7 +685,7 @@ if __name__ == "__main__":
     # Ni 2-compression text-2-0.003-20201002
     # Ni 2-compression text-1-0.003-20200928
     # Ni 1-compression text-1-0.003-20201004
-    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  [np.where(chan_3[:, 1] < 95000)[0]]
+    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  t_cut=95000
     # Nano Ni-compression text-1-0.003-20200919  [np.where(chan_3[:, 1] < 14700)[0]]
     # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
     # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
@@ -694,13 +694,13 @@ if __name__ == "__main__":
     # Cu-annealing-tension-1126
     # 2020.11.10-PM-self
     # 6016_CR_1
-    # 316L-1.5-z3-AE-3 sensor-20200530
+    # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='pri only', t_cut=95000)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
