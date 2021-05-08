@@ -437,7 +437,7 @@ class Frequency:
         fig = plt.figure(figsize=(5.12, 5.12))
         # plt.imshow(np.abs(Twxo), aspect='auto', vmin=0, vmax=.2, cmap='jet')
         plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
-        plt.ylim(0, 1)
+        plt.ylim(min(ssq_freqs * 1000), 1000)
         plt.xlabel(r'Time (μs)')
         plt.ylabel(r'Frequency (kHz)')
         if save_path:
