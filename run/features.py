@@ -694,7 +694,7 @@ if __name__ == "__main__":
     # Cu-annealing-tension-1126
     # 2020.11.10-PM-self
     # 6016_CR_1
-    # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000
+    # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000  random_state=100
     # Ni-tension test-electrolysis-1-0.01-AE-20201031
     # Ni-tension test-pure-1-0.01-AE-20201030
     # 2020.11.10-PM-self

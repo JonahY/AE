@@ -28,7 +28,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 class TrainVal():
     def __init__(self, config):
-        self.model = UNetMulti2()
+        self.model = UNetMulti3()
 
         # # freeze model parameters
         # for param in self.model.parameters():
@@ -148,12 +148,12 @@ class TrainVal():
                     # decoded = torch.cat([decoded, decoded_tmp], 0) if i else decoded_tmp
                     # allImages = torch.cat([allImages, images], 0) if i else images
 
-                cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
-                                 torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
+                # cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
+                #                  torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
                 loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
                 # loss_constrain = self.criterion_constrain(torch.cat([cal, 1 - cal], 1),
                 #                                           torch.tensor([1, 0]).to(self.device))
-                loss_constrain = self.criterion_constrain(cal, torch.tensor([1, 0]).to(self.device))
+                loss_constrain = self.criterion_constrain(constrain, torch.tensor([1, 0]).to(self.device))
                 loss = loss_reBuild * 0.7 + loss_constrain * 0.3
                 epoch_loss += loss.item()
 

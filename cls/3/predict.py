@@ -30,7 +30,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 class Predict():
     def __init__(self, config):
-        self.model = UNetMulti()
+        self.model = UNetMulti3()
 
         self.device = torch.device("cpu")
         if torch.cuda.is_available():
