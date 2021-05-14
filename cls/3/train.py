@@ -42,15 +42,15 @@ class TrainVal():
         #     else:
         #         print("requires_grad: False ", name)
 
-        self.device = torch.device("cpu")
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda:%i" % config.device[0])
-            self.model = torch.nn.DataParallel(self.model, device_ids=config.device)
-        self.model = self.model.to(self.device)
+        # self.device = torch.device("cpu")
+        # if torch.cuda.is_available():
+        #     self.device = torch.device("cuda:%i" % config.device[0])
+        #     self.model = torch.nn.DataParallel(self.model, device_ids=config.device)
+        # self.model = self.model.to(self.device)
 
-        if config.load_path:
-            checkpoint = torch.load(config.load_path, map_location=self.device)
-            self.model.module.load_state_dict(checkpoint['state_dict'])
+        # if config.load_path:
+        #     checkpoint = torch.load(config.load_path, map_location=self.device)
+        #     self.model.module.load_state_dict(checkpoint['state_dict'])
 
         self.lr = config.lr
         self.weight_decay = config.weight_decay
@@ -91,39 +91,39 @@ class TrainVal():
                 for i in train_df_index:
                     try:
                         shutil.copy(os.path.join(config.root, 'train dataset_wsst/%s.jpg' % (i + 1)),
-                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316',
+                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis',
                                                  'train_%d/%d/%d.jpg' % (idx, labels_1dim[i], i + 1)))
                     except FileNotFoundError:
                         try:
                             os.mkdir(
-                                os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316', 'train_%d' % idx))
+                                os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis', 'train_%d' % idx))
                         except (FileNotFoundError, FileExistsError):
-                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316',
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis',
                                                   'train_%d/%d' % (idx, labels_1dim[i])))
                 for i in val_df_index:
                     try:
                         shutil.copy(os.path.join(config.root, 'train dataset_wsst/%s.jpg' % (i + 1)),
-                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316',
+                                    os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis',
                                                  'test_%d/%d/%d.jpg' % (idx, labels_1dim[i], i + 1)))
                     except FileNotFoundError:
                         try:
-                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316', 'test_%d' % idx))
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis', 'test_%d' % idx))
                         except (FileNotFoundError, FileExistsError):
-                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_316',
+                            os.mkdir(os.path.join('/home/Yuanbincheng/project/dislocation_cls/3/SAE_Ni_electrolysis',
                                                   'test_%d/%d' % (idx, labels_1dim[i])))
             print('<' * 20 + ' Finish creating datasets ' + '>' * 20)
 
-        optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.module.parameters()), self.lr,
+        optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), self.lr,
                                weight_decay=self.weight_decay)
         lr_scheduler = optim.lr_scheduler.StepLR(optimizer, 25, gamma=0.99)
         global_step, global_threshold, global_threshold_pop1, global_threshold_pop2, global_threshold_pop3 = 1, 1, 1, 1, 1
 
         for fold_index in range(1):
-            train_dataset = torchvision.datasets.ImageFolder(root='SAE_316/train_%d/' % (fold_index + 1),
+            train_dataset = torchvision.datasets.ImageFolder(root='SAE_Ni_electrolysis/train_%d/' % (fold_index + 1),
                                                              transform=self.train_transform)
             train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=False,
                                       num_workers=config.num_workers)
-            val_dataset = torchvision.datasets.ImageFolder(root='SAE_316/train_%d/' % (fold_index + 1),
+            val_dataset = torchvision.datasets.ImageFolder(root='SAE_Ni_electrolysis/train_%d/' % (fold_index + 1),
                                                            transform=self.test_transform)
             val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False,
                                     num_workers=config.num_workers)
@@ -143,17 +143,17 @@ class TrainVal():
 
                 tbar = tqdm(train_loader, ncols=100)
                 for i, (images, _) in enumerate(tbar):
-                    _, constrain, decoded = self.model(images)
+                    _, constrain, decoded = self.model(images.to('cuda:0'))
                     # constrain = torch.cat([constrain, constrain_tmp], 0) if i else constrain_tmp
                     # decoded = torch.cat([decoded, decoded_tmp], 0) if i else decoded_tmp
                     # allImages = torch.cat([allImages, images], 0) if i else images
 
                 # cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
                 #                  torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
-                loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
+                loss_reBuild = self.criterion_reBuild(decoded, images.to('cuda:1'))
                 # loss_constrain = self.criterion_constrain(torch.cat([cal, 1 - cal], 1),
                 #                                           torch.tensor([1, 0]).to(self.device))
-                loss_constrain = self.criterion_constrain(constrain, torch.tensor([1, 0]).to(self.device))
+                loss_constrain = self.criterion_constrain(constrain, torch.tensor([1, 0]).to('cuda:1'))
                 loss = loss_reBuild * 0.7 + loss_constrain * 0.3
                 epoch_loss += loss.item()
 
@@ -185,7 +185,7 @@ class TrainVal():
 
                 state = {
                     'epoch': epoch,
-                    'state_dict': self.model.module.state_dict(),
+                    'state_dict': self.model.state_dict(),
                     'min_loss': self.min_loss,
                 }
 
@@ -197,23 +197,26 @@ class TrainVal():
                     shutil.copyfile(save_path, save_best_path)
                 self.writer.add_scalar('valid_loss', val_loss, epoch)
 
+                del images, constrain, decoded, loss_reBuild, loss_constrain, loss
+                torch.cuda.empty_cache()
+
     def validation(self, valid_loader):
         self.model.eval()
         loss_sum = 0
         tbar = tqdm(valid_loader, ncols=100)
         with torch.no_grad():
             for i, (images, labels) in enumerate(tbar):
-                _, constrain, decoded = self.model(images)
+                _, constrain, decoded = self.model(images.to('cuda:0'))
                 # constrain = torch.cat([constrain, constrain_tmp], 0) if i else constrain_tmp
                 # decoded = torch.cat([decoded, decoded_tmp], 0) if i else decoded_tmp
                 # allImages = torch.cat([allImages, images], 0) if i else images
 
-            cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
-                             torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
-            loss_reBuild = self.criterion_reBuild(decoded, images.to(self.device))
+            # cal = torch.cat([torch.mean(constrain[:math.ceil(constrain.size()[0] * 0.3)], dim=0, keepdim=True),
+            #                  torch.mean(constrain[math.ceil(constrain.size()[0] * 0.3):], dim=0, keepdim=True)], 0)
+            loss_reBuild = self.criterion_reBuild(decoded, images.to('cuda:1'))
             # loss_constrain = self.criterion_constrain(torch.cat([cal, 1 - cal], 1),
             #                                           torch.tensor([1, 0]).to(self.device))
-            loss_constrain = self.criterion_constrain(cal, torch.tensor([1, 0]).to(self.device))
+            loss_constrain = self.criterion_constrain(constrain, torch.tensor([1, 0]).to('cuda:1'))
             loss = loss_reBuild * 0.7 + loss_constrain * 0.3
             loss_sum += loss.item()
 
@@ -225,13 +228,13 @@ class TrainVal():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', type=int, default=146, help='batch size')
-    parser.add_argument('--epoch', type=int, default=500, help='epoch')
+    parser.add_argument('--batch_size', type=int, default=300, help='batch size')
+    parser.add_argument('--epoch', type=int, default=1000, help='epoch')
     parser.add_argument('--n_splits', type=int, default=10, help='n_splits_fold')
     parser.add_argument("--device", type=int, nargs='+', default=[i for i in range(torch.cuda.device_count())])
     parser.add_argument('--create_data', type=bool, default=False, help='For the first training')
     # model set
-    parser.add_argument('--model_name', type=str, default='unet_Multi2',
+    parser.add_argument('--model_name', type=str, default='unet_Multi3',
                         help='unet_resnet34/unet_se_resnext50_32x4d/unet_efficientnet_b4'
                              '/unet_resnet50/unet_efficientnet_b4')
     # model hyper-parameters
@@ -241,8 +244,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='weight_decay in optimizer')
     # dataset
     parser.add_argument('--save_path', type=str, default='./checkpoints')
-    parser.add_argument('--root', type=str, default='/home/Yuanbincheng/data/316L-1.5-z3-AE-3 sensor-20200530')
-    parser.add_argument('--load_path', type=str, default='./2021-04-28T11-25-27-classify-fold0_best_0.3297101.pth')
+    parser.add_argument('--root', type=str, default='/home/Yuanbincheng/data/Ni-tension test-electrolysis-1-0.01-AE-20201031')
+    parser.add_argument('--load_path', type=str, default='')
     config = parser.parse_args()
     print(config)
 

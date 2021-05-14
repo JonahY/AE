@@ -674,7 +674,7 @@ class Features:
 
 if __name__ == "__main__":
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -695,12 +695,12 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
     # 6016_CR_1
     # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000  random_state=100
-    # Ni-tension test-electrolysis-1-0.01-AE-20201031
-    # Ni-tension test-pure-1-0.01-AE-20201030  [np.where(chan_2[:, 1] < 38600)[0]]  random_state=50
+    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)
+    # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=38600)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
@@ -821,4 +821,3 @@ if __name__ == "__main__":
     # stdScaler = StandardScaler().fit(nano_ni)
     # trainStd = stdScaler.transform(nano_ni)
     # target_pred = svm.predict(trainStd)
-
