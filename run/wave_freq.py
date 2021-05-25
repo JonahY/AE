@@ -332,13 +332,13 @@ class Frequency:
         ax.plot(self.grid / 1000, Res / N, lw=1, color=color)
         plot_norm(ax, x_lim=[0, 800], xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
 
-    def plot_freq_TRAI(self, k, valid=False):
+    def plot_freq_TRAI(self, k, valid=False, color='blue'):
         # Frequency with specific TRAI
         half_frq, normalization_half, _ = self.cal_frequency(k - 1, valid=valid)
 
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d (%s)' % (k, valid))
         ax = plt.subplot()
-        ax.plot(half_frq / 1000, normalization_half, lw=1)
+        ax.plot(half_frq / 1000, normalization_half, lw=1, color=color)
         plot_norm(ax, 'Freq (kHz)', '|Y(freq)|', x_lim=[0, pow(10, 3)], title='TRAI:%d' % k, legend=False)
 
     def plot_2cls_freq(self, TRAI_1, TRAI_2, same):

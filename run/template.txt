@@ -1,0 +1,151 @@
+# Save waveform and ssq_cwt in batches
+for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+    fig = plt.figure(figsize=(9.2, 3), num='0')
+    ax = fig.add_subplot(1, 2, 1)
+    ax.plot(time, sig, lw=1, color=color_2)
+    plt.axhline(abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plt.axhline(-abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
+    ax = fig.add_subplot(1, 2, 2)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+    plt.savefig('./Ni electrolysis/subdivision_Entanglement/waveFreq_pop1/TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save waveforms in batches
+for idx, i in tqdm(enumerate(TRAI[cls_KKM[0]], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+    
+    fig = plt.figure(figsize=(6, 4.1), num='0')
+    fig.text(0.95, 0.17, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+             horizontalalignment="right")
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(time, sig, lw=1, color=color_1)
+    plt.axhline(abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plt.axhline(-abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
+    plt.savefig('./pop1_wave/TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save ssq_cwt in batches
+for trai in tqdm(TRAI[cls_KKM[1]]):
+    i = data_tra[int(trai - 1)]
+    sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
+    time = np.linspace(0, pow(i[-5], -1) * (i[-4] - 1) * pow(10, 6), i[-4])
+
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=i[3], t=time)
+
+    fig = plt.figure(figsize=(5.12, 5.12), num='1')
+    # plt.imshow(np.abs(Twxo), vmin=0, vmax=3, cmap='inferno')
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.ylim(min(ssq_freqs * 1000), 1000)
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    plt.savefig(os.path.join('./train dataset_wsst', '%i.jpg' % trai), pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save waveforms in batches
+for idx, i in tqdm(enumerate(TRAI[cls_KKM[0]], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+    
+    fig = plt.figure(figsize=(6, 4.1), num='0')
+    fig.text(0.95, 0.17, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+             horizontalalignment="right")
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(time, sig, lw=1, color=color_1)
+    plt.axhline(abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plt.axhline(-abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
+    plt.savefig('./pop1_wave/TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save cwt figures in batches
+for idx, i in tqdm(enumerate(TRAI, 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+    scales = pywt.central_frequency('morl') * 1e3 / np.arange(1, 1e3, 1e0)
+    [cwtmatr_new, frequencies_new] = pywt.cwt(sig, scales, 'morl', 1.0 / tmp[3])
+
+    fig = plt.figure(figsize=(5.12, 5.12), num='1')
+    plt.contourf(time, frequencies_new, abs(cwtmatr_new))
+    plt.ylim(2e4, 1e6)
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    plt.savefig('./cwt_data_chan2/%d.jpg' % idx, pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save stft figures in batches
+for idx, i in tqdm(enumerate(TRAI_2)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    D = librosa.stft(sig, hop_length=128)
+    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+    fig, ax = plt.subplots(figsize=(5.12, 5.12), num='2')
+    img = librosa.display.specshow(S_db, sr=tmp[3], hop_length=128, x_axis='time', y_axis='linear', ax=ax)
+    ax.set(title='Now with labeled axes!')
+    ax.set_ylim(0, 1000000)
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    plt.savefig('./data/%d.jpg' % (idx + 1), pad_inches=0)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Save waveforms data in batches
+for idx, i in tqdm(enumerate(TRAI, 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+    with open('./wave_chan3/%d.txt' % (idx + 256), 'w') as f:
+        f.write('Time (μs), Amplitude (μV)\n')
+        for s, t in zip(sig, time):
+            f.write('%f, %f\n' % (t, s))
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+

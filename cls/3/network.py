@@ -431,7 +431,7 @@ if __name__ == "__main__":
 
     # model(torch.ones(300, 3, 112, 112).to('cuda:0'))
     summary(model, (3, 112, 112), batch_size=300)
-    # print(model)
+    print(model)
     # for name, param in model.named_parameters():
     #     if param.requires_grad:
     #         print("requires_grad: True ", name)

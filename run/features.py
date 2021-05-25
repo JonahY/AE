@@ -306,7 +306,7 @@ class Features:
             for j in range(N):
                 valid_x = tmp[j:]
                 E0 = valid_x[0]
-                Sum = np.sum(np.log(valid_x / E0))
+                Sum = np.sum(np.log(valid_x / E0)) + 1e-5
                 N_prime = N - j
                 alpha = 1 + N_prime / Sum
                 error_bar = (alpha - 1) / pow(N_prime, 0.5)
@@ -318,7 +318,7 @@ class Features:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
                     f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
-        plot_norm(ax, xlabel, ylabel, y_lim=[1.25, 3], legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right')
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
@@ -690,7 +690,7 @@ if __name__ == "__main__":
     # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
     # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
     # Nano Ni-compression text-4-0.003-20200921
-    # Cu-3D-compression-1106-before900s
+    # Cu-3D-compression-1106-before900s  t_cut=900
     # Cu-annealing-tension-1126
     # 2020.11.10-PM-self
     # 6016_CR_1
@@ -706,8 +706,8 @@ if __name__ == "__main__":
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 4], chan[:, 5], \
-    #                                           chan[:, 6], chan[:, 7], chan[:, 8], chan[:, 9]
+    # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
+    #                                                 chan[:, 8], chan[:, 9], chan[:, -1].astype(int)
     # # TRAI, Time, Channel, Amp, RiseT, Dur, Eny = chan[:, 0], chan[:, 1], chan[:, 2], \
     # #                                             chan[:, 3], chan[:, 4], chan[:, 5], chan[:, 6]
 
@@ -821,3 +821,12 @@ if __name__ == "__main__":
     # stdScaler = StandardScaler().fit(nano_ni)
     # trainStd = stdScaler.transform(nano_ni)
     # target_pred = svm.predict(trainStd)
+
+    # fig = plt.figure(figsize=[6, 3.9])
+    # fig.text(0.96, 0.2, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+    #          horizontalalignment="right")
+    # ax = plt.subplot()
+    # ax.loglog(Amp[pop1], Eny[pop1], '.', marker='.', markersize=8, color=color_1, label='Pop 1')
+    # ax.loglog(Amp[pop2_1], Eny[pop2_1], '.', marker='.', markersize=8, color=color_2, label='Pop 2-1')
+    # ax.loglog(Amp[pop2_2], Eny[pop2_2], '.', marker='.', markersize=8, color='orange', label='Pop 2-2')
+    # plot_norm(ax, xlabelz[0], xlabelz[2])

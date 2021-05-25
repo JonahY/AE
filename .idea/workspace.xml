@@ -29,12 +29,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/Vallen-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.ipynb_checkpoints/Vallen-checkpoint.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Vallen.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Vallen.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cls/3/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/cls/3/network.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cls/3/predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/cls/3/predict.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cls/3/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/cls/3/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/features.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run/wave_freq.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +98,7 @@
       <recent name="C:\Users\Yuan\Desktop\AE\cls\3" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.train">
+  <component name="RunManager" selected="Python.features">
     <configuration name="features" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -169,6 +166,9 @@
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="D:\Anaconda3\envs\PyTorch-YOLOv3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/cls/3" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -238,10 +238,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.train" />
-        <item itemvalue="Python.network" />
-        <item itemvalue="Python.predict" />
         <item itemvalue="Python.features" />
+        <item itemvalue="Python.network" />
+        <item itemvalue="Python.train" />
+        <item itemvalue="Python.predict" />
         <item itemvalue="Python.network2" />
       </list>
     </recent_temporary>
@@ -274,7 +274,8 @@
       <workItem from="1618383047974" duration="6201000" />
       <workItem from="1619141386473" duration="68607000" />
       <workItem from="1619611572958" duration="61884000" />
-      <workItem from="1620869093801" duration="34215000" />
+      <workItem from="1620869093801" duration="65258000" />
+      <workItem from="1621849600434" duration="31211000" />
     </task>
     <servers />
   </component>
@@ -306,22 +307,22 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="359" y="302" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1617856916449" />
-    <state width="819" height="922" key="GridCell.Tab.0.bottom" timestamp="1620904799493">
+    <state width="823" height="922" key="GridCell.Tab.0.bottom" timestamp="1621218805106">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="819" height="922" key="GridCell.Tab.0.bottom/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620904799493" />
-    <state width="819" height="922" key="GridCell.Tab.0.center" timestamp="1620904799493">
+    <state width="823" height="922" key="GridCell.Tab.0.bottom/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1621218805106" />
+    <state width="823" height="922" key="GridCell.Tab.0.center" timestamp="1621218805106">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="819" height="922" key="GridCell.Tab.0.center/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620904799493" />
-    <state width="819" height="922" key="GridCell.Tab.0.left" timestamp="1620904799493">
+    <state width="823" height="922" key="GridCell.Tab.0.center/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1621218805106" />
+    <state width="823" height="922" key="GridCell.Tab.0.left" timestamp="1621218805106">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="819" height="922" key="GridCell.Tab.0.left/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620904799493" />
-    <state width="819" height="922" key="GridCell.Tab.0.right" timestamp="1620904799493">
+    <state width="823" height="922" key="GridCell.Tab.0.left/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1621218805106" />
+    <state width="823" height="922" key="GridCell.Tab.0.right" timestamp="1621218805106">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state width="819" height="922" key="GridCell.Tab.0.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620904799493" />
+    <state width="823" height="922" key="GridCell.Tab.0.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1621218805106" />
     <state width="835" height="922" key="GridCell.Tab.1.bottom" timestamp="1620903981892">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -342,10 +343,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491095271" />
-    <state x="2224" y="183" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1620983104582">
+    <state x="2224" y="183" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1621952216016">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2224" y="183" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620983104582" />
+    <state x="2224" y="183" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1621952216016" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1618388635368" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />
@@ -358,13 +359,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/cls/3/network.py</url>
-          <line>433</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -376,7 +370,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/preprocess_py$features.coverage" NAME="features Coverage Results" MODIFIED="1607322903666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
-    <SUITE FILE_PATH="coverage/preprocess_py$network.coverage" NAME="network Coverage Results" MODIFIED="1620904276171" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
+    <SUITE FILE_PATH="coverage/preprocess_py$network.coverage" NAME="network Coverage Results" MODIFIED="1621149655947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
     <SUITE FILE_PATH="coverage/preprocess_py$predict.coverage" NAME="predict Coverage Results" MODIFIED="1618839123136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
     <SUITE FILE_PATH="coverage/preprocess_py$vallen.coverage" NAME="vallen Coverage Results" MODIFIED="1606287851714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/preprocess_py$vallen__1_.coverage" NAME="vallen (1) Coverage Results" MODIFIED="1606805034819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
