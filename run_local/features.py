@@ -679,6 +679,9 @@ if __name__ == "__main__":
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # Cu-1119-test1-tension  random_state=50
+    # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
+    # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
     # TC21-900-600-z2-0.01-AE-DIC-20210413  [np.where(chan_3[:, 1] < 4300)[0]]
     # TC21-900-600-tension text-z1-0.05-AE-20210125  [np.where(chan_3[:, 1] < 5600)[0]]
     # Ni 2-compression text-4-0.003-20201012

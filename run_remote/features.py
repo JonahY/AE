@@ -674,11 +674,14 @@ class Features:
 
 if __name__ == "__main__":
     path = '/home/Yuanbincheng/data'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Cu-20210418-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    # Cu-1119-test1-tension  random_state=50
+    # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
+    # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
     # TC21-900-600-z2-0.01-AE-DIC-20210413  [np.where(chan_3[:, 1] < 4300)[0]]
     # TC21-900-600-tension text-z1-0.05-AE-20210125  [np.where(chan_3[:, 1] < 5600)[0]]
     # Ni 2-compression text-4-0.003-20201012
@@ -700,7 +703,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=7600)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))

@@ -92,7 +92,7 @@ class Waveform:
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k, valid=False):
+    def plot_wave_TRAI(self, k, valid=False, color='blue'):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[0 if self.device == 'stream' else -1] != k:
@@ -104,7 +104,7 @@ class Waveform:
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = fig.add_subplot(1, 1, 1)
-        ax.plot(time, sig, lw=1)
+        ax.plot(time, sig, lw=1, color=color)
         if self.device == 'vallen':
             plt.axhline(abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
             plt.axhline(-abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
@@ -184,7 +184,7 @@ class Waveform:
 
 
 class Frequency:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=500):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=250):
         self.data_tra = data_tra
         self.color_1 = color_1
         self.color_2 = color_2
@@ -380,7 +380,7 @@ class Frequency:
                 stage_idx.append(tmp)
         freq = np.array(freq)
         stage_idx = np.array(stage_idx)
-        return freq, stage_idx
+        return freq / 1000, stage_idx
 
     def plot_tf_stft(self, TRAI, hop_length=128, save_path=None):
         i = self.data_tra[int(TRAI - 1)]
