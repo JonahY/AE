@@ -533,10 +533,7 @@ class Features:
                     x_eny = np.append(x_eny, np.array(tmp_xx))
             y = []
             for k in range(x.shape[0]):
-                if k != x.shape[0] - 1:
-                    N, Naft = self.cal_N_Naft(tmp, [x[k], x[k + 1]])
-                else:
-                    N, Naft = self.cal_N_Naft(tmp, [x[k], float('inf')])
+                N, Naft = self.cal_N_Naft(tmp, [x[k], x[k + 1]]) if k != x.shape[0] - 1 else self.cal_N_Naft(tmp, [x[k], float('inf')])
                 if Naft != 0 and N != 0:
                     y.append(np.log10(N / Naft))
                 else:

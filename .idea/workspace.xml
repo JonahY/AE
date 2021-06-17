@@ -28,11 +28,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/AE.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AE.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/template.txt" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/template.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/wave_freq.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_remote/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_remote/features.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/plot_format.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/plot_format.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +84,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="PyConsoleConfigurable.Python Console" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -104,6 +104,9 @@
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_local" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -164,6 +167,9 @@
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="sftp://Yuanbincheng@115.154.225.172:22/opt/anaconda3/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_remote" />
       <option name="IS_MODULE_SDK" value="false" />
@@ -295,7 +301,9 @@
       <workItem from="1622007377635" duration="839000" />
       <workItem from="1622014015333" duration="59364000" />
       <workItem from="1622443784303" duration="2440000" />
-      <workItem from="1622448837545" duration="7686000" />
+      <workItem from="1622448837545" duration="14480000" />
+      <workItem from="1623326279091" duration="36046000" />
+      <workItem from="1623914973378" duration="12387000" />
     </task>
     <servers />
   </component>
@@ -359,14 +367,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="835" height="922" key="GridCell.Tab.1.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620903981891" />
-    <state x="461" y="169" key="SettingsEditor" timestamp="1622449344996">
+    <state x="461" y="169" key="SettingsEditor" timestamp="1623923542851">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449344996" />
-    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1622517006353">
+    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1623923542851" />
+    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1623929887887">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622517006353" />
+    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1623929887887" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1618388635368" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />
