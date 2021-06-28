@@ -32,7 +32,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/plot_format.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/plot_format.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,9 +103,6 @@
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_local" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -303,7 +299,11 @@
       <workItem from="1622443784303" duration="2440000" />
       <workItem from="1622448837545" duration="14480000" />
       <workItem from="1623326279091" duration="36046000" />
-      <workItem from="1623914973378" duration="12387000" />
+      <workItem from="1623914973378" duration="16999000" />
+      <workItem from="1623987271365" duration="3374000" />
+      <workItem from="1624189963930" duration="32774000" />
+      <workItem from="1624602072796" duration="2915000" />
+      <workItem from="1624635198870" duration="16522000" />
     </task>
     <servers />
   </component>
@@ -367,14 +367,18 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="835" height="922" key="GridCell.Tab.1.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1620903981891" />
-    <state x="461" y="169" key="SettingsEditor" timestamp="1623923542851">
+    <state x="540" y="267" key="IDE.errors.dialog" timestamp="1624635261057">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1623923542851" />
-    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1623929887887">
+    <state x="540" y="267" key="IDE.errors.dialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624635261057" />
+    <state x="461" y="169" key="SettingsEditor" timestamp="1624190002234">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624190002234" />
+    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1624802077475">
       <screen x="1920" y="0" width="1440" height="870" />
     </state>
-    <state x="2273" y="187" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1623929887887" />
+    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624802077475" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1618388635368" />
     <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
       <screen x="0" y="0" width="1920" height="1050" />

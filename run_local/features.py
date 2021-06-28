@@ -198,19 +198,22 @@ class Features:
         return res
 
     def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
-                INTERVAL_NUM=None, bin_method='log', select=None, FIT=False):
+                INTERVAL_NUM=None, bin_method='log', select=None, FIT=False, COLOR=None, LABEL=None):
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [6] * 3
         if select is None:
             select = [0, 3]
         if LIM is None:
             LIM = [[0, None]] * 3
+        if LABEL is None:
+            LABEL = ['Whole', 'Population 1', 'Population 2']
+        if COLOR is None:
+            COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
-        #         fig = plt.figure(figsize=[6, 3.9])
+        # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TMP, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['black', self.color_1, self.color_2], ['Whole', 'Population 1',
-                                                                                                'Population 2']
+        TMP = [tmp_origin, tmp_1, tmp_2]
         if LIM[0][1] == None or LIM[0][1] < 0:
             method = 'index'
         elif LIM[0][1] == float('inf') or LIM[0][1] > 0:
@@ -245,17 +248,20 @@ class Features:
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
-                 select=None, FIT=False):
+                 select=None, FIT=False, COLOR=None, LABEL=None):
         if LIM is None:
             LIM = [[0, float('inf')]] * 3
         if select is None:
             select = [0, 3]
+        if LABEL is None:
+            LABEL = ['Whole', 'Population 1', 'Population 2']
+        if COLOR is None:
+            COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TMP, N, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], ['black', self.color_1, self.color_2], [
-            'Whole', 'Population 1', 'Population 2']
+        TMP, N = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2]
         for tmp, N, color, label, lim in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
                                              COLOR[select[0]:select[1]],
                                              LABEL[select[0]:select[1]], LIM[select[0]:select[1]]):
@@ -498,19 +504,21 @@ class Features:
         plot_norm(ax, 'Time (s)', ylabel, legend=False)
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
-                    select=None):
+                    select=None, COLOR=None, LABEL=None):
         if select is None:
             select = [0, 3]
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
+        if LABEL is None:
+            LABEL = ['Whole', 'Population 1', 'Population 2']
+        if COLOR is None:
+            COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
         #         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TMP, MARKER, COLOR, LABEL = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h'], ['black', self.color_1,
-                                                                                  self.color_2], ['Whole',
-                                                                                                  'Population 1',
-                                                                                                  'Population 2']
+        TMP, MARKER = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h']
+
         for tmp, interval_num, marker, color, label in zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]],
                                                            MARKER[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                            LABEL[select[0]:select[1]]):
@@ -552,23 +560,31 @@ class Features:
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
 
     def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
-                        select=None, FIT=False):
+                        select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
         if select is None:
             select = [0, 3]
+        if LIM is None:
+            LIM = [[0, None]] * 3
+        if LABEL is None:
+            LABEL = ['Whole', 'Population 1', 'Population 2']
+        if COLOR is None:
+            COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
-        #         fig = plt.figure(figsize=[6, 3.9])
+        # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TIME, MARKER, COLOR, LABEL = [time_origin, time_1, time_2], ['o', 'p', 'h'], ['black', self.color_1,
-                                                                                      self.color_2], ['Whole',
-                                                                                                      'Population 1',
-                                                                                                      'Population 2']
-        for [time, interval_num, marker, color, label] in zip(TIME[select[0]:select[1]],
+        TIME, MARKER = [time_origin, time_1, time_2], ['o', 'p', 'h']
+
+        for [time, interval_num, marker, color, label, lim] in zip(TIME[select[0]:select[1]],
                                                               INTERVAL_NUM[select[0]:select[1]],
                                                               MARKER[select[0]:select[1]], COLOR[select[0]:select[1]],
-                                                              LABEL[select[0]:select[1]]):
+                                                              LABEL[select[0]:select[1]], LIM[select[0]:select[1]]):
+            if lim[1] == None or lim[1] < 0:
+                method = 'index'
+            elif lim[1] == float('inf') or lim[1] > 0:
+                method = 'value'
             res = []
             for i in range(time.shape[0] - 1):
                 res.append(time[i + 1] - time[i])
@@ -580,7 +596,11 @@ class Features:
                 xx, yy = self.cal_log(sorted(np.array(res)), inter, interval_num)
             if FIT:
                 xx, yy = np.array(xx), np.array(yy)
-                fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
+                if method == 'value':
+                    lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
+                    fit = np.polyfit(np.log10(xx[lim[0]:lim[-1]]), np.log10(yy[lim[0]:lim[-1]]), 1)
+                elif method == 'index':
+                    fit = np.polyfit(np.log10(xx[lim[0]:lim[1]]), np.log10(yy[lim[0]:lim[1]]), 1)
                 alpha, b = fit[0], fit[1]
                 fit_x = np.linspace(xx[0], xx[-1], 100)
                 fit_y = self.convert(fit_x, alpha, b)
@@ -695,7 +715,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
     # 6016_CR_1
     # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000  random_state=100
-    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)
+    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)  random_state=50
     # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # 2020.11.10-PM-self
 
@@ -771,6 +791,9 @@ if __name__ == "__main__":
     # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
     # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]
     # INTERVAL_NUM = [[8, 11, 8], [8, 10, 9], [8, 5, 9]]
+    #
+    # lim_ccdf = [[0.9, float('inf')], [0.3, 9], [0, float('inf')]]
+    # lim_waitingT = [[4e-4, 40], [0.8, 90], [0, float('inf')]]
 
     # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
     #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
