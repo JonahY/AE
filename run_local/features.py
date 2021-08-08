@@ -20,9 +20,8 @@ from matplotlib.pylab import mpl
 from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.mplot3d import Axes3D
 
-
 warnings.filterwarnings("ignore")
-mpl.rcParams['axes.unicode_minus'] = False  #显示负号
+mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 
@@ -36,33 +35,61 @@ class Features:
         self.convert = lambda x, a, b: pow(x, a) * pow(10, b)
         self.status = status
 
-    def cal_linear_interval(self, tmp, interval):
+    def __cal_linear_interval(self, tmp, interval):
+        """
+        Take the linear interval to get the first number in each order and the interval between grids
+        :param tmp: Energy/Amplitude/Duration in order of magnitude
+        :param interval: Number of bins in each order of magnitude
+        :return:
+        """
         tmp_max = int(max(tmp))
         tmp_min = int(min(tmp))
+        mid = []
         if tmp_min <= 0:
             inter = [0] + [pow(10, i) for i in range(len(str(tmp_max)))]
-            mid = [interval * pow(10, i) for i in range(len(str(tmp_max)) + 1)]
         else:
-            inter = [pow(10, i) for i in range(len(str(tmp_min)) - 1,
-                                               len(str(tmp_max)))]
-            mid = [interval * pow(10, i) for i in range(len(str(tmp_min)),
-                                                        len(str(tmp_max)) + 1)]
+            inter = [pow(10, i) for i in range(len(str(tmp_min)) - 1, len(str(tmp_max)))]
+        for idx in range(len(inter)):
+            try:
+                mid.extend([(inter[idx + 1] - inter[idx]) / interval])
+            except IndexError:
+                mid.extend([9 * inter[idx] / interval])
         return inter, mid
 
-    def cal_log_interval(self, tmp):
+    def __cal_log_interval(self, tmp):
+        """
+        Take the logarithmic interval to get the first number in each order
+        :param tmp: Energy/Amplitude/Duration in order of magnitude
+        :return:
+        """
         tmp_min = math.floor(np.log10(min(tmp)))
         tmp_max = math.ceil(np.log10(max(tmp)))
         inter = [i for i in range(tmp_min, tmp_max + 1)]
         return inter
 
-    def cal_negtive_interval(self, res, interval):
+    def __cal_negtive_interval(self, res, interval):
+        """
+
+        :param res:
+        :param interval:
+        :return:
+        """
         tmp = sorted(np.array(res))
         tmp_min, tmp_max = math.floor(np.log10(min(tmp))), math.ceil(np.log10(max(tmp)))
         inter = [pow(10, i) for i in range(tmp_min, tmp_max + 1)]
         mid = [interval * pow(10, i) for i in range(tmp_min + 1, tmp_max + 2)]
         return inter, mid
 
-    def cal_linear(self, tmp, inter, mid, interval_num, idx=0):
+    def __cal_linear(self, tmp, inter, mid, interval_num, idx=0):
+        """
+        Calculate the probability density value at linear interval
+        :param tmp: Energy/Amplitude/Duration in order of magnitude
+        :param inter: The first number of each order of magnitude
+        :param mid: Bin spacing per order of magnitude
+        :param interval_num: Number of bins divided in each order of magnitude
+        :param idx:
+        :return:
+        """
         # 初始化横坐标
         x = np.array([])
         for i in inter:
@@ -70,7 +97,6 @@ class Features:
                 x = np.append(x, np.linspace(i, i * 10, interval_num, endpoint=False))
             else:
                 x = np.append(x, np.linspace(i, 1, interval_num, endpoint=False))
-
         # 初始化纵坐标
         y = np.zeros(x.shape[0])
         for i, n in Counter(tmp).items():
@@ -84,23 +110,21 @@ class Features:
                         y[idx] += n
                         break
                 idx += 1
-
         # 对横坐标作进一步筛选，计算概率分布值
         x, y = x[y != 0], y[y != 0]
         xx = np.zeros(x.shape[0])
         yy = y / sum(y)
-
         # 取区间终点作为该段的横坐标
         for idx in range(len(x) - 1):
             xx[idx] = (x[idx] + x[idx + 1]) / 2
         xx[-1] = x[-1] + pow(10, len(str(int(x[-1])))) * (0.9 / interval_num) / 2
-
         # 计算分段区间长度，从而求得概率密度值
         interval = []
         for i, j in enumerate(mid):
             try:
-                num = len(np.intersect1d(np.where(inter[i] <= xx)[0],
-                                         np.where(xx < inter[i + 1])[0]))
+                # num = len(np.intersect1d(np.where(inter[i] <= xx)[0],
+                #                          np.where(xx < inter[i + 1])[0]))
+                num = len(np.where((inter[i] <= xx) & (xx < inter[i + 1]))[0])
                 interval.extend([j] * num)
             except IndexError:
                 num = len(np.where(inter[i] <= xx)[0])
@@ -115,7 +139,15 @@ class Features:
         #     fit_y = np.polyval(fit, fit_x)
         return xx, yy
 
-    def cal_log(self, tmp, inter, interval_num, idx=0):
+    def __cal_log(self, tmp, inter, interval_num, idx=0):
+        """
+        Calculate the probability density value at logarithmic interval
+        :param tmp: Energy/Amplitude/Duration in order of magnitude
+        :param inter: The first number of each order of magnitude
+        :param interval_num: Number of bins divided in each order of magnitude
+        :param idx:
+        :return:
+        """
         x, xx, interval = np.array([]), np.array([]), np.array([])
         for i in inter:
             logspace = np.logspace(i, i + 1, interval_num, endpoint=False)
@@ -144,7 +176,7 @@ class Features:
         yy = y / (sum(y) * interval)
         return xx, yy
 
-    def cal_N_Naft(self, tmp, eny_lim):
+    def __cal_N_Naft(self, tmp, eny_lim):
         N_ms, N_as = 0, 0
         main_peak = np.where(eny_lim[0] < tmp)[0]
         if len(main_peak):
@@ -161,7 +193,7 @@ class Features:
             N_ms += tmp[main_peak[-1]]
         return N_ms + N_as, N_as
 
-    def cal_OmiroLaw_helper(self, tmp, eny_lim):
+    def __cal_OmiroLaw_helper(self, tmp, eny_lim):
         res = [[] for _ in range(len(eny_lim))]
         for idx in range(len(eny_lim)):
             main_peak = np.where((eny_lim[idx][0] < tmp) & (tmp < eny_lim[idx][1]))[0]
@@ -179,7 +211,7 @@ class Features:
                         res[idx].append(k)
         return res
 
-    def cal_OmiroLaw_timeSeq_helper(self, tmp, cls_idx):
+    def __cal_OmiroLaw_timeSeq_helper(self, tmp, cls_idx):
         res = []
         main_peak = np.where(cls_idx == True)[0] if type(cls_idx[0]) == bool else cls_idx
         eny_lim = [min(tmp[cls_idx]), max(tmp[cls_idx])]
@@ -197,8 +229,29 @@ class Features:
                     res.append(k)
         return res
 
-    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
-                INTERVAL_NUM=None, bin_method='log', select=None, FIT=False, COLOR=None, LABEL=None):
+    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, INTERVAL_NUM=None,
+                bin_method='log', select=None, FIT=False, COLOR=None, LABEL=None):
+        """
+        Calculate Probability Density Distribution Function
+        :param tmp_origin: Energy/Amplitude/Duration in order of magnitude of original data
+        :param tmp_1: Energy/Amplitude/Duration in order of magnitude of population 1
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of population 2
+        :param xlabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param ylabel: 'PDF (A)', 'PDF (D)', 'PDF (E)'
+        :param features_path: Absolute path of output data
+        :param LIM: Use in function fitting, support specific values or indexes,
+                    value: [0, float('inf')], [100, 900], ...
+                    index: [0, None], [11, -2], ...
+        :param INTERVAL_NUM: Number of bins divided in each order of magnitude
+        :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
+        :param select: The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param FIT: Whether to fit parameters, support True or False
+        :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :return:
+        """
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [6] * 3
         if select is None:
@@ -206,7 +259,7 @@ class Features:
         if LIM is None:
             LIM = [[0, None]] * 3
         if LABEL is None:
-            LABEL = ['Whole', 'Population 1', 'Population 2']
+            LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
@@ -222,11 +275,13 @@ class Features:
                                                LABEL[select[0]:select[1]],
                                                INTERVAL_NUM[select[0]:select[1]], LIM[select[0]:select[1]]):
             if bin_method == 'linear':
-                inter, mid = self.cal_linear_interval(tmp, num)
-                xx, yy = self.cal_linear(tmp, inter, mid, num)
+                inter, mid = self.__cal_linear_interval(tmp, num)
+                xx, yy = self.__cal_linear(tmp, inter, mid, num)
+                print(inter, mid)
             elif bin_method == 'log':
-                inter = self.cal_log_interval(tmp)
-                xx, yy = self.cal_log(tmp, inter, num)
+                inter = self.__cal_log_interval(tmp)
+                xx, yy = self.__cal_log(tmp, inter, num)
+                print(inter)
             if FIT:
                 if method == 'value':
                     lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
@@ -247,14 +302,33 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None,
-                 select=None, FIT=False, COLOR=None, LABEL=None):
+    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, select=None, FIT=False,
+                 COLOR=None, LABEL=None):
+        """
+        Calculate Complementary Cumulative Distribution Function
+        :param tmp_origin: Energy/Amplitude/Duration in order of magnitude of original data
+        :param tmp_1: Energy/Amplitude/Duration in order of magnitude of population 1
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of population 2
+        :param xlabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param ylabel: 'CCDF (A)', 'CCDF (D)', 'CCDF (E)'
+        :param features_path: Absolute path of output data
+        :param LIM: Use in function fitting, support specific values or indexes,
+                    value: [0, float('inf')], [100, 900], ...
+                    index: [0, None], [11, -2], ...
+        :param select: The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param FIT: Whether to fit parameters, support True or False
+        :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :return:
+        """
         if LIM is None:
             LIM = [[0, float('inf')]] * 3
         if select is None:
             select = [0, 3]
         if LABEL is None:
-            LABEL = ['Whole', 'Population 1', 'Population 2']
+            LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
@@ -291,10 +365,25 @@ class Features:
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, LABEL=None):
+        """
+        Calculate the maximum likelihood function distribution
+        :param tmp_origin: Energy/Amplitude/Duration in order of magnitude of original data
+        :param tmp_1: Energy/Amplitude/Duration in order of magnitude of population 1
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of population 2
+        :param xlabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param ylabel: 'ML (A)', 'ML (D)', 'ML (E)'
+        :param features_path: Absolute path of output data
+        :param select: The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :return:
+        """
         if select is None:
             select = [0, 3]
         if LABEL is None:
-            LABEL = ['Whole', 'Population 1', 'Population 2']
+            LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
@@ -309,7 +398,7 @@ class Features:
                                                LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
                                                LABEL[select[0]:select[1]]):
             ML_y, Error_bar = [], []
-            for j in range(N):
+            for j in tqdm(range(N)):
                 valid_x = tmp[j:]
                 E0 = valid_x[0]
                 Sum = np.sum(np.log(valid_x / E0)) + 1e-5
@@ -332,9 +421,9 @@ class Features:
         if method == 'log_bin':
             sum_x, sum_y = x_lim[1] - x_lim[0], y_lim[1] - y_lim[0]
             arry_x = np.logspace(np.log10(sum_x + 10), 1, size_x) / (
-                        sum(np.logspace(np.log10(sum_x + 10), 1, size_x)) / sum_x)
+                    sum(np.logspace(np.log10(sum_x + 10), 1, size_x)) / sum_x)
             arry_y = np.logspace(np.log10(sum_y + 10), 1, size_y) / (
-                        sum(np.logspace(np.log10(sum_y + 10), 1, size_y)) / sum_y)
+                    sum(np.logspace(np.log10(sum_y + 10), 1, size_y)) / sum_y)
             x, y = [], []
             for tmp, res, arry in zip([x_lim[0], y_lim[0]], [x, y], [arry_x, arry_y]):
                 for i in arry:
@@ -462,12 +551,16 @@ class Features:
         fig = plt.figure(figsize=[6, 3.9], num='3D Correlation--%s & %s %s' % (xlabel, ylabel, zlabel))
         ax = plt.subplot(projection='3d')
         if cls_1 is not None and cls_2 is not None:
-            ax.scatter3D(np.log10(tmp_1)[cls_1], np.log10(tmp_2)[cls_1], np.log10(tmp_3)[cls_1], s=15, color=self.color_1)
-            ax.scatter3D(np.log10(tmp_1)[cls_2], np.log10(tmp_2)[cls_2], np.log10(tmp_3)[cls_2], s=15, color=self.color_2)
+            ax.scatter3D(np.log10(tmp_1)[cls_1], np.log10(tmp_2)[cls_1], np.log10(tmp_3)[cls_1], s=15,
+                         color=self.color_1)
+            ax.scatter3D(np.log10(tmp_1)[cls_2], np.log10(tmp_2)[cls_2], np.log10(tmp_3)[cls_2], s=15,
+                         color=self.color_2)
             if idx_1 is not None:
-                ax.scatter3D(np.log10(tmp_1)[cls_1][idx_1], np.log10(tmp_2)[cls_1][idx_1], np.log10(tmp_3)[cls_1][idx_1], s=15, color='black')
+                ax.scatter3D(np.log10(tmp_1)[cls_1][idx_1], np.log10(tmp_2)[cls_1][idx_1],
+                             np.log10(tmp_3)[cls_1][idx_1], s=15, color='black')
             if idx_2 is not None:
-                ax.scatter3D(np.log10(tmp_1)[cls_2][idx_2], np.log10(tmp_2)[cls_2][idx_2], np.log10(tmp_3)[cls_2][idx_2], s=15, color='black')
+                ax.scatter3D(np.log10(tmp_1)[cls_2][idx_2], np.log10(tmp_2)[cls_2][idx_2],
+                             np.log10(tmp_3)[cls_2][idx_2], s=15, color='black')
         else:
             ax.scatter3D(np.log10(tmp_1), np.log10(tmp_2), np.log10(tmp_3), s=15, color=self.color_1)
         ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
@@ -510,7 +603,7 @@ class Features:
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
         if LABEL is None:
-            LABEL = ['Whole', 'Population 1', 'Population 2']
+            LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
@@ -530,7 +623,7 @@ class Features:
                     x = np.append(x, np.linspace(i, i * 10, interval_num, endpoint=False))
             elif bin_method == 'log':
                 x, x_eny = np.array([]), np.array([])
-                inter = self.cal_log_interval(tmp)
+                inter = self.__cal_log_interval(tmp)
                 for i in inter:
                     if i < 0:
                         continue
@@ -541,7 +634,10 @@ class Features:
                     x_eny = np.append(x_eny, np.array(tmp_xx))
             y = []
             for k in range(x.shape[0]):
-                N, Naft = self.cal_N_Naft(tmp, [x[k], x[k + 1]]) if k != x.shape[0] - 1 else self.cal_N_Naft(tmp, [x[k], float('inf')])
+                N, Naft = self.__cal_N_Naft(tmp, [x[k], x[k + 1]]) if k != x.shape[0] - 1 else self.__cal_N_Naft(tmp,
+                                                                                                                 [x[k],
+                                                                                                                  float(
+                                                                                                                      'inf')])
                 if Naft != 0 and N != 0:
                     y.append(np.log10(N / Naft))
                 else:
@@ -568,7 +664,7 @@ class Features:
         if LIM is None:
             LIM = [[0, None]] * 3
         if LABEL is None:
-            LABEL = ['Whole', 'Population 1', 'Population 2']
+            LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
@@ -578,9 +674,11 @@ class Features:
         TIME, MARKER = [time_origin, time_1, time_2], ['o', 'p', 'h']
 
         for [time, interval_num, marker, color, label, lim] in zip(TIME[select[0]:select[1]],
-                                                              INTERVAL_NUM[select[0]:select[1]],
-                                                              MARKER[select[0]:select[1]], COLOR[select[0]:select[1]],
-                                                              LABEL[select[0]:select[1]], LIM[select[0]:select[1]]):
+                                                                   INTERVAL_NUM[select[0]:select[1]],
+                                                                   MARKER[select[0]:select[1]],
+                                                                   COLOR[select[0]:select[1]],
+                                                                   LABEL[select[0]:select[1]],
+                                                                   LIM[select[0]:select[1]]):
             if lim[1] == None or lim[1] < 0:
                 method = 'index'
             elif lim[1] == float('inf') or lim[1] > 0:
@@ -589,11 +687,11 @@ class Features:
             for i in range(time.shape[0] - 1):
                 res.append(time[i + 1] - time[i])
             if bin_method == 'linear':
-                inter, mid = self.cal_negtive_interval(res, 0.9 / interval_num)
-                xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
+                inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
+                xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
             elif bin_method == 'log':
-                inter = self.cal_log_interval(res)
-                xx, yy = self.cal_log(sorted(np.array(res)), inter, interval_num)
+                inter = self.__cal_log_interval(res)
+                xx, yy = self.__cal_log(sorted(np.array(res)), inter, interval_num)
             if FIT:
                 xx, yy = np.array(xx), np.array(yy)
                 if method == 'value':
@@ -609,6 +707,11 @@ class Features:
                           label='{}--{:.2f}'.format(label, abs(alpha)))
             else:
                 ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+            with open(features_path[:-4] + '_{}_'.format(label) + 'WaitingTime.txt', 'w') as f:
+                f.write('{}, {}\n'.format(xlabel, ylabel))
+                for j in range(xx.shape[0]):
+                    f.write('{}, {}\n'.format(xx[j], yy[j]))
+
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
@@ -618,11 +721,11 @@ class Features:
             select = [0, 3]
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
-        eny_lim = [[0.01, 0.1], [0.01, 0.1], [0.1, 10], [10, 1000], [1000, 10000]]
-        tmp_origin, tmp_1, tmp_2 = self.cal_OmiroLaw_helper(tmp_origin, eny_lim), self.cal_OmiroLaw_helper(tmp_1,
-                                                                                                           eny_lim), self.cal_OmiroLaw_helper(
+        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 1000], [1000, 10000]]
+        tmp_origin, tmp_1, tmp_2 = self.__cal_OmiroLaw_helper(tmp_origin, eny_lim), self.__cal_OmiroLaw_helper(tmp_1,
+                                                                                                               eny_lim), self.__cal_OmiroLaw_helper(
             tmp_2, eny_lim)
-        TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Population 1', 'Omori law_Population 2']
+        TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Pop 1', 'Omori law_Pop 2']
         for idx, [tmp, interval_num, title] in enumerate(
                 zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]], TITLE[select[0]:select[1]])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
@@ -633,16 +736,16 @@ class Features:
                                                            [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0],
                                                             [0.5, 0.5, 0.5]],
                                                            ['$10^{-2}aJ<E_{MS}<10^{-1}aJ$',
-                                                            '$10^{-2}aJ<E_{MS}<10^{-1}aJ$',
-                                                            '$10^{-1}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{3}aJ$',
+                                                            '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
+                                                            '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{3}aJ$',
                                                             '$10^{3}aJ<E_{MS}<10^{4}aJ$'])):
                 if len(tmp[i]):
                     if bin_method == 'linear':
-                        inter, mid = self.cal_negtive_interval(tmp[i], 0.9 / interval_num)
-                        xx, yy = self.cal_linear(sorted(np.array(tmp[i])), inter, mid, interval_num)
+                        inter, mid = self.__cal_negtive_interval(tmp[i], 0.9 / interval_num)
+                        xx, yy = self.__cal_linear(sorted(np.array(tmp[i])), inter, mid, interval_num)
                     elif bin_method == 'log':
-                        inter = self.cal_log_interval(tmp[i])
-                        xx, yy = self.cal_log(sorted(np.array(tmp[i])), inter, interval_num)
+                        inter = self.__cal_log_interval(tmp[i])
+                        xx, yy = self.__cal_log(sorted(np.array(tmp[i])), inter, interval_num)
                     if FIT:
                         xx, yy = np.array(xx), np.array(yy)
                         #                         fit_lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
@@ -655,13 +758,20 @@ class Features:
                                   label='{}--{:.2f}'.format(label, abs(alpha)))
                     else:
                         ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
+
+                    with open(features_path[:-4] + '_{}_'.format(title) + '(%s).txt' %
+                              label.replace('<', ' ').replace('>', ' '), 'w') as f:
+                        f.write('t-t_{MS} (s), r_{AS}(t-t_{MS})(s^{-1})\n')
+                        for j in range(xx.shape[0]):
+                            f.write('{}, {}\n'.format(xx[j], yy[j]))
+
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
     def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False):
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [3] * 2
-        res_1 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_1)
-        res_2 = self.cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_2)
+        res_1 = self.__cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_1)
+        res_2 = self.__cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_2)
         for res, interval_num, ylabel, title in zip([res_1, res_2], INTERVAL_NUM,
                                                     [r'$\mathbf{n_1^{2}\;(t)}$', r'$\mathbf{n_2^{1}\;(t)}$'],
                                                     ['Time sequence_Population 1 as Mainshock',
@@ -671,11 +781,11 @@ class Features:
             ax = plt.subplot()
             if len(res):
                 if bin_method == 'linear':
-                    inter, mid = self.cal_negtive_interval(res, 0.9 / interval_num)
-                    xx, yy = self.cal_linear(sorted(np.array(res)), inter, mid, interval_num)
+                    inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
+                    xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
                 elif bin_method == 'log':
-                    inter = self.cal_log_interval(res)
-                    xx, yy = self.cal_log(sorted(np.array(res)), inter, interval_num)
+                    inter = self.__cal_log_interval(res)
+                    xx, yy = self.__cal_log(sorted(np.array(res)), inter, interval_num)
                 if FIT:
                     xx, yy = np.array(xx), np.array(yy)
                     fit = np.polyfit(np.log10(xx), np.log10(yy), 1)
@@ -690,8 +800,8 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    path = r'E:\VALLEN\HDD'
+    fold = 'Cu-20210418-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -720,7 +830,7 @@ if __name__ == "__main__":
     # 2020.11.10-PM-self
 
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=7614)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))

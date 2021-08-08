@@ -59,7 +59,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="JupyterTrust" id="91697f68-892b-466a-978a-4a5fa145ee1a" />
+  <component name="JupyterTrust" id="f8a8568d-bb20-4db3-b97e-92ccf581f4a2" />
   <component name="ProjectId" id="1j87etv1ghWviOPWY6H22fwsITq" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -99,6 +99,28 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.features">
+    <configuration name="code" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AE" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_local" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_local/code.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="features" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -225,42 +247,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="AE" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="sftp://Yuanbincheng@115.154.225.172:22/opt/anaconda3/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/cls/3" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cls/3/train.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
-      <item itemvalue="Python.train" />
       <item itemvalue="Python.network" />
       <item itemvalue="Python.predict" />
       <item itemvalue="Python.features" />
       <item itemvalue="Python.features_remote" />
+      <item itemvalue="Python.code" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.features" />
+        <item itemvalue="Python.code" />
         <item itemvalue="Python.features_remote" />
         <item itemvalue="Python.features" />
         <item itemvalue="Python.features" />
-        <item itemvalue="Python.network" />
       </list>
     </recent_temporary>
   </component>
@@ -304,6 +304,8 @@
       <workItem from="1624189963930" duration="32774000" />
       <workItem from="1624602072796" duration="2915000" />
       <workItem from="1624635198870" duration="16522000" />
+      <workItem from="1626863759849" duration="1208000" />
+      <workItem from="1627099666820" duration="18757000" />
     </task>
     <servers />
   </component>
@@ -323,34 +325,35 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="552" y="183" key="#Deployment" timestamp="1616491191674">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="552" y="183" key="#Deployment/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491191674" />
-    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1622449299388">
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1626864171422">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449299388" />
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1626864171422" />
     <state x="359" y="302" key="FileChooserDialogImpl" timestamp="1622449356201">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="359" y="302" key="FileChooserDialogImpl/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449356201" />
-    <state width="823" height="922" key="GridCell.Tab.0.bottom" timestamp="1622449283165">
+    <state width="1877" height="285" key="GridCell.Tab.0.bottom" timestamp="1626864971327">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.bottom/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449283165" />
-    <state width="823" height="922" key="GridCell.Tab.0.center" timestamp="1622449283165">
+    <state width="1877" height="285" key="GridCell.Tab.0.bottom/0.0.1920.1050@0.0.1920.1050" timestamp="1626864971327" />
+    <state width="1877" height="285" key="GridCell.Tab.0.center" timestamp="1626864971327">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.center/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449283165" />
-    <state width="823" height="922" key="GridCell.Tab.0.left" timestamp="1622449283165">
+    <state width="1877" height="285" key="GridCell.Tab.0.center/0.0.1920.1050@0.0.1920.1050" timestamp="1626864971327" />
+    <state width="1877" height="285" key="GridCell.Tab.0.left" timestamp="1626864971327">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.left/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449283165" />
-    <state width="823" height="922" key="GridCell.Tab.0.right" timestamp="1622449283165">
+    <state width="1877" height="285" key="GridCell.Tab.0.left/0.0.1920.1050@0.0.1920.1050" timestamp="1626864971327" />
+    <state width="1877" height="285" key="GridCell.Tab.0.right" timestamp="1626864971327">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.right/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1622449283165" />
+    <state width="1877" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1626864971327" />
     <state width="835" height="922" key="GridCell.Tab.1.bottom" timestamp="1620903981892">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -375,15 +378,15 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624190002234" />
-    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1624802077475">
-      <screen x="1920" y="0" width="1440" height="870" />
-    </state>
-    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624802077475" />
-    <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1618388635368" />
-    <state x="422" y="308" key="ftp.server.browser" timestamp="1616491185978">
+    <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1628404049502">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="422" y="308" key="ftp.server.browser/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1616491185978" />
+    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624802077475" />
+    <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1628404049502" />
+    <state x="0" y="0" width="1628" height="1038" key="dock-window-1" timestamp="1627101035398">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="0" y="0" width="1628" height="1038" key="dock-window-1/0.0.1920.1050@0.0.1920.1050" timestamp="1627101035398" />
     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1620873244681">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -401,16 +404,17 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/preprocess_py$features.coverage" NAME="features Coverage Results" MODIFIED="1607322903666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
-    <SUITE FILE_PATH="coverage/preprocess_py$network.coverage" NAME="network Coverage Results" MODIFIED="1621149655947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
-    <SUITE FILE_PATH="coverage/preprocess_py$predict.coverage" NAME="predict Coverage Results" MODIFIED="1618839123136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
-    <SUITE FILE_PATH="coverage/preprocess_py$vallen.coverage" NAME="vallen Coverage Results" MODIFIED="1606287851714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/preprocess_py$vallen__1_.coverage" NAME="vallen (1) Coverage Results" MODIFIED="1606805034819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
+    <SUITE FILE_PATH="coverage/preprocess_py$features__1_.coverage" NAME="features (1) Coverage Results" MODIFIED="1622449277509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_remote" />
     <SUITE FILE_PATH="coverage/preprocess_py$cls_done.coverage" NAME="cls_done Coverage Results" MODIFIED="1616745780530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/2" />
     <SUITE FILE_PATH="coverage/preprocess_py$train.coverage" NAME="train Coverage Results" MODIFIED="1620904799486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
+    <SUITE FILE_PATH="coverage/preprocess_py$predict.coverage" NAME="predict Coverage Results" MODIFIED="1618839123136" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
     <SUITE FILE_PATH="coverage/preprocess_py$network__1_.coverage" NAME="network2 Coverage Results" MODIFIED="1618837819082" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/2" />
+    <SUITE FILE_PATH="coverage/preprocess_py$vallen.coverage" NAME="vallen Coverage Results" MODIFIED="1606287851714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/preprocess_py$vallen__1_.coverage" NAME="vallen (1) Coverage Results" MODIFIED="1606805034819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
+    <SUITE FILE_PATH="coverage/preprocess_py$features.coverage" NAME="features Coverage Results" MODIFIED="1607322903666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
+    <SUITE FILE_PATH="coverage/preprocess_py$code.coverage" NAME="code Coverage Results" MODIFIED="1626864385266" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_local" />
+    <SUITE FILE_PATH="coverage/preprocess_py$network.coverage" NAME="network Coverage Results" MODIFIED="1621149655947" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/3" />
     <SUITE FILE_PATH="coverage/preprocess_py$utils.coverage" NAME="utils Coverage Results" MODIFIED="1618124670793" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
-    <SUITE FILE_PATH="coverage/preprocess_py$features__1_.coverage" NAME="features (1) Coverage Results" MODIFIED="1622449277509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_remote" />
     <SUITE FILE_PATH="coverage/preprocess_py$nanoindentation.coverage" NAME="nanoindentation Coverage Results" MODIFIED="1618197819816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../Others" />
   </component>
 </project>

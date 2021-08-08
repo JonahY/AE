@@ -149,12 +149,13 @@ class Waveform:
                 plot_norm(ax, r'$Time$ $(μs)$', ylabel[idx], legend=False)
         return start, end, time, sig, t_stE
 
-    def plot_envelope(self, TRAI, COLOR, valid=False, method='hl'):
+    def plot_envelope(self, TRAI, COLOR, features_path, valid=False, method='hl', xlog=False):
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         for idx, [trai, color] in enumerate(zip(TRAI, COLOR)):
+            XX, YY = [], []
             for k in tqdm(trai):
                 tmp = self.data_tra[k - 1]
                 time, sig = self.cal_wave(tmp, valid=valid)
@@ -163,12 +164,29 @@ class Waveform:
                 if method == 'se':
                     sig = (sig / max(sig))
                     X_pos_frontier, X_neg_frontier = se.get_frontiers(sig, 0)
-                    ax.semilogy(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2, '.',
-                                Marker='.', color=color)
+                    XX.extend(np.linspace(0, time[-1], len(X_pos_frontier) - 2))
+                    YY.extend(sig[X_pos_frontier[2:]] ** 2)
+                    if not xlog:
+                        ax.semilogy(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2,
+                                    '.', Marker='.', color=color)
+                    else:
+                        ax.loglog(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2,
+                                    '.', Marker='.', color=color)
                 else:
                     sig = sig ** 2 / max(sig ** 2)
                     high_idx, low_idx = hl_envelopes_idx(sig, dmin=60, dmax=60)
-                    ax.semilogy(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+                    XX.extend(time[low_idx])
+                    YY.extend(sig[low_idx])
+                    if not xlog:
+                        ax.semilogy(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+                    else:
+                        ax.loglog(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+
+            with open('%s_Decay Function_Pop %d.txt' % (features_path, idx + 1), 'w') as f:
+                f.write('Time (μs), Normalized A$^2$\n')
+                for j in range(len(XX)):
+                    f.write('{}, {}\n'.format(XX[j], YY[j]))
+
         plot_norm(ax, 'Time (μs)', 'Normalized A$^2$', legend=False)
 
     def save_wave(self, TRAI, pop):

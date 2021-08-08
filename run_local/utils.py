@@ -449,6 +449,14 @@ def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):
     return lmin, lmax
 
 
+def find_nearest(ls, v):
+    idx = np.searchsorted(ls, v, side="left")
+    if idx > 0 and (idx == len(ls) or abs(v - ls[idx-1]) < abs(v - ls[idx])):
+        return idx-1
+    else:
+        return idx
+
+
 '''
 wave_ls = sorted(os.listdir('./wave/txt/'), key=lambda x: int(x.split('-')[0][5:]))
 channel = [3]

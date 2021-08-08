@@ -7,9 +7,8 @@ def formatnum(x, pos):
 
 
 def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], z_lim=[], legend=True,
-              grid=False, frameon=True,
-              legend_loc='upper left', font_color='black', legendsize=11, labelsize=14, titlesize=15, ticksize=13,
-              linewidth=2, fontname='Arial'):
+              grid=False, frameon=True, legend_loc='upper left', font_color='black', legendsize=11, labelsize=14,
+              titlesize=15, ticksize=13, linewidth=2, fontname='Arial'):
     ax.spines['bottom'].set_linewidth(linewidth)
     ax.spines['left'].set_linewidth(linewidth)
     ax.spines['right'].set_linewidth(linewidth)
