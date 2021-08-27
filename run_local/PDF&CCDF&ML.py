@@ -53,12 +53,12 @@ def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y
 
 
 class Features:
-    def __init__(self, color_1, color_2, time, feature_idx, status):
+    def __init__(self, color_1, color_2, time, status):
         self.color_1 = color_1
         self.color_2 = color_2
         self.time = time
-        self.feature_idx = feature_idx
         self.status = status
+        self.convert = lambda x, a, b: pow(x, a) * pow(10, b)
 
     def __cal_linear_interval(self, tmp, interval):
         """
@@ -309,6 +309,10 @@ class Features:
             else:
                 ax.loglog(xx, yy, color=color, label=label)
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+        with open('./CCDF(E).txt', 'w') as f:
+            f.write('{}, {}\n'.format(xlabel, ylabel))
+            for j in range(len(xx)):
+                f.write('{}, {}\n'.format(xx[j], yy[j]))
 
     def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, select=None, COLOR=None, LABEL=None):
         """
@@ -355,3 +359,37 @@ class Features:
             ax.errorbar(tmp, ML_y, yerr=Error_bar, fmt='o', ecolor=color, color=color, elinewidth=1, capsize=2, ms=3,
                         label=label, zorder=layer)
         plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right')
+
+
+# if __name__ == '__main__':
+#     # 读取txt文件中的数据
+#     # 数据的绝对路径，注意与转义符加以区别
+#     dirPath = ''
+#     with open(dirPath, 'r') as f:
+#         data = np.array(list(map(lambda i: float(i.strip()), f.readlines())))
+#
+#     # 按步长生成时间序列
+#     # 时间步长
+#     timeStep = 0.001
+#     t = np.linspace(0, timeStep * (data.shape[0] - 1), data.shape[0])
+#
+#     # 设置颜色为了区分不同类别的数据
+#     color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+#     color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+#
+#     # 图注
+#     status = ''
+#
+#     # 由于求导后存在为0的数据，此处将其替换为非零值（任意无穷小的数）
+#     replaceZero = 1e-6
+#     data[np.where(data == 0)[0]] = replaceZero
+#
+#     features = Features(color_1, color_2, t, status)
+#     # PDF
+#     features.cal_PDF(sorted(data), sorted(data), sorted(data), 'Energy (aJ)', 'PDF (E)',
+#                      [[0, None], [0, None], [0, None]], [8, 8, 8], bin_method='log', select=[0, 1], FIT=True)
+#     # CCDF
+#     features.cal_CCDF(sorted(data), sorted(data), sorted(data), 'Energy (aJ)', 'CCD C(s)',
+#                       [[0, float('inf')], [0, float('inf')], [0, float('inf')]], select=[0, 1], FIT=True)
+#     # ML 该程序计算复杂度有待优化，若数据量较大，可在原有数据基础上间隔取值计算ML
+#     features.cal_ML(sorted(data), sorted(data), sorted(data), 'Energy (aJ)', 'ML (E)', select=[0, 1])
