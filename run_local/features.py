@@ -277,11 +277,9 @@ class Features:
             if bin_method == 'linear':
                 inter, mid = self.__cal_linear_interval(tmp, num)
                 xx, yy = self.__cal_linear(tmp, inter, mid, num)
-                print(inter, mid)
             elif bin_method == 'log':
                 inter = self.__cal_log_interval(tmp)
                 xx, yy = self.__cal_log(tmp, inter, num)
-                print(inter)
             if FIT:
                 if method == 'value':
                     lim = np.where((xx > lim[0]) & (xx < lim[1]))[0]
@@ -331,7 +329,7 @@ class Features:
             LABEL = ['Whole', 'Pop 1', 'Pop 2']
         if COLOR is None:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
-        N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
+        N_origin, N1, N2 = len(tmp_origin) if tmp_origin else 0, len(tmp_1) if tmp_1 else 0, len(tmp_2) if tmp_2 else 0
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
         fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
@@ -364,7 +362,8 @@ class Features:
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
 
-    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, LABEL=None):
+    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, ECOLOR=None,
+               LABEL=None):
         """
         Calculate the maximum likelihood function distribution
         :param tmp_origin: Energy/Amplitude/Duration in order of magnitude of original data
@@ -377,16 +376,19 @@ class Features:
                        [0, None]: Display the original data, the first population, the second population of calculation results.
                        [1, 2]: Only display the first population of calculation results.
         :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param ECOLOR: Line color of error bar, corresponding parameter COLOR
         :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
         :return:
         """
-        if select is None:
+        if not select:
             select = [0, 3]
-        if LABEL is None:
+        if not LABEL:
             LABEL = ['Whole', 'Pop 1', 'Pop 2']
-        if COLOR is None:
+        if not COLOR:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
-        N_origin, N1, N2 = len(tmp_origin), len(tmp_1), len(tmp_2)
+        if not ECOLOR:
+            ECOLOR = [[0.7, 0.7, 0.7], [1, 0.58, 0.67], [0.93, 0.39, 0.93]]
+        N_origin, N1, N2 = len(tmp_origin) if tmp_origin else 0, len(tmp_1) if tmp_1 else 0, len(tmp_2) if tmp_2 else 0
         # fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
@@ -394,9 +396,9 @@ class Features:
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
         TMP, N, LAYER = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2], [1, 3, 2]
-        for tmp, N, layer, color, label in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
-                                               LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
-                                               LABEL[select[0]:select[1]]):
+        for tmp, N, layer, color, ecolor, label in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
+                                                       LAYER[select[0]:select[1]], COLOR[select[0]:select[1]],
+                                                       ECOLOR[select[0]:select[1]], LABEL[select[0]:select[1]]):
             ML_y, Error_bar = [], []
             for j in tqdm(range(N)):
                 valid_x = tmp[j:]
@@ -407,8 +409,10 @@ class Features:
                 error_bar = (alpha - 1) / pow(N_prime, 0.5)
                 ML_y.append(alpha)
                 Error_bar.append(error_bar)
-            ax.errorbar(tmp, ML_y, yerr=Error_bar, fmt='o', ecolor=color, color=color, elinewidth=1, capsize=2, ms=3,
-                        label=label, zorder=layer)
+            _, caps, bars = ax.errorbar(tmp, ML_y, yerr=Error_bar, fmt='o', color=color, ecolor=ecolor, elinewidth=1,
+                                        capsize=2, ms=3, label=label, zorder=layer, alpha=0.8)
+            _ = [bar.set_alpha(0.5) for bar in bars]
+            _ = [cap.set_alpha(0.5) for cap in caps]
             with open(features_path[:-4] + '_{}_'.format(label) + 'ML(%s).txt' % xlabel[0], 'w') as f:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
@@ -800,12 +804,14 @@ class Features:
 
 
 if __name__ == "__main__":
-    path = r'E:\VALLEN\HDD'
-    fold = 'Cu-20210418-test1-tension-0.1mm-min'
+    '''
+    path = r'F:\VALLEN'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+    '''
     # Cu-1119-test1-tension  random_state=50
     # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
     # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
@@ -829,11 +835,13 @@ if __name__ == "__main__":
     # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # 2020.11.10-PM-self
 
+    '''
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=7614)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
+    '''
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
@@ -901,7 +909,7 @@ if __name__ == "__main__":
     # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
     # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]
     # INTERVAL_NUM = [[8, 11, 8], [8, 10, 9], [8, 5, 9]]
-    #
+
     # lim_ccdf = [[0.9, float('inf')], [0.3, 9], [0, float('inf')]]
     # lim_waitingT = [[4e-4, 40], [0.8, 90], [0, float('inf')]]
 
