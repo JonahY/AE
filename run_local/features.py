@@ -806,12 +806,13 @@ class Features:
 if __name__ == "__main__":
     '''
     path = r'F:\VALLEN'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    fold = 'Cu-20210914-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
     '''
+    # Cu - 20210914 - test1 - tension - 0.1mm - min
     # Cu-1119-test1-tension  random_state=50
     # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
     # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
