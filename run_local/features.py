@@ -804,14 +804,15 @@ class Features:
 
 
 if __name__ == "__main__":
-    '''
-    path = r'F:\VALLEN'
-    fold = 'Cu-20210914-test1-tension-0.1mm-min'
+    # '''
+    # path = r'F:\VALLEN'
+    path = r'D:\data\vallen'
+    fold = 'Cu-20210921-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
-    '''
+    # '''
     # Cu - 20210914 - test1 - tension - 0.1mm - min
     # Cu-1119-test1-tension  random_state=50
     # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
@@ -836,13 +837,13 @@ if __name__ == "__main__":
     # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # 2020.11.10-PM-self
 
-    '''
+    # '''
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
-    '''
+    # '''
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
