@@ -309,7 +309,9 @@
       <workItem from="1630893755674" duration="29298000" />
       <workItem from="1631756486933" duration="7989000" />
       <workItem from="1631856053361" duration="28982000" />
-      <workItem from="1632272237514" duration="35615000" />
+      <workItem from="1632272237514" duration="99075000" />
+      <workItem from="1633743045314" duration="32060000" />
+      <workItem from="1634126243443" duration="25778000" />
     </task>
     <servers />
   </component>
@@ -354,20 +356,11 @@
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.right/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1631886841272" />
     <state width="1877" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1629207483596" />
-    <state x="540" y="267" key="IDE.errors.dialog" timestamp="1624635261057">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="540" y="267" key="IDE.errors.dialog/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624635261057" />
-    <state x="461" y="169" key="SettingsEditor" timestamp="1624190002234">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="461" y="169" key="SettingsEditor/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624190002234" />
-    <state x="325" y="385" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1632320155706">
-      <screen x="0" y="0" width="1920" height="1050" />
+    <state x="-1295" y="188" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1634899526739">
+      <screen x="-1440" y="0" width="1440" height="870" />
     </state>
     <state x="-1226" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@-1440.0.1440.870" timestamp="1631878446701" />
-    <state x="325" y="385" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1632320155706" />
-    <state x="2097" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050/1920.0.1440.870@0.0.1920.1050" timestamp="1624802077475" />
+    <state x="-1295" y="188" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1634899526739" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1629382201548" />
     <state x="-917" y="347" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1631880964117">
       <screen x="-1440" y="0" width="1440" height="870" />
@@ -377,6 +370,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="0" y="0" width="1628" height="1038" key="dock-window-1/0.0.1920.1050@0.0.1920.1050" timestamp="1627101035398" />
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1633748638774">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="623" y="227" width="672" height="678" key="search.everywhere.popup/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1633748638774" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

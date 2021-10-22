@@ -27,13 +27,15 @@ plt.rcParams['ytick.direction'] = 'in'
 
 
 class Features:
-    def __init__(self, color_1, color_2, time, feature_idx, status):
+    def __init__(self, color_1, color_2, time, feature_idx, status, font='Arial', frameon=True):
         self.color_1 = color_1
         self.color_2 = color_2
         self.time = time
         self.feature_idx = feature_idx
         self.convert = lambda x, a, b: pow(x, a) * pow(10, b)
         self.status = status
+        self.frameon = frameon
+        self.font = font
 
     def __cal_linear_interval(self, tmp, interval):
         """
@@ -264,7 +266,7 @@ class Features:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='PDF--%s' % xlabel)
         # fig = plt.figure(figsize=[6, 3.9])
-        fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+        fig.text(0.15, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP = [tmp_origin, tmp_1, tmp_2]
         if LIM[0][1] == None or LIM[0][1] < 0:
@@ -298,7 +300,7 @@ class Features:
                 f.write('{}, {}\n'.format(xlabel, ylabel))
                 for j in range(len(xx)):
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
-        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, select=None, FIT=False,
                  COLOR=None, LABEL=None):
@@ -331,7 +333,7 @@ class Features:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         N_origin, N1, N2 = len(tmp_origin) if tmp_origin else 0, len(tmp_1) if tmp_1 else 0, len(tmp_2) if tmp_2 else 0
         fig = plt.figure(figsize=[6, 3.9], num='CCDF--%s' % xlabel)
-        fig.text(0.15, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+        fig.text(0.15, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, N = [tmp_origin, tmp_1, tmp_2], [N_origin, N1, N2]
         for tmp, N, color, label, lim in zip(TMP[select[0]:select[1]], N[select[0]:select[1]],
@@ -360,7 +362,7 @@ class Features:
                 f.write('{}, {}\n'.format(xlabel, ylabel))
                 for j in range(len(xx)):
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
-        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, ECOLOR=None,
                LABEL=None):
@@ -391,7 +393,7 @@ class Features:
         N_origin, N1, N2 = len(tmp_origin) if tmp_origin else 0, len(tmp_1) if tmp_1 else 0, len(tmp_2) if tmp_2 else 0
         # fig = plt.figure(figsize=[6, 3.9], num='ML--%s' % xlabel)
         fig = plt.figure(figsize=[6, 3.9])
-        fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+        fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         ax.set_xscale("log", nonposx='clip')
@@ -417,7 +419,7 @@ class Features:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
                     f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
-        plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
@@ -451,7 +453,7 @@ class Features:
 
         fig = plt.figure(figsize=[6, 3.9],
                          num='Contour--%s & %s' % (ylabel.split(' ')[-1][0], xlabel.split(' ')[-1][0]))
-        fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+        fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         if padding:
@@ -462,27 +464,27 @@ class Features:
         #             cbar = plt.colorbar(ct)
         if clabel:
             ax.clabel(ct, inline=True, colors='k', fmt='%.1f')
-        plot_norm(ax, xlabel, ylabel, title=title, legend=False)
+        plot_norm(ax, xlabel, ylabel, title=title, legend=False, frameon=self.frameon, fontname=self.font)
 
-    def plot_correlation(self, tmp_1, tmp_2, xlabel, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None,
-                         fit=False, status='A-D', x1_lim=None, x2_lim=None, plot_lim=None, title=''):
+    def plot_correlation(self, tmp_1, tmp_2, xlabel, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None, fit=False,
+                         status='A-D', x1_lim=None, x2_lim=None, plot_lim=None, title=''):
         fig = plt.figure(figsize=[6, 3.9], num='Correlation--%s & %s %s' % (ylabel, xlabel, title))
-        fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+        fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         if cls_1 is not None and cls_2 is not None:
-            ax.loglog(tmp_1[cls_2], tmp_2[cls_2], '.', marker='.', markersize=8, color=self.color_2,
-                      label='Population 2')
             ax.loglog(tmp_1[cls_1], tmp_2[cls_1], '.', marker='.', markersize=8, color=self.color_1,
                       label='Population 1')
+            ax.loglog(tmp_1[cls_2], tmp_2[cls_2], '.', marker='.', markersize=8, color=self.color_2,
+                      label='Population 2')
             if idx_1 is not None:
                 ax.loglog(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', marker='.', markersize=8, color='black')
             if idx_2 is not None:
                 ax.loglog(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', marker='.', markersize=8, color='black')
-            plot_norm(ax, xlabel, ylabel)
+            plot_norm(ax, xlabel, ylabel, frameon=self.frameon, fontname=self.font)
         else:
             ax.loglog(tmp_1, tmp_2, '.', Marker='.', markersize=8, color='b')
-            plot_norm(ax, xlabel, ylabel, legend=False)
+            plot_norm(ax, xlabel, ylabel, legend=False, frameon=self.frameon, fontname=self.font)
 
         if fit:
             cor_x1, cor_x2 = tmp_1[cls_1], tmp_1[cls_2]
@@ -527,8 +529,8 @@ class Features:
                     ave += max(pow(10, tmp1), pow(10, tmp2)) / min(pow(10, tmp1), pow(10, tmp2))
             return ave / 100, alpha, b, A, B
 
-    def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=None, color=None,
-                               sharex=True, sharey=True):
+    def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=None, color=None, sharex=True,
+                               sharey=True):
         if fig_loc is None:
             fig_loc = [3, 1]
         if not color:
@@ -541,13 +543,13 @@ class Features:
             for idx, ax in enumerate(axes):
                 ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
                             label='Pop %d' % (idx + 1))
-                plot_norm(ax, xlabel, ylabel, legend=True)
+                plot_norm(ax, xlabel, ylabel, legend=True, frameon=self.frameon, fontname=self.font)
         else:
             for idx, axs in enumerate(axes):
                 for idy, ax in enumerate(axs):
                     ax.semilogy(tmp_1[cls_idx[idx]], tmp_2[cls_idx[idx]], '.', Marker='.', color=color[idx],
                                 label='Pop %d' % (idx * fig_loc[1] + idy + 1))
-                    plot_norm(ax, xlabel, ylabel, legend=True)
+                    plot_norm(ax, xlabel, ylabel, legend=True, frameon=self.frameon, fontname=self.font)
         plt.subplots_adjust(wspace=0, hspace=0)
 
     def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, idx_1=None,
@@ -570,12 +572,12 @@ class Features:
         ax.xaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
         ax.yaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
         ax.zaxis.set_major_formatter(plt.FuncFormatter('$10^{:.0f}$'.format))
-        plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False)
+        plot_norm(ax, xlabel, ylabel, zlabel, title, legend=False, frameon=self.frameon, fontname=self.font)
 
-    def plot_feature_time(self, tmp_1, tmp_2, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None
-                          , mode='scatter', width=55):
+    def plot_feature_time(self, tmp_1, tmp_2, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None, mode='scatter',
+                          width=55):
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
-        fig.text(0.96, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+        fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         if mode == 'bar':
@@ -598,10 +600,10 @@ class Features:
                     ax.semilogy(tmp_1[cls_2][idx_2], tmp_2[cls_2][idx_2], '.', Marker='.', color='black')
             else:
                 ax.semilogy(tmp_1, tmp_2, '.', Marker='.', color='b')
-        plot_norm(ax, 'Time (s)', ylabel, legend=False)
+        plot_norm(ax, 'Time (s)', ylabel, legend=False, frameon=self.frameon, fontname=self.font)
 
-    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
-                    select=None, COLOR=None, LABEL=None):
+    def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log', select=None,
+                    COLOR=None, LABEL=None):
         if select is None:
             select = [0, 3]
         if INTERVAL_NUM is None:
@@ -612,7 +614,7 @@ class Features:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Bath law')
         #         fig = plt.figure(figsize=[6, 3.9])
-        fig.text(0.12, 0.2, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+        fig.text(0.12, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TMP, MARKER = [tmp_origin, tmp_1, tmp_2], ['o', 'p', 'h']
 
@@ -657,7 +659,7 @@ class Features:
                 x_eny, y = x_eny[y != float('inf')], y[y != float('inf')]
             ax.semilogx(x_eny, y, color=color, marker=marker, markersize=8, mec=color, mfc='none', label=label)
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
-        plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
                         select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
@@ -673,7 +675,7 @@ class Features:
             COLOR = ['black', [1, 0, 0.4], [0, 0.53, 0.8]]
         fig = plt.figure(figsize=[6, 3.9], num='Distribution of waiting time')
         # fig = plt.figure(figsize=[6, 3.9])
-        fig.text(0.16, 0.22, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+        fig.text(0.16, 0.22, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
         TIME, MARKER = [time_origin, time_1, time_2], ['o', 'p', 'h']
 
@@ -716,25 +718,24 @@ class Features:
                 for j in range(xx.shape[0]):
                     f.write('{}, {}\n'.format(xx[j], yy[j]))
 
-        plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+        plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
-    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
-                     select=None, FIT=False):
+    def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log', select=None,
+                     FIT=False):
         #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
         if select is None:
             select = [0, 3]
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 1000], [1000, 10000]]
-        tmp_origin, tmp_1, tmp_2 = self.__cal_OmiroLaw_helper(tmp_origin, eny_lim), self.__cal_OmiroLaw_helper(tmp_1,
-                                                                                                               eny_lim), self.__cal_OmiroLaw_helper(
-            tmp_2, eny_lim)
+        tmp_origin, tmp_1, tmp_2 = self.__cal_OmiroLaw_helper(tmp_origin, eny_lim), \
+                                   self.__cal_OmiroLaw_helper(tmp_1, eny_lim), self.__cal_OmiroLaw_helper(tmp_2, eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Pop 1', 'Omori law_Pop 2']
         for idx, [tmp, interval_num, title] in enumerate(
                 zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]], TITLE[select[0]:select[1]])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
             #             fig = plt.figure(figsize=[6, 3.9])
-            fig.text(0.16, 0.21, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+            fig.text(0.16, 0.21, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
             for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'],
                                                            [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0],
@@ -769,7 +770,7 @@ class Features:
                         for j in range(xx.shape[0]):
                             f.write('{}, {}\n'.format(xx[j], yy[j]))
 
-            plot_norm(ax, xlabel, ylabel, legend_loc='upper right')
+            plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False):
         if INTERVAL_NUM is None:
@@ -781,7 +782,7 @@ class Features:
                                                     ['Time sequence_Population 1 as Mainshock',
                                                      'Time sequence_Population 2 as Mainshock']):
             fig = plt.figure(figsize=[6, 3.9], num=title)
-            fig.text(0.16, 0.21, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12})
+            fig.text(0.16, 0.21, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
             if len(res):
                 if bin_method == 'linear':
@@ -800,19 +801,21 @@ class Features:
                     ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
                 else:
                     ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
-            plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right')
+            plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
 
 if __name__ == "__main__":
-    # '''
-    # path = r'F:\VALLEN'
-    path = r'D:\data\vallen'
-    fold = 'Cu-20210921-test1-tension-0.1mm-min'
+    '''
+    path = r'F:\VALLEN'
+    # path = r'D:\data\vallen'
+    fold = '316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
-    # '''
+    '''
+    # gongyechuntie-yuanshitai-AE-2  t_cut=27000  [np.where((chan_2[:, 1] < 440) | (chan_2[:, 1] > 450))[0]]
+    # gongyechuntie-700-1.5h-1  t_cut=35170  [np.where((chan_2[:, 1] < 27360) | (chan_2[:, 1] > 27370))[0]]
     # Cu - 20210914 - test1 - tension - 0.1mm - min
     # Cu-1119-test1-tension  random_state=50
     # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
@@ -837,13 +840,13 @@ if __name__ == "__main__":
     # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # 2020.11.10-PM-self
 
-    # '''
+    '''
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=float('inf'))
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=95000)
+    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', 27000t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
-    # '''
+    '''
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
@@ -973,3 +976,11 @@ if __name__ == "__main__":
     # ax.loglog(Amp[pop2_1], Eny[pop2_1], '.', marker='.', markersize=8, color=color_2, label='Pop 2-1')
     # ax.loglog(Amp[pop2_2], Eny[pop2_2], '.', marker='.', markersize=8, color='orange', label='Pop 2-2')
     # plot_norm(ax, xlabelz[0], xlabelz[2])
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # data_1 = pd.DataFrame(
+    #     {'Time_1': Time[cls_KKM[0]], 'Eny_1': Eny[cls_KKM[0]], 'Amp_1': Amp[cls_KKM[0]], 'Dur_1': Dur[cls_KKM[0]]})
+    # data_2 = pd.DataFrame(
+    #     {'Time_2': Time[cls_KKM[1]], 'Eny_2': Eny[cls_KKM[1]], 'Amp_2': Amp[cls_KKM[1]], 'Dur_2': Dur[cls_KKM[1]]})
+    # data_1.to_csv(r'', header=None)
+    # data_2.to_csv(r'', header=None)

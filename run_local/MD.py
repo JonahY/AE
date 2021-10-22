@@ -6,6 +6,30 @@ from shapely.geometry import Polygon, LineString
 from shapely.ops import polygonize
 from tqdm import tqdm
 from scipy.linalg import solve
+import os
+
+
+def rotateAxis(position, center, alpha, beta, theta):
+    """
+    Coordinate transformation in three dimensional space
+    :param position:
+    :param center:
+    :param alpha:
+    :param beta:
+    :param theta:
+    :return:
+    """
+    alpha *= pi / 180
+    beta *= pi / 180
+    theta *= pi / 180
+    c_m = np.array([[cos(beta) * cos(theta), cos(beta) * sin(theta), -sin(beta)],
+                    [-cos(alpha) * sin(theta) + sin(alpha) * sin(beta) * cos(theta),
+                     cos(alpha) * cos(theta) + sin(alpha) * sin(beta) * sin(theta), sin(alpha) * cos(beta)],
+                    [sin(alpha) * sin(theta) + cos(alpha) * cos(beta) * cos(theta),
+                     -sin(alpha) * cos(theta) + cos(alpha) * sin(beta) * sin(theta), cos(alpha) * cos(beta)]])
+    position -= center
+    position = np.dot(c_m, position.T)
+    return position.T + center
 
 
 def voronoi(points, save=False):
@@ -76,9 +100,9 @@ def dataPosition(allAtoms, dim, atomsPerUnitCell, cellNums, latticeConstant, ori
     # Define the normalized atomic coordinates of FCC crystal structure
     if orient == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]:
         normalizedCoordinates = np.array([[0, 0, 0], [0, 0.5, 0.5], [0.5, 0.5, 0], [0.5, 0, 0.5]]) * latticeConstant
-    elif orient == [[1, 1, -2], [-1, 1, 0], [1, 1, 1]]:
+    elif orient == [[1, 1, 1], [1, 1, -2], [-1, 1, 0]]:
         normalizedCoordinates = np.array([[0, 0, 0], [0.66666667, 0.66666667, 0], [0.33333333, 0.33333333, 0],
-                                          [0.5, 0, 0.5], [0.83333333, 0.33333333, 0.5], [0.16666667, 0.66666667, 0.5]]) \
+                                          [0, 0.5, 0.5], [0.33333333, 0.83333333, 0.5], [0.66666667, 0.16666667, 0.5]])\
                                 * latticeConstant
 
     position = np.zeros([allAtoms, dim])
@@ -256,15 +280,30 @@ def getCrossPoint(line1, line2):
     return x, y
 
 
+def convertLammpsFiles(path):
+    """
+    Initialize the atomic number of the original LAMMPS file
+    :param path:
+    :return:
+    """
+    files = os.listdir(path)
+    for file in tqdm(files):
+        with open(os.path.join(path, file), 'r') as f1, open(os.path.join(path, file) + '.bak', 'w') as f2:
+            for _ in range(13):
+                f2.write(f1.readline())
+            for idx, line in enumerate(f1.readlines(), 1):
+                f2.write('%d ' % idx + ' '.join(line.split(' ')[1:]))
+
+
 if __name__ == '__main__':
     '''
     dim = 3
-    # orient = [[1, 1, -2], [-1, 1, 0], [1, 1, 1]]
+    # orient = [[1, 1, 1], [1, 1, -2], [-1, 1, 0]]
     orient = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     atomsPerUnitCell = 4
     cellNums = [170, 113, 1]
     allAtoms = atomsPerUnitCell * cellNums[0] * cellNums[1] * cellNums[2]
-    # latticeConstant = [4.31600093, 6.10374705, 2.49184430]
+    # latticeConstant = [6.10374705, 4.31600093, 2.49184430]
     latticeConstant = [3.524, 3.524, 3.524]
     position = dataPosition(allAtoms, dim, atomsPerUnitCell, cellNums, latticeConstant, orient)
     file = r'C:\\Users\\Yuan\\Desktop\\test.lmp'
@@ -296,7 +335,7 @@ if __name__ == '__main__':
     points = np.append(points, points_origin + [1200, 800], axis=0)
     centers = points_origin + [600, 400]
 
-    with open(r'C:\Users\Yuan\Desktop\voronoi_vertices.txt', 'r') as f:
+    with open(r'F:\project\atomsk\2D\voronoi_vertices.txt', 'r') as f:
         vertices = [list(map(lambda j: float(j), i.strip().split('\t')[1][6:-1].split(' '))) for i in f.readlines()]
     vertices = np.array(vertices)
     vertices = vertices[
