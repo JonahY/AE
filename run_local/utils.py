@@ -139,7 +139,6 @@ class Reload:
         chan_4 = np.array(chan_4)
         return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
-
     def read_pac_data(self, path, lower=2):
         os.chdir(path)
         dir_features = os.listdir(path)[0]
@@ -295,7 +294,7 @@ def material_status(component, status):
     return idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2
 
 
-def validation(k):
+def validation(data_tra, k):
     # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
     i = data_tra[k]
     sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -325,6 +324,7 @@ def validation(k):
     #         continue
     #     idx += 1
     print(i[0], amplitude, rise_time, duration, energy / pow(10, 4), count, i[-1])
+    return i[0], amplitude, rise_time, duration, energy / pow(10, 4), count, i[-1]
 
 
 def val_TRAI(data_pri, TRAI):

@@ -602,3 +602,30 @@ if __name__ == '__main__':
         yCal = getEquationResult(a, c, xCal)
         plt.plot(xCal, yCal, c='b')
         plt.plot(xCal + 600, yCal, c='b')
+
+'''
+points_origin = np.array([[43, 29], [129, 29], [215, 29], [301, 29], [387, 29], [473, 29], [559, 29],
+                          [43+43, 87], [129+43, 87], [215+43, 87], [387+43, 87], [473+43, 87], [559+43, 87],
+                          [43, 145], [129, 145], [473, 145], [559, 145],
+                          [43+43, 203], [300, 200],[559+43, 203],
+                          [43, 261], [129, 261], [473, 261], [559, 261],
+                          [43+43, 319], [129+43, 319], [215+43, 319], [387+43, 319], [473+43, 319], [559+43, 319],
+                          [43, 377], [129, 377], [215, 377], [301, 377], [387, 377], [473, 377], [559, 377]]).astype('float64')
+points_origin += np.random.normal(0, 8, points_origin.shape)
+points = np.append(points_origin, points_origin + [0, 400], axis=0)
+points = np.append(points, points_origin + [0, 800], axis=0)
+points = np.append(points, points_origin + [600, 0], axis=0)
+points = np.append(points, points_origin + [600, 400], axis=0)
+points = np.append(points, points_origin + [600, 800], axis=0)
+points = np.append(points, points_origin + [1200, 0], axis=0)
+points = np.append(points, points_origin + [1200, 400], axis=0)
+points = np.append(points, points_origin + [1200, 800], axis=0)
+
+voronoi(points)
+plt.ylim(300, 900)
+plt.xlim(400, 1400)
+plt.axhline(400, 0.2, 0.8, c='black')
+plt.axhline(800, 0.2, 0.8, c='black')
+plt.axvline(600, 1 / 6, 5 / 6, c='black')
+plt.axvline(1200, 1 / 6, 5 / 6, c='black')
+'''
