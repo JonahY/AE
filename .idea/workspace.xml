@@ -29,10 +29,14 @@
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/MD.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/MD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Bimodal Nickel_CCDF(P).txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Bimodal Nickel_ML(P).txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Bimodal Nickel_PDF (PE).txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Uniform Nickel_CCDF(P).txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Uniform Nickel_ML(P).txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/_Uniform Nickel_PDF (PE).txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/pac.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/pac.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/wave_freq.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +81,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/run_remote" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../AE_GUI" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -315,6 +319,8 @@
       <workItem from="1633743045314" duration="32060000" />
       <workItem from="1634126243443" duration="26378000" />
       <workItem from="1634974486516" duration="40418000" />
+      <workItem from="1635815388494" duration="18506000" />
+      <workItem from="1636018732584" duration="23401000" />
     </task>
     <servers />
   </component>
@@ -339,6 +345,10 @@
     </state>
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1631886844368" />
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1629381939323" />
+    <state x="740" y="279" key="FileChooserDialogImpl" timestamp="1636363016663">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="740" y="279" key="FileChooserDialogImpl/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1636363016663" />
     <state width="823" height="922" key="GridCell.Tab.0.bottom" timestamp="1631886841272">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -359,20 +369,16 @@
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.right/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1631886841272" />
     <state width="1877" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1629207483596" />
-    <state x="-1311" y="152" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1635768026988">
-      <screen x="-1440" y="0" width="1440" height="870" />
+    <state x="458" y="242" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1636191247792">
+      <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="-1226" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@-1440.0.1440.870" timestamp="1631878446701" />
-    <state x="-1311" y="152" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1635768026988" />
+    <state x="458" y="242" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1636191247792" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1629382201548" />
     <state x="-917" y="347" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1631880964117">
       <screen x="-1440" y="0" width="1440" height="870" />
     </state>
     <state x="-917" y="347" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/-1440.0.1440.870/0.0.1920.1050@-1440.0.1440.870" timestamp="1631880964117" />
-    <state x="0" y="0" width="1628" height="1038" key="dock-window-1" timestamp="1627101035398">
-      <screen x="0" y="0" width="1920" height="1050" />
-    </state>
-    <state x="0" y="0" width="1628" height="1038" key="dock-window-1/0.0.1920.1050@0.0.1920.1050" timestamp="1627101035398" />
     <state x="623" y="227" width="672" height="678" key="search.everywhere.popup" timestamp="1633748638774">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>

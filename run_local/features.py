@@ -806,9 +806,9 @@ class Features:
 
 if __name__ == "__main__":
     # '''
-    path = r'F:\VALLEN'
+    path = r'F:\VALLEN\HDD'
     # path = r'D:\data\vallen'
-    fold = '316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224'
+    fold = 'Cu-20210914-test1-tension-0.1mm-min'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -817,7 +817,8 @@ if __name__ == "__main__":
     # gongyechuntie-700-1.5h-AE-2-2  t_cut=21930  [np.where((chan_3[:, 1] < 17600) | (chan_3[:, 1] > 17650))[0]]
     # gongyechuntie-yuanshitai-AE-2  t_cut=27000  [np.where((chan_2[:, 1] < 440) | (chan_2[:, 1] > 450))[0]]
     # gongyechuntie-700-1.5h-1  t_cut=35170  [np.where((chan_2[:, 1] < 27360) | (chan_2[:, 1] > 27370))[0]]
-    # Cu - 20210914 - test1 - tension - 0.1mm - min
+    # AM-Cu-20210928-test2-tension-0.05mm-min  t_cut=34508  slope, intercept = 2, -2.9
+    # Cu-20210914-test1-tension-0.1mm-min  t_cut=13730  random_state=100
     # Cu-1119-test1-tension  random_state=50
     # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
     # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
@@ -843,7 +844,7 @@ if __name__ == "__main__":
 
     # '''
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=95000)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=14250)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', 27000t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
@@ -985,3 +986,9 @@ if __name__ == "__main__":
     #     {'Time_2': Time[cls_KKM[1]], 'Eny_2': Eny[cls_KKM[1]], 'Amp_2': Amp[cls_KKM[1]], 'Dur_2': Dur[cls_KKM[1]]})
     # data_1.to_csv(r'', index=None)
     # data_2.to_csv(r'', index=None)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # for trai, title, c in zip([TRAI[pop1], TRAI[pop2_1], TRAI[pop2_both]], ['Pop 1', 'Pop 2_1', 'Pop 2_2'],
+    #                           [color_1, color_2, 'orange']):
+    #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
+    #     frequency.plot_ave_freq(Res, N, title, c)

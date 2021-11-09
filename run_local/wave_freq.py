@@ -344,11 +344,11 @@ class Frequency:
                 ax.bar(index, values, 0.45, color="#87CEFA")
                 plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
-    def plot_ave_freq(self, Res, N, title, color='blue'):
+    def plot_ave_freq(self, Res, N, title, color='blue', y_lim=[0, 1.7], label='whole'):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid / 1000, Res / N, lw=1, color=color)
-        plot_norm(ax, x_lim=[0, 800], xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
+        ax.plot(self.grid / 1000, Res / N, lw=1, color=color, label=label)
+        plot_norm(ax, x_lim=[0, 800], y_lim=y_lim, xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency')
 
     def plot_freq_TRAI(self, k, valid=False, color='blue'):
         # Frequency with specific TRAI
@@ -481,6 +481,7 @@ class Frequency:
             if t[-1] < t_lim:
                 continue
             valid_idx = np.where((half_frq / 1000) < 1000)[0]
-            ax.plot(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx], lw=lw)
+            # ax.plot(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx], lw=lw)
+            ax.scatter(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx])
             z += 1
         plot_norm(ax, 'Freq (kHz)', 'Points', '|Y(freq)|', x_lim=[0, 1000], y_lim=[0, z], legend=False)
