@@ -324,7 +324,7 @@ def main_read_pac_data(file_list, data_path, processor, threshold_dB, magnificat
     # check existing file
     tar = data_path.split('/')[-1] + '.txt'
     if tar in file_list:
-        exist_idx = np.where(np.array(file_list) == tar)
+        exist_idx = np.where(np.array(file_list) == tar)[0][0]
         file_list = file_list[0:exist_idx] + file_list[exist_idx+1:]
     each_core = int(math.ceil(len(file_list) / float(processor)))
     result, tra_1, tra_2, tra_3, tra_4 = [], [], [], [], []
@@ -390,7 +390,7 @@ def main_read_pac_features(data_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", "--data_path", type=str,
-                        default=r"F:\PAC\316L-1.5-z8-0.01-AE-3 sensor-Vallen&PAC-20210302\316L-1.5-z8-0.01-AE-3 sensor-Vallen&PAC-20210302",
+                        default=r"H:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115",
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("-mag", "--magnification_dB", type=int, default=40, help="Magnification /dB")
@@ -410,21 +410,22 @@ if __name__ == "__main__":
 
     data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 
-    # data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path)
+    data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path)
 
-    # chan = chan_1
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), chan[:, 8] * pow(10, 6), \
-    #                                           chan[:, 9], chan[:, 10], chan[:, -1]
+    chan = chan_1
+    Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), \
+                                                    chan[:, 8] * pow(10, 6), chan[:, 9], chan[:, 10], chan[:, -1], \
+                                                    chan[:, 0]
     # feature_idx = [Amp, Dur, Eny]
     # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = '316L'
+    color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+    color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+    status = 'Pure Ni'
     # features = Features(color_1, color_2, Time, feature_idx, status)
     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2])
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0])
     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2])
 
-    waveform = Waveform(color_1, color_2, data_tra_1, opt.data_path, 'test', status, 'pac', opt.threshold_dB, opt.magnification_dB)
+    waveform = Waveform(color_1, color_2, data_tra_1, opt.data_path, 'test', status, 'pac', opt.threshold_dB)
 
     # file_list, file_idx = filelist_convert(opt.data_path)

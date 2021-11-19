@@ -1,3 +1,35 @@
+# ======================================================== PAC =========================================================
+# ----------------------------------------------------------------------------------------------------------------------
+# Save waveform and ssq_cwt in batches
+for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
+    tmp = data_tra_1[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = tmp[-2]
+    time = np.linspace(0, tmp[2] * (tmp[-3] - 1) * pow(10, 6), tmp[-3])
+    for tmp_tail, s in enumerate(sig[::-1]):
+        if s != 0:
+            tail = -tmp_tail if tmp_tail > 0 else None
+            break
+    time, sig = time[:tail], sig[:tail]
+
+    fig = plt.figure(figsize=(9.2, 3), num='0')
+    ax = fig.add_subplot(1, 2, 1)
+    ax.plot(time, sig, lw=1, color=color_1)
+    plt.axhline(abs(pow(10, opt.threshold_dB / 20)), 0, sig.shape[0], linewidth=1, color="black")
+    plt.axhline(-abs(pow(10, opt.threshold_dB / 20)), 0, sig.shape[0], linewidth=1, color="black")
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
+    ax = fig.add_subplot(1, 2, 2)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+    plt.savefig(r'H:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\pop1\TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
+
+# ======================================================= VALLEN =======================================================
+# ----------------------------------------------------------------------------------------------------------------------
 # Save waveform and ssq_cwt in batches at the same time
 for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
     tmp = data_tra[int(i - 1)]

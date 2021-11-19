@@ -99,6 +99,11 @@ class Waveform:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
                        (i[0 if self.device == 'stream' else -1], k))
         time, sig = self.cal_wave(i, valid=valid)
+        for tmp_tail, s in enumerate(sig[::-1]):
+            if s != 0:
+                tail = -tmp_tail if tmp_tail > 0 else None
+                break
+        time, sig = time[:tail], sig[:tail]
 
         fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI %d (%s)' % (k, valid))
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},

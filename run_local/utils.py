@@ -1,4 +1,5 @@
 import sqlite3
+from plot_format import plot_norm
 from tqdm import tqdm
 import numpy as np
 import array
@@ -10,6 +11,12 @@ import shutil
 import pandas as pd
 from scipy.signal import savgol_filter
 import sqlite3
+import matplotlib.pyplot as plt
+from matplotlib.pylab import mpl
+
+mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
+plt.rcParams['xtick.direction'] = 'in'
+plt.rcParams['ytick.direction'] = 'in'
 
 
 class Reload:
@@ -296,7 +303,7 @@ def material_status(component, status):
 
 def validation(data_tra, k):
     # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
-    i = data_tra[k]
+    i = data_tra[k - 1]
     sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
     time = np.linspace(i[0], i[0] + pow(i[-5], -1) * (i[-4] - 1), i[-4])
 
@@ -323,7 +330,7 @@ def validation(data_tra, k):
     #         idx += 2
     #         continue
     #     idx += 1
-    print(i[0], amplitude, rise_time, duration, energy / pow(10, 4), count, i[-1])
+    # print(i[0], amplitude, rise_time, duration, energy / pow(10, 4), count, i[-1])
     return i[0], amplitude, rise_time, duration, energy / pow(10, 4), count, i[-1]
 
 
@@ -416,6 +423,46 @@ def cal_label(tmp1, tmp2, formula, slope, intercept):
             else:
                 label.append(1)
     return label
+
+
+def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
+    idx_1, idx_2 = [], []
+    formula = lambda x, a, b: pow(x, a) * pow(10, b)
+    fit_x = cal_fitx(tmp1, 1000)
+    if len(slope) == 1:
+        fit_y = [formula(i, slope[0], intercept[0]) for i in fit_x]
+        label = cal_label(tmp1, tmp2, formula, slope, intercept)
+        idx_1 = np.where(np.array(label) == 0)[0]
+        idx_2 = np.where(np.array(label) == 1)[0]
+
+        fig = plt.figure(figsize=[6, 3.9])
+        ax = plt.subplot()
+        ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='red', label='Pop 1')
+        ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='blue', label='Pop 2')
+        ax.loglog(fit_x, fit_y, '.', Marker='.', markersize=0.5, color='black')
+        plot_norm(ax, xlabel, ylabel, legend=True)
+
+    elif len(slope) == 2:
+        fit_y1 = [formula(i, slope[0], intercept[0]) for i in fit_x]
+        fit_y2 = [formula(i, slope[1], intercept[1]) for i in fit_x]
+        label = cal_label(tmp1, tmp2, formula, slope, intercept)
+        idx_1 = np.where(np.array(label) == 0)[0]
+        idx_2 = np.where(np.array(label) == 1)[0]
+        idx_3 = np.where(np.array(label) == 2)[0]
+
+        fig = plt.figure(figsize=[6, 3.9])
+        ax = plt.subplot()
+        ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='black', label='Pop 1')
+        ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='r', label='Pop 2')
+        ax.loglog(tmp1[idx_3], tmp2[idx_3], '.', Marker='.', markersize=8, color='b', label='Pop 3')
+        ax.loglog(fit_x, fit_y1, '.', Marker='.', markersize=0.5, color='black')
+        ax.loglog(fit_x, fit_y2, '.', Marker='.', markersize=0.5, color='black')
+        plot_norm(ax, xlabel, ylabel, legend=True)
+
+    else:
+        print("Current function don't support fit more than two lines.")
+
+    return idx_1, idx_2
 
 
 def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):

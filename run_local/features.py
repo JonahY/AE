@@ -21,13 +21,13 @@ from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.mplot3d import Axes3D
 
 warnings.filterwarnings("ignore")
-mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
+mpl.rcParams['axes.unicode_minus'] = False
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 
 
 class Features:
-    def __init__(self, color_1, color_2, time, feature_idx, status, font='Arial', frameon=True):
+    def __init__(self, color_1, color_2, time, feature_idx, status, font='Arial', frameon=False):
         self.color_1 = color_1
         self.color_2 = color_2
         self.time = time
@@ -474,9 +474,9 @@ class Features:
         ax = plt.subplot()
         if cls_1 is not None and cls_2 is not None:
             ax.loglog(tmp_1[cls_1], tmp_2[cls_1], '.', marker='.', markersize=8, color=self.color_1,
-                      label='Population 1')
+                      label='Pop 1')
             ax.loglog(tmp_1[cls_2], tmp_2[cls_2], '.', marker='.', markersize=8, color=self.color_2,
-                      label='Population 2')
+                      label='Pop 2')
             if idx_1 is not None:
                 ax.loglog(tmp_1[cls_1][idx_1], tmp_2[cls_1][idx_1], '.', marker='.', markersize=8, color='black')
             if idx_2 is not None:
@@ -806,17 +806,23 @@ class Features:
 
 if __name__ == "__main__":
     # '''
-    path = r'F:\VALLEN\HDD'
+    path = r'H:\VALLEN'
     # path = r'D:\data\vallen'
-    fold = 'Cu-20210914-test1-tension-0.1mm-min'
+    fold = 'Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115'
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
-    # '''
+
+    # =================================================== Data Info ===================================================
+    # ------------------------------------------------------ Fe ------------------------------------------------------
+    # gongyechuntie-700-1.5h-0.1-3-2  t_cut=3500  [np.where((chan_4[:, 1] < 2004) | (chan_4[:, 1] > 2006))[0]]
+    # gongyechuntie-700-1.5h-0.1-3-3  t_cut=3000  [np.where((chan_4[:, 1] < 1917) | (chan_4[:, 1] > 1919))[0]]
     # gongyechuntie-700-1.5h-AE-2-2  t_cut=21930  [np.where((chan_3[:, 1] < 17600) | (chan_3[:, 1] > 17650))[0]]
     # gongyechuntie-yuanshitai-AE-2  t_cut=27000  [np.where((chan_2[:, 1] < 440) | (chan_2[:, 1] > 450))[0]]
     # gongyechuntie-700-1.5h-1  t_cut=35170  [np.where((chan_2[:, 1] < 27360) | (chan_2[:, 1] > 27370))[0]]
+
+    # ------------------------------------------------------ Cu ------------------------------------------------------
     # AM-Cu-20210928-test2-tension-0.05mm-min  t_cut=34508  slope, intercept = 2, -2.9
     # Cu-20210914-test1-tension-0.1mm-min  t_cut=13730  random_state=100
     # Cu-1119-test1-tension  random_state=50
@@ -824,27 +830,35 @@ if __name__ == "__main__":
     # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
     # TC21-900-600-z2-0.01-AE-DIC-20210413  [np.where(chan_3[:, 1] < 4300)[0]]
     # TC21-900-600-tension text-z1-0.05-AE-20210125  [np.where(chan_3[:, 1] < 5600)[0]]
+    # Cu-3D-compression-1106-before900s  t_cut=900
+    # Cu-annealing-tension-1126
+
+    # ------------------------------------------------------ Ni ------------------------------------------------------
+    # Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115  t_cut=24000
+    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)  random_state=50
+    # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
     # Ni 2-compression text-4-0.003-20201012
     # Ni 2-compression text-2-0.003-20201002
     # Ni 2-compression text-1-0.003-20200928
     # Ni 1-compression text-1-0.003-20201004
-    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  t_cut=95000
+
+    # ---------------------------------------------------- Nano Ni ----------------------------------------------------
     # Nano Ni-compression text-1-0.003-20200919  [np.where(chan_3[:, 1] < 14700)[0]]
     # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
     # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
     # Nano Ni-compression text-4-0.003-20200921
-    # Cu-3D-compression-1106-before900s  t_cut=900
-    # Cu-annealing-tension-1126
-    # 2020.11.10-PM-self
-    # 6016_CR_1
+
+    # ----------------------------------------------------- 316L -----------------------------------------------------
+    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  t_cut=95000
     # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000  random_state=100
-    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)  random_state=50
-    # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
+
+    # ---------------------------------------------------- Others ----------------------------------------------------
+    # 6016_CR_1
+    # 2020.11.10-PM-self
     # 2020.11.10-PM-self
 
-    # '''
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=14250)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=24000)
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', 27000t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
@@ -992,3 +1006,6 @@ if __name__ == "__main__":
     #                           [color_1, color_2, 'orange']):
     #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
     #     frequency.plot_ave_freq(Res, N, title, c)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # idx_1, idx_2 = linear_matching(Amp, Eny, xlabelz[0], xlabelz[2], [2], [-3])
