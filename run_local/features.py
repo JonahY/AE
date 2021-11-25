@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
+import json
 from tqdm import tqdm
 import array
 import csv
@@ -706,7 +707,7 @@ class Features:
                 elif method == 'index':
                     fit = np.polyfit(np.log10(xx[lim[0]:lim[1]]), np.log10(yy[lim[0]:lim[1]]), 1)
                 alpha, b = fit[0], fit[1]
-                fit_x = np.linspace(xx[0], xx[-1], 100)
+                fit_x = np.linspace(xx[lim[0]], xx[-1], 100)
                 fit_y = self.convert(fit_x, alpha, b)
                 ax.plot(fit_x, fit_y, '-.', lw=1, color=color)
                 ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color,
@@ -806,60 +807,20 @@ class Features:
 
 if __name__ == "__main__":
     # '''
-    path = r'H:\VALLEN'
-    # path = r'D:\data\vallen'
-    fold = 'Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115'
+    with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
+        js = json.load(f)
+
+    path = r'H:\VALLEN\Ni'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
 
-    # =================================================== Data Info ===================================================
-    # ------------------------------------------------------ Fe ------------------------------------------------------
-    # gongyechuntie-700-1.5h-0.1-3-2  t_cut=3500  [np.where((chan_4[:, 1] < 2004) | (chan_4[:, 1] > 2006))[0]]
-    # gongyechuntie-700-1.5h-0.1-3-3  t_cut=3000  [np.where((chan_4[:, 1] < 1917) | (chan_4[:, 1] > 1919))[0]]
-    # gongyechuntie-700-1.5h-AE-2-2  t_cut=21930  [np.where((chan_3[:, 1] < 17600) | (chan_3[:, 1] > 17650))[0]]
-    # gongyechuntie-yuanshitai-AE-2  t_cut=27000  [np.where((chan_2[:, 1] < 440) | (chan_2[:, 1] > 450))[0]]
-    # gongyechuntie-700-1.5h-1  t_cut=35170  [np.where((chan_2[:, 1] < 27360) | (chan_2[:, 1] > 27370))[0]]
-
-    # ------------------------------------------------------ Cu ------------------------------------------------------
-    # AM-Cu-20210928-test2-tension-0.05mm-min  t_cut=34508  slope, intercept = 2, -2.9
-    # Cu-20210914-test1-tension-0.1mm-min  t_cut=13730  random_state=100
-    # Cu-1119-test1-tension  random_state=50
-    # Cu-20210418-test1-tension-0.1mm-min  t_cut=7600  random_state=10
-    # T2-Cu-20210502-test1-tension-0.1mm-min  random_state=100
-    # TC21-900-600-z2-0.01-AE-DIC-20210413  [np.where(chan_3[:, 1] < 4300)[0]]
-    # TC21-900-600-tension text-z1-0.05-AE-20210125  [np.where(chan_3[:, 1] < 5600)[0]]
-    # Cu-3D-compression-1106-before900s  t_cut=900
-    # Cu-annealing-tension-1126
-
-    # ------------------------------------------------------ Ni ------------------------------------------------------
-    # Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115  t_cut=24000
-    # Ni-tension test-electrolysis-1-0.01-AE-20201031    chan = np.delete(chan_2, [3, 129, 509], 0)  random_state=50
-    # Ni-tension test-pure-1-0.01-AE-20201030  t_cut=38600  chan = np.delete(chan_2, [2, 65], 0)  random_state=50
-    # Ni 2-compression text-4-0.003-20201012
-    # Ni 2-compression text-2-0.003-20201002
-    # Ni 2-compression text-1-0.003-20200928
-    # Ni 1-compression text-1-0.003-20201004
-
-    # ---------------------------------------------------- Nano Ni ----------------------------------------------------
-    # Nano Ni-compression text-1-0.003-20200919  [np.where(chan_3[:, 1] < 14700)[0]]
-    # Nano Ni-compression text-2-0.003-20200920‘  [np.where(chan_3[:, 1] < 16880)[0]]
-    # Nano Ni-compression text-3-0.003-20200920  [np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]
-    # Nano Ni-compression text-4-0.003-20200921
-
-    # ----------------------------------------------------- 316L -----------------------------------------------------
-    # 316L-1.5-z8-0.01-AE-3 sensors-Vallen&PAC-20210224  t_cut=95000
-    # 316L-1.5-z3-AE-3 sensor-20200530  [np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]  t_cut=95000  random_state=100
-
-    # ---------------------------------------------------- Others ----------------------------------------------------
-    # 6016_CR_1
-    # 2020.11.10-PM-self
-    # 2020.11.10-PM-self
-
     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=24000)
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', 27000t_cut=float('inf'))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
+    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # '''
@@ -867,15 +828,13 @@ if __name__ == "__main__":
     # chan = chan_2
     # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
     #                                                 chan[:, 8], chan[:, 9], chan[:, -1].astype(int)
-    # # TRAI, Time, Channel, Amp, RiseT, Dur, Eny = chan[:, 0], chan[:, 1], chan[:, 2], \
-    # #                                             chan[:, 3], chan[:, 4], chan[:, 5], chan[:, 6]
 
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # feature_idx = [Amp, Dur, Eny]
     # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
     # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
     # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
+    # status = info['fold'].split('-')[0] + '-' + info['fold'].split('-')[2]
     # features = Features(color_1, color_2, Time, feature_idx, status)
 
     # # ICA and Kernel K-Means
@@ -909,30 +868,6 @@ if __name__ == "__main__":
     # for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
     #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
     #     frequency.plot_ave_freq(Res, N, title)
-
-    # # Al-alloy
-    # LIM_PDF = [[[0, None], [1, -4], [2, -6]], [[0, float('inf')], [100, 900], [36, 500]], [[0, None], [4, -3], [2, -4]]]
-    # LIM_CCDF = [[[0, float('inf')], [15, 100], [20, 300]], [[0, float('inf')], [100, 2500], [30, 250]],
-    #             [[0, float('inf')], [0.5, 10], [0.2, 10]]]
-    # INTERVAL_NUM = [[8, 16, 16], [8, 15, 20], [8, 8, 10]]
-
-    # # Ni-electrolysis: 8, 10, 7
-    # LIM_PDF = [[[0, None], [1, None], [1, -2]], [[0, None], [11, -2], [10, -1]], [[0, None], [2, -2], [1, -2]]]
-    # LIM_CCDF = [[[0, float('inf')], [0, 1000], [0, 3000]], [[0, float('inf')], [100, 3600], [80, 600]], [[0, float('inf')], [1, 3000], [0.5, 1500]]]
-    # INTERVAL_NUM = [[8, 16, 16], [8, 16, 8], [8, 5, 6]]
-
-    # # Ni-electrolysis_P2E
-    # lim_pdf = [[2, -2], [3, -1], [3, -1]]
-    # lim_ccdf = [[1, 3000], [0.3, float('inf')], [0, float('inf')]]
-    # inerval_num = [5, 8, 4]
-
-    # # Ni-pure
-    # LIM_PDF = [[[0, None], [2, -1], [1, -1]], [[0, None], [6, None], [9, -1]], [[0, None], [2, -2], [2, -4]]]
-    # LIM_CCDF = [[[0, float('inf')], [20, 250], [25, 150]], [[0, float('inf')], [150, 2000], [30, 200]], [[0, float('inf')], [0.6, 400], [0.3, 6]]]
-    # INTERVAL_NUM = [[8, 11, 8], [8, 10, 9], [8, 5, 9]]
-
-    # lim_ccdf = [[0.9, float('inf')], [0.3, 9], [0, float('inf')]]
-    # lim_waitingT = [[4e-4, 40], [0.8, 90], [0, float('inf')]]
 
     # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
     #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])

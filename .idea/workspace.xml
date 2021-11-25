@@ -30,9 +30,7 @@
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/pac.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/pac.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/template.txt" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/template.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/wave_freq.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -44,6 +42,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="package.json" />
       </list>
     </option>
   </component>
@@ -101,7 +100,7 @@
       <recent name="C:\Users\Yuan\Desktop\AE\cls\3" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.pac">
+  <component name="RunManager" selected="Python.features">
     <configuration name="MD" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -210,6 +209,9 @@
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_local" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -256,8 +258,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.pac" />
         <item itemvalue="Python.features" />
+        <item itemvalue="Python.pac" />
         <item itemvalue="Python.MD" />
         <item itemvalue="Python.utils" />
         <item itemvalue="Python.PDF&amp;CCDF&amp;ML" />
@@ -318,7 +320,10 @@
       <workItem from="1634974486516" duration="40418000" />
       <workItem from="1635815388494" duration="18506000" />
       <workItem from="1636018732584" duration="41821000" />
-      <workItem from="1636625640173" duration="39962000" />
+      <workItem from="1636625640173" duration="40785000" />
+      <workItem from="1637290786992" duration="10499000" />
+      <workItem from="1637654594671" duration="13182000" />
+      <workItem from="1637734198866" duration="23165000" />
     </task>
     <servers />
   </component>
@@ -343,6 +348,10 @@
     </state>
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1637200836739" />
     <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1629381939323" />
+    <state x="0" y="0" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1637634079273">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="0" y="0" key="#com.intellij.fileTypes.FileTypeChooser/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1637634079273" />
     <state x="740" y="279" key="FileChooserDialogImpl" timestamp="1637201467286">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -367,11 +376,11 @@
     </state>
     <state width="823" height="922" key="GridCell.Tab.0.right/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1637200822142" />
     <state width="1877" height="285" key="GridCell.Tab.0.right/0.0.1920.1050@0.0.1920.1050" timestamp="1629207483596" />
-    <state x="477" y="265" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1637246170844">
+    <state x="477" y="265" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1637846913702">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="-1226" y="279" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@-1440.0.1440.870" timestamp="1631878446701" />
-    <state x="477" y="265" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1637246170844" />
+    <state x="477" y="265" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1637846913702" />
     <state x="340" y="197" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1920.1050@0.0.1920.1050" timestamp="1629382201548" />
     <state x="-1113" y="49" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1636719586344">
       <screen x="-1440" y="0" width="1440" height="870" />

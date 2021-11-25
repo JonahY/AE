@@ -13,6 +13,7 @@ import signal_envelope as se
 from stream import *
 from utils import hl_envelopes_idx
 from ssqueezepy import ssq_cwt
+from scipy.signal import butter, filtfilt
 
 
 class Waveform:
@@ -176,7 +177,7 @@ class Waveform:
                                     '.', Marker='.', color=color)
                     else:
                         ax.loglog(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2,
-                                    '.', Marker='.', color=color)
+                                  '.', Marker='.', color=color)
                 else:
                     sig = sig ** 2 / max(sig ** 2)
                     high_idx, low_idx = hl_envelopes_idx(sig, dmin=60, dmax=60)
@@ -187,12 +188,60 @@ class Waveform:
                     else:
                         ax.loglog(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
 
-            with open('%s_Decay Function_Pop %d.txt' % (features_path, idx + 1), 'w') as f:
+            with open('%s_Decay Function_Pop %d.txt' % (features_path[:-4], idx + 1), 'w') as f:
                 f.write('Time (μs), Normalized A$^2$\n')
                 for j in range(len(XX)):
                     f.write('{}, {}\n'.format(XX[j], YY[j]))
 
         plot_norm(ax, 'Time (μs)', 'Normalized A$^2$', legend=False)
+
+    def plot_filtering(self, TRAI, N, CutoffFreq, btype, valid=False, originWave=False, filteredWave=True):
+        """
+        Signal Filtering
+        :param TRAI:
+        :param N: Order of filter
+        :param CutoffFreq: Cutoff frequency, Wn = 2 * cutoff frequency / sampling frequency, len(Wn) = 2 if btype in ['bandpass', 'bandstop'] else 1
+        :param btype: Filter Types, {'lowpass', 'highpass', 'bandpass', 'bandstop'}
+        :param originWave: Whether to display the original waveform
+        :param filteredWave: Whether to display the filtered waveform
+        :param valid: Whether to truncate the waveform according to the threshold
+        :return:
+        """
+        tmp = self.data_tra[int(TRAI - 1)]
+        if TRAI != tmp[-1]:
+            print('Error: TRAI is incorrect!')
+        time, sig = self.cal_wave(tmp, valid=valid)
+        b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+        sig_filter = filtfilt(b, a, sig)
+
+        if originWave:
+            fig = plt.figure(figsize=(9.2, 3))
+            ax = fig.add_subplot(1, 2, 1)
+            ax.plot(time, sig, lw=1, color='blue')
+            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d' % TRAI, legend=False, grid=True)
+            ax = fig.add_subplot(1, 2, 2)
+            Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+            plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+            plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+        if filteredWave:
+            if btype in ['lowpass', 'highpass']:
+                label = 'Frequency %s %d kHz' % ('<' if btype == 'lowpass' else '>', CutoffFreq)
+            elif btype == 'bandpass':
+                label = '%d kHz < Frequency < %d kHz' % (CutoffFreq[0], CutoffFreq[1])
+            else:
+                label = 'Frequency < %d kHz or > %d kHz' % (CutoffFreq[0], CutoffFreq[1])
+            fig = plt.figure(figsize=(9.2, 3))
+            ax = fig.add_subplot(1, 2, 1)
+            ax.plot(time, sig_filter, lw=1, color='gray', label=label)
+            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d (%s)' % (TRAI, btype), grid=True,
+                      frameon=False, legend_loc='upper right')
+            ax = fig.add_subplot(1, 2, 2)
+            Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+            plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+            plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+        return sig_filter
 
     def save_wave(self, TRAI, pop):
         # Save waveform
@@ -271,7 +320,7 @@ class Frequency:
             num += 1
         return Res, num
 
-    def cla_wtpacket(self, signal, w, n, plot=False):
+    def cal_wtpacket(self, signal, w, n, plot=False):
         w = pywt.Wavelet(w)
         wp = pywt.WaveletPacket(data=signal, wavelet=w, mode='symmetric', maxlevel=n)
 
@@ -332,7 +381,7 @@ class Frequency:
 
         if wtpacket:
             fig = plt.figure(figsize=(15, 7), num='WaveletPacket--TRAI %d' % TRAI)
-            map, wp, energy = self.cla_wtpacket(valid_data, 'db8', n)
+            map, wp, energy = self.cal_wtpacket(valid_data, 'db8', n)
             for i in range(2, n + 2):
                 level_num = pow(2, i - 1)
                 # ['aaa', 'aad', 'add', 'ada', 'dda', 'ddd', 'dad', 'daa']

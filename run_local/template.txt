@@ -30,6 +30,51 @@ for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
 
 # ======================================================= VALLEN =======================================================
 # ----------------------------------------------------------------------------------------------------------------------
+# Save waveform and ssq_cwt in batches (Filtering)
+for idx, i in tqdm(enumerate(TRAI[pop2_2], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+    fig = plt.figure(figsize=(9.2, 9), num='0')
+    ax = fig.add_subplot(3, 2, 1)
+    ax.plot(time, sig, lw=1, color='blue')
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d' % i, legend=False, grid=True)
+    ax = fig.add_subplot(3, 2, 2)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+    N, CutoffFreq, btype = 4, [550, 700], 'bandpass'
+    b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+    sig_filter = filtfilt(b, a, sig)
+    ax = fig.add_subplot(3, 2, 3)
+    ax.plot(time, sig_filter, lw=1, color='gray', label='%d kHz < Frequency < %d kHz' % (CutoffFreq[0], CutoffFreq[1]))
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Bandpass', grid=True, frameon=False, legend_loc='upper right')
+    ax = fig.add_subplot(3, 2, 4)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+    N, CutoffFreq, btype = 4, [550, 700], 'bandstop'
+    b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+    sig_filter = filtfilt(b, a, sig)
+    ax = fig.add_subplot(3, 2, 5)
+    ax.plot(time, sig_filter, lw=1, color='gray', label='Frequency < %d kHz or > %d kHz' % (CutoffFreq[0], CutoffFreq[1]))
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Bandstop', grid=True, frameon=False, legend_loc='upper right')
+    ax = fig.add_subplot(3, 2, 6)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+    plt.savefig('./Ni pure/subdivision_new/waveFreq_pop2_2_filter/TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Save waveform and ssq_cwt in batches at the same time
 for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
     tmp = data_tra[int(i - 1)]
