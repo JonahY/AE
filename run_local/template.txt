@@ -22,13 +22,33 @@ for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
     plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
     ax = fig.add_subplot(1, 2, 2)
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
     plt.savefig(r'H:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\pop1\TRAI-%d.jpg' % i, pad_inches=0)
     fig.clear()
 
 
 # ======================================================= VALLEN =======================================================
+# Feature calculation after filtering
+TRAI_bandstop, Time_bandstop, Amp_bandstop, RiseT_bandstop, Dur_bandstop, Eny_bandstop, Counts_bandstop = np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
+for idx, i in tqdm(enumerate(TRAI[sorted(pop2_2)], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    try:
+        tmp_T, tmp_A, tmp_RT, tmp_D, tmp_E, tmp_Cnts, _ = validation(data_tra, i, True, 'bandstop')
+        TRAI_Waveform = np.append(TRAI_Waveform, tmp[-1])
+        Time_Waveform = np.append(Time_Waveform, tmp_T)
+        Amp_Waveform = np.append(Amp_Waveform, tmp_A)
+        RiseT_Waveform = np.append(RiseT_Waveform, tmp_RT)
+        Dur_Waveform = np.append(Dur_Waveform, tmp_D)
+        Eny_Waveform = np.append(Eny_Waveform, tmp_E)
+        Counts_Waveform = np.append(Counts_Waveform, tmp_Cnts)
+    except TypeError:
+        continue
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Save waveform and ssq_cwt in batches (Filtering)
 for idx, i in tqdm(enumerate(TRAI[pop2_2], 1)):
@@ -45,10 +65,10 @@ for idx, i in tqdm(enumerate(TRAI[pop2_2], 1)):
     plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d' % i, legend=False, grid=True)
     ax = fig.add_subplot(3, 2, 2)
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
 
-    N, CutoffFreq, btype = 4, [550, 700], 'bandpass'
+    N, CutoffFreq, btype = 4, [550, 650], 'bandpass'
     b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
     sig_filter = filtfilt(b, a, sig)
     ax = fig.add_subplot(3, 2, 3)
@@ -56,10 +76,10 @@ for idx, i in tqdm(enumerate(TRAI[pop2_2], 1)):
     plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Bandpass', grid=True, frameon=False, legend_loc='upper right')
     ax = fig.add_subplot(3, 2, 4)
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
 
-    N, CutoffFreq, btype = 4, [550, 700], 'bandstop'
+    N, CutoffFreq, btype = 4, [550, 650], 'bandstop'
     b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
     sig_filter = filtfilt(b, a, sig)
     ax = fig.add_subplot(3, 2, 5)
@@ -67,7 +87,7 @@ for idx, i in tqdm(enumerate(TRAI[pop2_2], 1)):
     plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='Bandstop', grid=True, frameon=False, legend_loc='upper right')
     ax = fig.add_subplot(3, 2, 6)
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
 
     plt.savefig('./Ni pure/subdivision_new/waveFreq_pop2_2_filter/TRAI-%d.jpg' % i, pad_inches=0)
@@ -97,7 +117,7 @@ for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
 
     fig2 = plt.figure(figsize=(2.56, 2.56), num='1')
     # plt.imshow(np.abs(Twxo), vmin=0, vmax=3, cmap='inferno')
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plt.ylim(min(ssq_freqs * 1000), 1000)
     plt.gca().xaxis.set_major_locator(plt.NullLocator())
     plt.gca().yaxis.set_major_locator(plt.NullLocator())
@@ -125,7 +145,7 @@ for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
     plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
     ax = fig.add_subplot(1, 2, 2)
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
     plt.savefig('./Ni electrolysis/subdivision_Entanglement/waveFreq_pop1/TRAI-%d.jpg' % i, pad_inches=0)
     fig.clear()
@@ -164,7 +184,7 @@ for idx, i in tqdm(enumerate(TRAI[cls_KKM[0]], 1)):
         continue
     sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
     time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
-    
+
     fig = plt.figure(figsize=(6, 4.1), num='0')
     fig.text(0.95, 0.17, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
              horizontalalignment="right")
@@ -188,7 +208,7 @@ for trai in tqdm(TRAI[cls_KKM[1]]):
 
     fig = plt.figure(figsize=(2.56, 2.56), num='1')
     # plt.imshow(np.abs(Twxo), vmin=0, vmax=3, cmap='inferno')
-    plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plt.ylim(min(ssq_freqs * 1000), 1000)
     plt.gca().xaxis.set_major_locator(plt.NullLocator())
     plt.gca().yaxis.set_major_locator(plt.NullLocator())

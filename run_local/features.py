@@ -805,24 +805,24 @@ class Features:
             plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
 
-if __name__ == "__main__":
-    # '''
-    with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
-        js = json.load(f)
-
-    path = r'H:\VALLEN\Ni'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
-    info = js['Ni'][fold]
-    path_pri = fold + '.pridb'
-    path_tra = fold + '.tradb'
-    features_path = fold + '.txt'
-    os.chdir('/'.join([path, fold]))
-
-    reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
-    print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
-                                                                                 chan_3.shape[0], chan_4.shape[0]))
+# if __name__ == "__main__":
+#     # '''
+#     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
+#         js = json.load(f)
+#
+#     path = r'H:\VALLEN\Ni'
+#     fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+#     info = js['Ni'][fold]
+#     path_pri = fold + '.pridb'
+#     path_tra = fold + '.tradb'
+#     features_path = fold + '.txt'
+#     os.chdir('/'.join([path, fold]))
+#
+#     reload = Reload(path_pri, path_tra, fold)  # float('inf')
+#     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
+#     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
+#     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
+#                                                                                  chan_3.shape[0], chan_4.shape[0]))
     # '''
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2

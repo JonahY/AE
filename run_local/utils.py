@@ -13,6 +13,8 @@ from scipy.signal import savgol_filter
 import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib.pylab import mpl
+from stream import *
+
 
 mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
 plt.rcParams['xtick.direction'] = 'in'
@@ -301,14 +303,21 @@ def material_status(component, status):
     return idx_select_1, idx_select_2, TRAI_select_1, TRAI_select_2
 
 
-def validation(data_tra, k):
+def validation(data_tra, k, filter=False, btype='bandstop'):
     # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
     i = data_tra[k - 1]
     sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
     time = np.linspace(i[0], i[0] + pow(i[-5], -1) * (i[-4] - 1), i[-4])
 
+    if filter:
+        N, CutoffFreq = 4, [550, 650]
+        b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+        sig = filtfilt(b, a, sig)
+
     thr = i[2]
     valid_wave_idx = np.where(abs(sig) >= thr)[0]
+    if not valid_wave_idx.shape[0]:
+        return
     valid_time = time[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
     start = time[valid_wave_idx[0]]
     end = time[valid_wave_idx[-1]]
@@ -319,7 +328,7 @@ def validation(data_tra, k):
     valid_data = sig[valid_wave_idx[0]:(valid_wave_idx[-1] + 1)]
     energy = np.sum(np.multiply(pow(valid_data, 2), pow(10, 6) / i[3]))
     RMS = math.sqrt(energy / duration)
-    count, idx = 0, 1
+    count = 0
     N = len(valid_data)
     for idx in range(1, N):
         if valid_data[idx - 1] >= thr > valid_data[idx]:
@@ -502,6 +511,45 @@ def find_nearest(ls, v):
         return idx-1
     else:
         return idx
+
+
+def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7, ITU=550, alpha=1.7, t_backNoise=1e4):
+    # ====================================================== 数据读取 ======================================================
+    with open(file, 'r') as f:
+        for _ in range(4):
+            f.readline()
+
+        fs = int(f.readline().strip().split()[-1]) * 1e-3
+        sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[4:-1])))
+        t_initial = np.array([i / fs for i in range(sig_initial.shape[0])])
+
+    # ====================================================== 计算结果 ======================================================
+    t = t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])]
+    sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
+
+    width = int(fs * staLen)
+    stride = int(width) - overlap
+    t_stE, stE = shortTermEny(sig, width, stride, fs, staWin)
+    t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
+    stE_dev = cal_deriv(t_stE, stE)
+    start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
+
+    # ====================================================== 图形展示 ======================================================
+    x = [t, t_stE, t_stE, t_zcR]
+    y = [sig, stE, stE_dev, zcR]
+    color = ['black', 'green', 'gray', 'purple']
+    ylabel = [r'$Amplitude$ $(μV)$', r'$STEnergy$ $(μV^2 \cdot μs)$', r'$S\dot{T}E$ $(μV^2)$',
+              r'$ST\widehat{Z}CR$ $(\%)$']
+    fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+    for idx, ax in enumerate(axes):
+        ax.plot(x[idx], y[idx], lw=0.5, color=color[idx])
+        if idx == 0:
+            for s, e in tqdm(zip(start, end)):
+                ax.plot(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
+                        sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2], lw=0.5, color='red')
+        ax.grid()
+        plot_norm(ax, r'$Time$ $(μs)$' if idx == 3 else '', ylabel[idx], legend=False)
+    plt.subplots_adjust(wspace=0, hspace=0)
 
 
 '''

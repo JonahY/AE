@@ -57,10 +57,10 @@ from time import sleep
 
 def shortTermEny(signal, framelen, stride, fs, window='hamming'):
     """
-    :param signal: raw signal of waveform, unit: μs
+    :param signal: raw signal of waveform, unit: μV
     :param framelen: length of per frame, type: int
     :param stride: length of translation per frame
-    :param fs: sampling rate per millisecond
+    :param fs: sampling rate per microsecond
     :param window: window's function
     :return: time_stE, stE
     """
@@ -93,10 +93,10 @@ def shortTermEny(signal, framelen, stride, fs, window='hamming'):
 
 def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
     """
-    :param signal: raw signal of waveform, unit: μs
+    :param signal: raw signal of waveform, unit: μV
     :param framelen: length of per frame, type: int
     :param stride: length of translation per frame
-    :param fs: sampling rate per millisecond
+    :param fs: sampling rate per microsecond
     :param window: window's function
     :return: time_zcR, zcR
     """
@@ -150,22 +150,23 @@ def cal_deriv(x, y):
 
     return deriv
 
-
-# def zerosCountRate(audio_1, N, move):
-#     count = np.zeros(1)
-#     for i in range(0, len(audio_1), move):
-#         Calculation = 0
-#         if len(audio_1[i:i + N]) == N:
-#             for j in range(N):
-#                 tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
-#                 Calculation += tmp
-#             count = np.append(count, Calculation)
-#         else:
-#             for j in range(len(audio_1[i:i + N])):
-#                 tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
-#                 Calculation += tmp
-#             count = np.append(count, Calculation)
-#     return count
+'''
+def zerosCountRate(audio_1, N, move):
+    count = np.zeros(1)
+    for i in range(0, len(audio_1), move):
+        Calculation = 0
+        if len(audio_1[i:i + N]) == N:
+            for j in range(N):
+                tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
+                Calculation += tmp
+            count = np.append(count, Calculation)
+        else:
+            for j in range(len(audio_1[i:i + N])):
+                tmp = 0.5 * (np.abs(sgn(audio_1[i + j]) - sgn(audio_1[i + j - 1])))
+                Calculation += tmp
+            count = np.append(count, Calculation)
+    return count
+'''
 
 
 def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNoise=0):
@@ -182,38 +183,41 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
     last_end = end_backNoise
 
     while last_end < stE.shape[0] - 2:
-        print(last_end, ITU_tmp, IZCRT_tmp)
+        print('\nStart to find waveform...\nLast End: %d, ITU: %f, IZCRT: %f' % (last_end, ITU_tmp, IZCRT_tmp))
         try:
             start_temp = last_end + np.where(stE[last_end + 1:] >= ITU_tmp)[0][0]
         except IndexError:
-            print("\r100%|{}| [{:.2f}<?, ?it/s]".format("█" * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
-                  end="", flush=True)
+            # print("\r100%|{}| [{:.2f}<?, ?it/s]".format("█" * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
+            #       end="", flush=True)
+            print('No data with short-term energy greater than the threshold (ITU), the search ends.')
             return start, end
         start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp + 1]) <= 0)[0][-1] \
             if np.where(np.array(stE_dev[last_end:start_temp]) <= 0)[0].shape[0] else last_end
+        print('Successfully found the starting index! %d' % start_true)
 
         # Auto-adjust threshold
         ITU_tmp = ITU + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
             if last_end != start_true else ITU_tmp
         IZCRT_tmp = np.mean(zcR[last_end:start_true]) + alpha * np.std(zcR[last_end:start_true]) \
             if last_end != start_true else IZCRT_tmp
-        print(ITU_tmp, IZCRT_tmp)
+        print('Auto-adjust threshold! ITU: %f, IZCRT: %f' % (ITU_tmp, IZCRT_tmp))
 
         for j in range(start_temp + 1, stE.shape[0]):
             if stE[j] < ITU_tmp:
                 end_temp = j
                 break
         ITL = 0.368 * max(stE[start_true:end_temp+1]) if ITU_tmp > 0.368 * max(stE[start_true:end_temp+1]) else ITU_tmp
-        print(end_temp, ITL)
+        print('Successfully found the temporary ending index! End: %d, ITL: %f' % (end_temp, ITL))
 
         for k in range(end_temp, stE.shape[0]):
             if ((stE[k] < ITL) & (zcR[k] > IZCRT_tmp)) | (k == stE.shape[0] - 1):
                 end_true = k
+                print('Starting Index: %d, Ending Index: %d' % (start_true, end_true))
                 break
 
         if start_true >= end_true:
-            print("\r100%|{}| [{:.2f}<?, ?it/s]".format(" " * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
-                  end="", flush=True)
+            # print("\r100%|{}| [{:.2f}<?, ?it/s]".format(" " * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
+            #       end="", flush=True)
             return start, end
 
         last_end = end_true
@@ -222,8 +226,8 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
 
         progressbar = "█" * int(last_end / 10)
         space = " " * (int((stE.shape[0] - 2) / 10) - int(last_end / 10))
-        print("\r{:^3.0f}%|{}{}| [{:.2f}<?, ?it/s]".format((last_end / (stE.shape[0] - 1)) * 100, progressbar, space,
-                                                           time.perf_counter() - t0), end="", flush=True)
+        # print("\r{:^3.0f}%|{}{}| [{:.2f}<?, ?it/s]".format((last_end / (stE.shape[0] - 1)) * 100, progressbar, space,
+        #                                                    time.perf_counter() - t0), end="", flush=True)
 
     return start, end
 
@@ -319,3 +323,41 @@ duration = np.array(duration)
 rise_time = np.array(rise_time)
 energy = np.array(energy)
 '''
+
+# #====================================================== 数据读取 ======================================================
+# with open(r'F:\WFS\Pure Ni-tension test-0.01-2-STREAM20211115-182737-680_ch1.txt', 'r') as f:
+#     for _ in range(4):
+#         f.readline()
+#
+#     fs = int(f.readline().strip().split()[-1]) * 1e-3
+#     sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[4:-1])))
+#     t_initial = np.array([i / fs for i in range(len(sig))])
+#
+# #====================================================== 计算结果 ======================================================
+# t_str, t_end = 1.6 * 1e6, 3.1 * 1e6
+# t = t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])]
+# sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
+# staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 5, 1, 'hamming', 0.7, 550, 1.7, 1e4
+#
+# width = int(fs * staLen)
+# stride = int(width) - overlap
+# t_stE, stE = shortTermEny(sig, width, stride, fs, staWin)
+# t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
+# stE_dev = cal_deriv(t_stE, stE)
+# start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
+#
+# #====================================================== 图形展示 ======================================================
+# x = [t, t_stE, t_stE, t_zcR]
+# y = [sig, stE, stE_dev, zcR]
+# color = ['black', 'green', 'gray', 'purple']
+# ylabel = [r'$Amplitude$ $(μV)$', r'$STEnergy$ $(μV^2 \cdot μs)$', r'$S\dot{T}E$ $(μV^2)$', r'$ST\widehat{Z}CR$ $(\%)$']
+# fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+# for idx, ax in enumerate(axes):
+#     ax.plot(x[idx], y[idx], lw=0.5, color=color[idx])
+#     if idx == 0:
+#         for s, e in tqdm(zip(start, end)):
+#             ax.plot(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
+#                     sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2], lw=0.5, color='red')
+#     ax.grid()
+#     plot_norm(ax, r'$Time$ $(μs)$' if idx == 3 else '', ylabel[idx], legend=False)
+# plt.subplots_adjust(wspace=0, hspace=0)

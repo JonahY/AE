@@ -121,6 +121,28 @@ class Waveform:
 
     def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', IZCRT=0.3, ITU=150, alpha=1, t_backNoise=0,
                     plot=True, classify=False, valid=False, t_str=0, t_end=float('inf')):
+        """
+        Waveform stream segmentation program
+        :param k:
+        :param staLen: The duration of the window function, in μs
+                       The width of the window function = sampling frequency (MHz) * duration,
+                       so this value reflects the duration of the window function on the microsecond scale.
+        :param overlap: The overlap coefficient of the window function,
+                        stride = the width of the window function - the overlap coefficient
+        :param staWin: The name of window function，{'hamming', 'hanning', 'blackman', 'bartlett'}
+        :param IZCRT: Identification Zero Crossing Threshold
+        :param ITU: Identification Threshold Upper
+        :param alpha: weighted factor for the standard deviation of the STE signal, where this a factor can be estimated
+                      along with the previous calibration for the thresholds, if a heavy background noise is expected
+                      the value for this weighting value must be incremented.
+        :param t_backNoise: Used to evaluate background noise time
+        :param plot: Whether to draw a figure to show
+        :param classify: Whether to display the segmentation results in the figure
+        :param valid: Whether to pre-cut the waveform stream according to the threshold
+        :param t_str: Waveform stream data segmentation start time
+        :param t_end: Waveform stream data segmentation cut-off time
+        :return:
+        """
         tmp = self.data_tra[int(k - 1)]
         if tmp[0 if self.device == 'stream' else -1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
@@ -133,8 +155,8 @@ class Waveform:
 
         width = int(tmp[3] * pow(10, -6) * staLen)
         stride = int(width) - overlap
-        t_stE, stE = shortTermEny(sig, width, stride, 20, staWin)
-        t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20, staWin)
+        t_stE, stE = shortTermEny(sig, width, stride, tmp[3] * pow(10, -6), staWin)
+        t_zcR, zcR = zerosCrossingRate(sig, width, stride, tmp[3] * pow(10, -6), staWin)
         stE_dev = cal_deriv(t_stE, stE)
         start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
         if plot:
