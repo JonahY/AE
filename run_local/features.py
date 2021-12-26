@@ -28,11 +28,10 @@ plt.rcParams['ytick.direction'] = 'in'
 
 
 class Features:
-    def __init__(self, color_1, color_2, time, feature_idx, status, font='Arial', frameon=False):
+    def __init__(self, color_1, color_2, time, status, font='Arial', frameon=False):
         self.color_1 = color_1
         self.color_2 = color_2
         self.time = time
-        self.feature_idx = feature_idx
         self.convert = lambda x, a, b: pow(x, a) * pow(10, b)
         self.status = status
         self.frameon = frameon
@@ -805,24 +804,24 @@ class Features:
             plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
 
-# if __name__ == "__main__":
-#     # '''
-#     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
-#         js = json.load(f)
-#
-#     path = r'H:\VALLEN\Ni'
-#     fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
-#     info = js['Ni'][fold]
-#     path_pri = fold + '.pridb'
-#     path_tra = fold + '.tradb'
-#     features_path = fold + '.txt'
-#     os.chdir('/'.join([path, fold]))
-#
-#     reload = Reload(path_pri, path_tra, fold)  # float('inf')
-#     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
-#     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
-#     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
-#                                                                                  chan_3.shape[0], chan_4.shape[0]))
+if __name__ == "__main__":
+    # '''
+    with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
+        js = json.load(f)
+
+    path = r'H:\VALLEN\ZPH'
+    fold = 'GONGYECHUNTIE-700-1.5-XUNHUAN'
+    info = js['Fe'][fold]
+    path_pri = fold + '.pridb'
+    path_tra = fold + '.tradb'
+    features_path = fold + '.txt'
+    os.chdir('/'.join([path, fold]))
+
+    reload = Reload(path_pri, path_tra, fold)  # float('inf')
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
+    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
+    print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
+                                                                                 chan_3.shape[0], chan_4.shape[0]))
     # '''
     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
     # chan = chan_2
@@ -834,8 +833,8 @@ class Features:
     # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
     # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
     # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = info['fold'].split('-')[0] + '-' + info['fold'].split('-')[2]
-    # features = Features(color_1, color_2, Time, feature_idx, status)
+    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
+    # features = Features(color_1, color_2, Time, status)
 
     # # ICA and Kernel K-Means
     # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))

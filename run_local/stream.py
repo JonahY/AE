@@ -79,18 +79,19 @@ def shortTermEny(signal, framelen, stride, fs, window='hamming'):
     allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
                   'bartlett': np.bartlett(framelen)}
     t = np.arange(0, nf) * (stride * 1.0 / fs)
-    res = np.zeros(nf)
+    eny, amp = np.zeros(nf), np.zeros(nf)
 
     try:
         windows = allWindows[window]
     except:
         print("Please select window's function from: hamming, hanning, blackman and bartlett.")
-        return t, res
+        return t, eny, amp
 
     for i in range(0, nf):
         b = np.square(frames[i:i + 1][0]) * windows * 1.0 / fs
-        res[i] = np.sum(b)
-    return t, res
+        eny[i] = np.sum(b)
+        amp[i] = max(abs(frames[i:i + 1][0] * windows))
+    return t, eny, amp
 
 
 def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
@@ -253,7 +254,7 @@ def cut_stream(streamFold, saveFold):
 
         width = int(fs * staLen)
         stride = int(width) - overlap
-        t_stE, stE = shortTermEny(sig, width, stride, fs, staWin)
+        t_stE, stE, stA = shortTermEny(sig, width, stride, fs, staWin)
         t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
         stE_dev = cal_deriv(t_stE, stE)
         start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
@@ -375,7 +376,7 @@ energy = np.array(energy)
 #
 # width = int(fs * staLen)
 # stride = int(width) - overlap
-# t_stE, stE = shortTermEny(sig, width, stride, fs, staWin)
+# t_stE, stE, stA = shortTermEny(sig, width, stride, fs, staWin)
 # t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
 # stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)

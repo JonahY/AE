@@ -311,7 +311,7 @@ def validation(data_tra, k, filter=False, btype='bandstop'):
 
     if filter:
         N, CutoffFreq = 4, [550, 650]
-        b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+        b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / i[3], CutoffFreq)), btype)
         sig = filtfilt(b, a, sig)
 
     thr = i[2]

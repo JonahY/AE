@@ -19,6 +19,9 @@
     "gongyechuntie-700-1.5h-1": {
       "t_cut": 35170,
       "chan_filter": "[np.where((chan_2[:, 1] < 27360) | (chan_2[:, 1] > 27370))[0]]"
+    },
+    "GONGYECHUNTIE-700-1.5-XUNHUAN": {
+      "t_cut": "inf"
     }
   },
   "Cu": {
@@ -118,6 +121,12 @@
       "t_cut": 95000,
       "random_state": 100,
       "chan_filter": "[np.where((chan_2[:, 1] < 76600) | (chan_2[:, 1] > 77000))[0]]"
+    },
+    "Pre-316L-1.5-z1-AE-20200528-after": {
+      "t_cut": "inf",
+      "t_cut_chan4": 16740,
+      "t_cut_chan3": 82800,
+      "t_cut_chan2": 38380
     }
   },
   "Al": {
