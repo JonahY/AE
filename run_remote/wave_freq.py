@@ -13,6 +13,7 @@ import signal_envelope as se
 from stream import *
 from utils import hl_envelopes_idx
 from ssqueezepy import ssq_cwt
+from scipy.signal import butter, filtfilt
 
 
 class Waveform:
@@ -92,19 +93,24 @@ class Waveform:
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
-    def plot_wave_TRAI(self, k, valid=False):
+    def plot_wave_TRAI(self, k, valid=False, color='blue'):
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[0 if self.device == 'stream' else -1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
                        (i[0 if self.device == 'stream' else -1], k))
         time, sig = self.cal_wave(i, valid=valid)
+        for tmp_tail, s in enumerate(sig[::-1]):
+            if s != 0:
+                tail = -tmp_tail if tmp_tail > 0 else None
+                break
+        time, sig = time[:tail], sig[:tail]
 
         fig = plt.figure(figsize=(6, 4.1), num='Waveform--TRAI %d (%s)' % (k, valid))
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = fig.add_subplot(1, 1, 1)
-        ax.plot(time, sig, lw=1)
+        ax.plot(time, sig, lw=1, color=color)
         if self.device == 'vallen':
             plt.axhline(abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
             plt.axhline(-abs(i[2]), 0, sig.shape[0], linewidth=1, color="black")
@@ -115,6 +121,28 @@ class Waveform:
 
     def plot_stream(self, k, staLen=3, overlap=1, staWin='hamming', IZCRT=0.3, ITU=150, alpha=1, t_backNoise=0,
                     plot=True, classify=False, valid=False, t_str=0, t_end=float('inf')):
+        """
+        Waveform stream segmentation program
+        :param k:
+        :param staLen: The duration of the window function, in μs
+                       The width of the window function = sampling frequency (MHz) * duration,
+                       so this value reflects the duration of the window function on the microsecond scale.
+        :param overlap: The overlap coefficient of the window function,
+                        stride = the width of the window function - the overlap coefficient
+        :param staWin: The name of window function，{'hamming', 'hanning', 'blackman', 'bartlett'}
+        :param IZCRT: Identification Zero Crossing Threshold
+        :param ITU: Identification Threshold Upper
+        :param alpha: weighted factor for the standard deviation of the STE signal, where this a factor can be estimated
+                      along with the previous calibration for the thresholds, if a heavy background noise is expected
+                      the value for this weighting value must be incremented.
+        :param t_backNoise: Used to evaluate background noise time
+        :param plot: Whether to draw a figure to show
+        :param classify: Whether to display the segmentation results in the figure
+        :param valid: Whether to pre-cut the waveform stream according to the threshold
+        :param t_str: Waveform stream data segmentation start time
+        :param t_end: Waveform stream data segmentation cut-off time
+        :return:
+        """
         tmp = self.data_tra[int(k - 1)]
         if tmp[0 if self.device == 'stream' else -1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
@@ -127,8 +155,8 @@ class Waveform:
 
         width = int(tmp[3] * pow(10, -6) * staLen)
         stride = int(width) - overlap
-        t_stE, stE = shortTermEny(sig, width, stride, 20, staWin)
-        t_zcR, zcR = zerosCrossingRate(sig, width, stride, 20, staWin)
+        t_stE, stE = shortTermEny(sig, width, stride, tmp[3] * pow(10, -6), staWin)
+        t_zcR, zcR = zerosCrossingRate(sig, width, stride, tmp[3] * pow(10, -6), staWin)
         stE_dev = cal_deriv(t_stE, stE)
         start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
         if plot:
@@ -149,12 +177,13 @@ class Waveform:
                 plot_norm(ax, r'$Time$ $(μs)$', ylabel[idx], legend=False)
         return start, end, time, sig, t_stE
 
-    def plot_envelope(self, TRAI, COLOR, valid=False, method='hl'):
+    def plot_envelope(self, TRAI, COLOR, features_path, valid=False, method='hl', xlog=False):
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
         ax = plt.subplot()
         for idx, [trai, color] in enumerate(zip(TRAI, COLOR)):
+            XX, YY = [], []
             for k in tqdm(trai):
                 tmp = self.data_tra[k - 1]
                 time, sig = self.cal_wave(tmp, valid=valid)
@@ -163,13 +192,78 @@ class Waveform:
                 if method == 'se':
                     sig = (sig / max(sig))
                     X_pos_frontier, X_neg_frontier = se.get_frontiers(sig, 0)
-                    ax.semilogy(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2, '.',
-                                Marker='.', color=color)
+                    XX.extend(np.linspace(0, time[-1], len(X_pos_frontier) - 2))
+                    YY.extend(sig[X_pos_frontier[2:]] ** 2)
+                    if not xlog:
+                        ax.semilogy(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2,
+                                    '.', Marker='.', color=color)
+                    else:
+                        ax.loglog(np.linspace(0, time[-1], len(X_pos_frontier) - 2), sig[X_pos_frontier[2:]] ** 2,
+                                  '.', Marker='.', color=color)
                 else:
                     sig = sig ** 2 / max(sig ** 2)
                     high_idx, low_idx = hl_envelopes_idx(sig, dmin=60, dmax=60)
-                    ax.semilogy(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+                    XX.extend(time[low_idx])
+                    YY.extend(sig[low_idx])
+                    if not xlog:
+                        ax.semilogy(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+                    else:
+                        ax.loglog(time[low_idx], sig[low_idx], '.', Marker='.', color=color)
+
+            with open('%s_Decay Function_Pop %d.txt' % (features_path[:-4], idx + 1), 'w') as f:
+                f.write('Time (μs), Normalized A$^2$\n')
+                for j in range(len(XX)):
+                    f.write('{}, {}\n'.format(XX[j], YY[j]))
+
         plot_norm(ax, 'Time (μs)', 'Normalized A$^2$', legend=False)
+
+    def plot_filtering(self, TRAI, N, CutoffFreq, btype, valid=False, originWave=False, filteredWave=True):
+        """
+        Signal Filtering
+        :param TRAI:
+        :param N: Order of filter
+        :param CutoffFreq: Cutoff frequency, Wn = 2 * cutoff frequency / sampling frequency, len(Wn) = 2 if btype in ['bandpass', 'bandstop'] else 1
+        :param btype: Filter Types, {'lowpass', 'highpass', 'bandpass', 'bandstop'}
+        :param originWave: Whether to display the original waveform
+        :param filteredWave: Whether to display the filtered waveform
+        :param valid: Whether to truncate the waveform according to the threshold
+        :return:
+        """
+        tmp = self.data_tra[int(TRAI - 1)]
+        if TRAI != tmp[-1]:
+            print('Error: TRAI is incorrect!')
+        time, sig = self.cal_wave(tmp, valid=valid)
+        b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
+        sig_filter = filtfilt(b, a, sig)
+
+        if originWave:
+            fig = plt.figure(figsize=(9.2, 3))
+            ax = fig.add_subplot(1, 2, 1)
+            ax.plot(time, sig, lw=1, color='blue')
+            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d' % TRAI, legend=False, grid=True)
+            ax = fig.add_subplot(1, 2, 2)
+            Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+            plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+            plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+        if filteredWave:
+            if btype in ['lowpass', 'highpass']:
+                label = 'Frequency %s %d kHz' % ('<' if btype == 'lowpass' else '>', CutoffFreq)
+            elif btype == 'bandpass':
+                label = '%d kHz < Frequency < %d kHz' % (CutoffFreq[0], CutoffFreq[1])
+            else:
+                label = 'Frequency < %d kHz or > %d kHz' % (CutoffFreq[0], CutoffFreq[1])
+            fig = plt.figure(figsize=(9.2, 3))
+            ax = fig.add_subplot(1, 2, 1)
+            ax.plot(time, sig_filter, lw=1, color='gray', label=label)
+            plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI: %d (%s)' % (TRAI, btype), grid=True,
+                      frameon=False, legend_loc='upper right')
+            ax = fig.add_subplot(1, 2, 2)
+            Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig_filter, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+            plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
+            plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+        return sig_filter
 
     def save_wave(self, TRAI, pop):
         # Save waveform
@@ -184,7 +278,7 @@ class Waveform:
 
 
 class Frequency:
-    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=500):
+    def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=250):
         self.data_tra = data_tra
         self.color_1 = color_1
         self.color_2 = color_2
@@ -248,7 +342,7 @@ class Frequency:
             num += 1
         return Res, num
 
-    def cla_wtpacket(self, signal, w, n, plot=False):
+    def cal_wtpacket(self, signal, w, n, plot=False):
         w = pywt.Wavelet(w)
         wp = pywt.WaveletPacket(data=signal, wavelet=w, mode='symmetric', maxlevel=n)
 
@@ -309,7 +403,7 @@ class Frequency:
 
         if wtpacket:
             fig = plt.figure(figsize=(15, 7), num='WaveletPacket--TRAI %d' % TRAI)
-            map, wp, energy = self.cla_wtpacket(valid_data, 'db8', n)
+            map, wp, energy = self.cal_wtpacket(valid_data, 'db8', n)
             for i in range(2, n + 2):
                 level_num = pow(2, i - 1)
                 # ['aaa', 'aad', 'add', 'ada', 'dda', 'ddd', 'dad', 'daa']
@@ -326,11 +420,11 @@ class Frequency:
                 ax.bar(index, values, 0.45, color="#87CEFA")
                 plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
-    def plot_ave_freq(self, Res, N, title, color='blue'):
+    def plot_ave_freq(self, Res, N, title, color='blue', y_lim=[0, 1.7], label='whole'):
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid / 1000, Res / N, lw=1, color=color)
-        plot_norm(ax, x_lim=[0, 800], xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency', legend=False)
+        ax.plot(self.grid / 1000, Res / N, lw=1, color=color, label=label)
+        plot_norm(ax, x_lim=[0, 800], y_lim=y_lim, xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency')
 
     def plot_freq_TRAI(self, k, valid=False, color='blue'):
         # Frequency with specific TRAI
@@ -380,7 +474,7 @@ class Frequency:
                 stage_idx.append(tmp)
         freq = np.array(freq)
         stage_idx = np.array(stage_idx)
-        return freq, stage_idx
+        return freq / 1000, stage_idx
 
     def plot_tf_stft(self, TRAI, hop_length=128, save_path=None):
         i = self.data_tra[int(TRAI - 1)]
@@ -463,6 +557,7 @@ class Frequency:
             if t[-1] < t_lim:
                 continue
             valid_idx = np.where((half_frq / 1000) < 1000)[0]
-            ax.plot(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx], lw=lw)
+            # ax.plot(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx], lw=lw)
+            ax.scatter(half_frq[valid_idx] / 1000, [z] * valid_idx.shape[0], normalization_half[valid_idx])
             z += 1
         plot_norm(ax, 'Freq (kHz)', 'Points', '|Y(freq)|', x_lim=[0, 1000], y_lim=[0, z], legend=False)
