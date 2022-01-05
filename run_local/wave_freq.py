@@ -420,11 +420,17 @@ class Frequency:
                 ax.bar(index, values, 0.45, color="#87CEFA")
                 plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
-    def plot_ave_freq(self, Res, N, title, color='blue', y_lim=[0, 1.7], label='whole'):
+    def plot_ave_freq(self, Res, N, title, color='blue', y_lim=[0, 1.7], label='whole', save_path=False):
+        if save_path:
+            with open(os.path.join(save_path, 'AveFreq-%s.txt' % title), 'w') as f:
+                f.write('Frequency (kHz), Amplitude\n')
+                for j in range(Res.shape[0]):
+                    f.write('{}, {}\n'.format(self.grid[j] / 1000, Res[j] / max(Res)))
+
         fig = plt.figure(figsize=(6, 4.1), num='Average Frequency--%s' % title)
         ax = fig.add_subplot()
-        ax.plot(self.grid / 1000, Res / N, lw=1, color=color, label=label)
-        plot_norm(ax, x_lim=[0, 800], y_lim=y_lim, xlabel='Freq (kHz)', ylabel='|Y(freq)|', title='Average Frequency')
+        ax.plot(self.grid / 1000, Res / max(Res), lw=1, color=color, label=label)
+        plot_norm(ax, x_lim=[0, 800], y_lim=y_lim, xlabel='Frequency (kHz)', ylabel='Normalized Amplitude', title='Average Frequency')
 
     def plot_freq_TRAI(self, k, valid=False, color='blue'):
         # Frequency with specific TRAI

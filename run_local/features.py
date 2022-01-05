@@ -689,9 +689,7 @@ class Features:
                 method = 'index'
             elif lim[1] == float('inf') or lim[1] > 0:
                 method = 'value'
-            res = []
-            for i in range(time.shape[0] - 1):
-                res.append(time[i + 1] - time[i])
+            res = list(time[1:] - time[:-1])
             if bin_method == 'linear':
                 inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
                 xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
@@ -809,9 +807,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'H:\VALLEN\ZPH'
-    fold = 'GONGYECHUNTIE-700-1.5-XUNHUAN'
-    info = js['Fe'][fold]
+    path = r'H:\VALLEN\Ni'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
