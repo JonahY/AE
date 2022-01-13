@@ -807,8 +807,8 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'H:\VALLEN\Ni'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    path = r'H:\VALLEN\PAC&VALLEN'
+    fold = 'Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115'
     info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
