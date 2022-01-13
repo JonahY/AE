@@ -382,7 +382,7 @@ energy = np.array(energy)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
 #
 # #====================================================== 图形展示 ======================================================
-# x = [t, t_stE, t_stE, t_zcR]
+# x = [t_initial, t_stE, t_stE, t_zcR]
 # y = [sig, stE, stE_dev, zcR]
 # color = ['black', 'green', 'gray', 'purple']
 # ylabel = [r'$Amplitude$ $(μV)$', r'$STEnergy$ $(μV^2 \cdot μs)$', r'$S\dot{T}E$ $(μV^2)$', r'$ST\widehat{Z}CR$ $(\%)$']
