@@ -28,13 +28,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/AE.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AE.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/metarialsInfo.json" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/metarialsInfo.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/template.txt" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/template.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/wave_freq.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -327,6 +322,14 @@
       <workItem from="1641129808802" duration="825000" />
       <workItem from="1641214513733" duration="685000" />
       <workItem from="1641358017368" duration="6047000" />
+      <workItem from="1641446888991" duration="9407000" />
+      <workItem from="1641539371593" duration="9583000" />
+      <workItem from="1641800833370" duration="4762000" />
+      <workItem from="1641904657326" duration="916000" />
+      <workItem from="1642051316643" duration="20995000" />
+      <workItem from="1642073901585" duration="3281000" />
+      <workItem from="1642232807954" duration="10137000" />
+      <workItem from="1642337586149" duration="2642000" />
     </task>
     <servers />
   </component>
