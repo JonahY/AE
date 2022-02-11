@@ -661,8 +661,8 @@ class Features:
         ax.axhline(1.2, ls='-.', linewidth=1, color="black")
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
-    def cal_WaitingTime(self, time_origin, time_1, time_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log',
-                        select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
+    def cal_WaitingTime(self, time_origin, time_1, time_2, dur_origin, dur_1, dur_2, xlabel, ylabel, INTERVAL_NUM=None,
+                        bin_method='log', select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
         if select is None:
@@ -677,19 +677,20 @@ class Features:
         # fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.16, 0.22, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
         ax = plt.subplot()
-        TIME, MARKER = [time_origin, time_1, time_2], ['o', 'p', 'h']
+        TIME, DUR, MARKER = [time_origin, time_1, time_2], [dur_origin, dur_1, dur_2], ['o', 'p', 'h']
 
-        for [time, interval_num, marker, color, label, lim] in zip(TIME[select[0]:select[1]],
-                                                                   INTERVAL_NUM[select[0]:select[1]],
-                                                                   MARKER[select[0]:select[1]],
-                                                                   COLOR[select[0]:select[1]],
-                                                                   LABEL[select[0]:select[1]],
-                                                                   LIM[select[0]:select[1]]):
+        for [time, dur, interval_num, marker, color, label, lim] in zip(TIME[select[0]:select[1]],
+                                                                        DUR[select[0]:select[1]],
+                                                                        INTERVAL_NUM[select[0]:select[1]],
+                                                                        MARKER[select[0]:select[1]],
+                                                                        COLOR[select[0]:select[1]],
+                                                                        LABEL[select[0]:select[1]],
+                                                                        LIM[select[0]:select[1]]):
             if lim[1] == None or lim[1] < 0:
                 method = 'index'
             elif lim[1] == float('inf') or lim[1] > 0:
                 method = 'value'
-            res = list(time[1:] - time[:-1])
+            res = list(time[1:] - (time[:-1] + dur[:-1]/1e6))
             if bin_method == 'linear':
                 inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
                 xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
