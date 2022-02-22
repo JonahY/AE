@@ -808,7 +808,7 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'H:\VALLEN\Ni'
+    path = r'F:\VALLEN\Ni'
     fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
     info = js['Ni'][fold]
     path_pri = fold + '.pridb'
@@ -875,7 +875,7 @@ if __name__ == "__main__":
 
     # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
     # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
-    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
+    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], Dur, Dur[cls_KKM[0]], Dur[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],

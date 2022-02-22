@@ -28,10 +28,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/AE.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AE.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/template.txt" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/template.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,6 +224,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pac" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AE" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run_remote" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_remote/pac.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="Unittests in lab.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="AE" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -243,15 +265,16 @@
       <item itemvalue="Python.features_remote" />
       <item itemvalue="Python.features" />
       <item itemvalue="Python.lab" />
+      <item itemvalue="Python.pac" />
       <item itemvalue="Python tests.Unittests in lab.py" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.features" />
+        <item itemvalue="Python.pac" />
         <item itemvalue="Python.lab" />
         <item itemvalue="Python.lab" />
         <item itemvalue="Python tests.Unittests in lab.py" />
-        <item itemvalue="Python.features_remote" />
       </list>
     </recent_temporary>
   </component>
@@ -332,6 +355,7 @@
       <workItem from="1642073901585" duration="3281000" />
       <workItem from="1642232807954" duration="10137000" />
       <workItem from="1642337586149" duration="2642000" />
+      <workItem from="1645168918560" duration="9966000" />
     </task>
     <servers />
   </component>
@@ -351,10 +375,42 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1644587215957">
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1644671213031">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644587215957" />
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671213031" />
+    <state x="740" y="266" key="FileChooserDialogImpl" timestamp="1644731360443">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="740" y="266" key="FileChooserDialogImpl/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644731360443" />
+    <state width="823" height="850" key="GridCell.Tab.0.bottom" timestamp="1644671205341">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state width="823" height="850" key="GridCell.Tab.0.bottom/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671205341" />
+    <state width="823" height="850" key="GridCell.Tab.0.center" timestamp="1644671205341">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state width="823" height="850" key="GridCell.Tab.0.center/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671205341" />
+    <state width="823" height="850" key="GridCell.Tab.0.left" timestamp="1644671205340">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state width="823" height="850" key="GridCell.Tab.0.left/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671205340" />
+    <state width="823" height="850" key="GridCell.Tab.0.right" timestamp="1644671205341">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state width="823" height="850" key="GridCell.Tab.0.right/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671205341" />
+    <state x="461" y="169" key="SettingsEditor" timestamp="1644731195382">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="461" y="169" key="SettingsEditor/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644731195382" />
+    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1645495462227">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1645495462227" />
+    <state x="623" y="227" key="search.everywhere.popup" timestamp="1645431073589">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="623" y="227" key="search.everywhere.popup/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1645431073589" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -370,7 +426,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/preprocess_py$vallen__1_.coverage" NAME="vallen (1) Coverage Results" MODIFIED="1606805034819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run" />
     <SUITE FILE_PATH="coverage/preprocess_py$cls_done.coverage" NAME="cls_done Coverage Results" MODIFIED="1616745780530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/cls/2" />
-    <SUITE FILE_PATH="coverage/preprocess_py$pac.coverage" NAME="pac Coverage Results" MODIFIED="1637200814423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_local" />
+    <SUITE FILE_PATH="coverage/preprocess_py$pac.coverage" NAME="pac Coverage Results" MODIFIED="1644671201656" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_remote" />
     <SUITE FILE_PATH="coverage/preprocess_py$utils.coverage" NAME="utils Coverage Results" MODIFIED="1631859389975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_local" />
     <SUITE FILE_PATH="coverage/preprocess_py$stream.coverage" NAME="stream Coverage Results" MODIFIED="1638969841289" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_local" />
     <SUITE FILE_PATH="coverage/preprocess_py$Unittests_in_lab_py.coverage" NAME="Unittests in lab.py Coverage Results" MODIFIED="1640008714127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/run_local" />

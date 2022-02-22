@@ -552,6 +552,29 @@ def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7,
     plt.subplots_adjust(wspace=0, hspace=0)
 
 
+def remove_the_blackborder(image):
+    image = cv2.imread(image)  # 读取图片
+    img = cv2.medianBlur(image, 5)  # 中值滤波，去除黑色边际中可能含有的噪声干扰
+    b = cv2.threshold(img, 3, 255, cv2.THRESH_BINARY)  # 调整裁剪效果
+    binary_image = b[1]  # 二值图--具有三通道
+    binary_image = cv2.cvtColor(binary_image, cv2.COLOR_BGR2GRAY)
+    # print(binary_image.shape)     #改为单通道
+
+    edges_y, edges_x = np.where(binary_image == 255)  ##h, w
+    bottom = min(edges_y)
+    top = max(edges_y)
+    height = top - bottom
+
+    left = min(edges_x)
+    right = max(edges_x)
+    height = top - bottom
+    width = right - left
+
+    res_image = image[bottom:bottom + height, left:left + width]
+
+    return res_image
+
+
 '''
 wave_ls = sorted(os.listdir('./wave/txt/'), key=lambda x: int(x.split('-')[0][5:]))
 channel = [3]
