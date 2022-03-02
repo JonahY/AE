@@ -483,6 +483,14 @@ class Frequency:
         return freq / 1000, stage_idx
 
     def plot_tf_stft(self, TRAI, hop_length=128, save_path=None):
+        """
+        Short-time Fourier Transform Visualization of Discrete Signals
+        :param TRAI: waveform-specific serial number
+        :param hop_length: frame shift
+        :param save_path: image storage location
+        :return:
+        """
+
         i = self.data_tra[int(TRAI - 1)]
         if self.device == 'vallen':
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -493,9 +501,9 @@ class Frequency:
         S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
         fig, ax = plt.subplots(figsize=(5.12, 5.12))
         _ = librosa.display.specshow(S_db, sr=i[3], hop_length=hop_length, x_axis='time', y_axis='linear', ax=ax)
-        ax.set(title='Now with labeled axes!')
-        ax.set_ylim(0, 1000000)
+        plot_norm(ax, 'Time (μs)', 'Frequency (Hz)', y_lim=[0, 1000000], legend=False)
         if save_path:
+            plt.axis('off')
             plt.gca().xaxis.set_major_locator(plt.NullLocator())
             plt.gca().yaxis.set_major_locator(plt.NullLocator())
             plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
@@ -503,6 +511,15 @@ class Frequency:
             plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
     def plot_tf_cwt(self, TRAI, wavelet_name='morl', save_path=None):
+        """
+        Wavelet Transform Visualization of Discrete Signals
+        :param TRAI: waveform-specific serial number
+        :param wavelet_name: builtin wavelet in Package - "pywt".
+                            Execute the python command - "pywt.wavelist()" to check all wavelet families
+        :param save_path: image storage location
+        :return:
+        """
+
         i = self.data_tra[int(TRAI - 1)]
         if self.device == 'vallen':
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -513,19 +530,25 @@ class Frequency:
 
         scales = pywt.central_frequency(wavelet_name) * 1e3 / np.arange(1, 1e3, 1e0)
         [cwtmatr_new, frequencies_new] = pywt.cwt(sig, scales, wavelet_name, 1.0 / i[3])
-        plt.figure(figsize=(5.12, 5.12))
+        fig, ax = plt.subplots(figsize=(5.12, 5.12))
         plt.contourf(time, frequencies_new / 1000, abs(cwtmatr_new))
-        plt.ylim(20, 1000)
-        plt.xlabel('Time (μs)')
-        plt.ylabel('Frequency (kHz)')
+        plot_norm(ax, 'Time (μs)', 'Frequency (kHz)', y_lim=[20, 1000], legend=False)
         if save_path:
+            plt.axis('off')
             plt.gca().xaxis.set_major_locator(plt.NullLocator())
             plt.gca().yaxis.set_major_locator(plt.NullLocator())
             plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
             plt.margins(0, 0)
-            plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
+            plt.savefig(os.path.join(save_path, '%s-%i.jpg' % (wavelet_name, TRAI)), pad_inches=0)
 
     def plot_tf_wsst(self, TRAI, save_path=None):
+        """
+        Synchrosqueezing Wavelet Transform Visualization of Discrete Signals
+        :param TRAI: waveform-specific serial number
+        :param save_path: image storage location
+        :return:
+        """
+
         i = self.data_tra[int(TRAI - 1)]
         if self.device == 'vallen':
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -534,13 +557,12 @@ class Frequency:
             sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
             time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
         Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=i[3], t=time)
-        fig = plt.figure(figsize=(5.12, 5.12))
+        fig, ax = plt.subplots(figsize=(5.12, 5.12))
         # plt.imshow(np.abs(Twxo), aspect='auto', vmin=0, vmax=.2, cmap='jet')
-        plt.contourf(time, ssq_freqs * 1000, abs(Twxo), cmap='jet')
-        plt.ylim(min(ssq_freqs * 1000), 1000)
-        plt.xlabel(r'Time (μs)')
-        plt.ylabel(r'Frequency (kHz)')
+        plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
+        plot_norm(ax, 'Time (μs)', 'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
         if save_path:
+            plt.axis('off')
             plt.gca().xaxis.set_major_locator(plt.NullLocator())
             plt.gca().yaxis.set_major_locator(plt.NullLocator())
             plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)

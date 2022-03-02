@@ -29,6 +29,25 @@ for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
 
 
 # ======================================================= VALLEN =======================================================
+# Image normalization
+for idx, file in tqdm(enumerate(files, 1)):
+    img = cv2.imread(os.path.join(files_dir, file))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = np.array(img)
+    img_norm = (img - mean_255) / std_255
+
+    fig = plt.figure(figsize=(2.56, 2.56), num='0')
+    plt.imshow(img_norm)
+    plt.axis('off')
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    plt.savefig(os.path.join('./train dataset_wsst_norm', '%i.jpg' % idx), pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Feature calculation after filtering
 TRAI_bandstop, Time_bandstop, Amp_bandstop, RiseT_bandstop, Dur_bandstop, Eny_bandstop, Counts_bandstop = np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
 for idx, i in tqdm(enumerate(TRAI[sorted(pop2_2)], 1)):

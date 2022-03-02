@@ -28,10 +28,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b717d2a7-1dd3-4c4e-ace9-9dd82e6faeb0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/features.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/template.txt" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/template.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_local/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_local/wave_freq.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local/wave_freq.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -355,7 +356,9 @@
       <workItem from="1642073901585" duration="3281000" />
       <workItem from="1642232807954" duration="10137000" />
       <workItem from="1642337586149" duration="2642000" />
-      <workItem from="1645168918560" duration="9966000" />
+      <workItem from="1645168918560" duration="20667000" />
+      <workItem from="1645936073822" duration="14621000" />
+      <workItem from="1646053775421" duration="9674000" />
     </task>
     <servers />
   </component>
@@ -375,10 +378,10 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1644671213031">
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1645936093010">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644671213031" />
+    <state x="414" y="179" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1645936093010" />
     <state x="740" y="266" key="FileChooserDialogImpl" timestamp="1644731360443">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -403,10 +406,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="461" y="169" key="SettingsEditor/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1644731195382" />
-    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1645495462227">
+    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1646210624561">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1645495462227" />
+    <state x="435" y="229" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1440.0.1440.870/0.0.1920.1050@0.0.1920.1050" timestamp="1646210624561" />
     <state x="623" y="227" key="search.everywhere.popup" timestamp="1645431073589">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
