@@ -530,7 +530,7 @@ def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7,
 
     width = int(fs * staLen)
     stride = int(width) - overlap
-    t_stE, stE = shortTermEny(sig, width, stride, fs, staWin)
+    t_stE, stE, _ = shortTermEny(sig, width, stride, fs, staWin)
     t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
     stE_dev = cal_deriv(t_stE, stE)
     start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
