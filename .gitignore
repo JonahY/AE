@@ -3,3 +3,10 @@
 .idea/AE.iml
 .idea/misc.xml
 *.pyc
+__pycache__
+run_local/__pycache__
+run_remote/__pycache__
+cls/1/__pycache__
+cls/2/__pycache__
+cls/3/__pycache__
+cls/20220225/__pycache__
