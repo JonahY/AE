@@ -816,8 +816,9 @@ if __name__ == "__main__":
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
 
-    reload = Reload(path_pri, path_tra, fold)  # float('inf')
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
+    reload = Reload(path_pri, path_tra, fold)
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_str=info['t_str'],
+                                                                                 t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))

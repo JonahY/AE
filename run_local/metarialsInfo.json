@@ -139,7 +139,8 @@
   },
   "TiNi":{
     "tini-50.8-gurong-hui-1": {
-      "t_cut": "inf"
+      "t_str": 0,
+      "t_cut": 1967
     }
   },
   "Others": {
