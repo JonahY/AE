@@ -3,6 +3,7 @@ import time
 from time import sleep
 from tqdm import tqdm
 import sys
+import os
 
 
 # def Windows(width, parameter):
