@@ -1,7 +1,5 @@
 
-.idea/workspace.xml
-.idea/AE.iml
-.idea/misc.xml
+.idea
 *.pyc
 run_local/__pycache__
 run_remote/__pycache__
