@@ -61,6 +61,19 @@
     },
     "Cu-annealing-tension-1126": {
       "t_cut": "inf"
+    },
+    "AM-Cu-1208-test2-compression-3.5mA-0.01mm-min": {
+      "t_str": 0,
+      "t_cut": "inf"
+    },
+    "AM-Cu-1209-test1-compression-5mA-0.01mm-min": {
+      "t_str": 0,
+      "t_cut": 26441.947
+    },
+    "AM-Cu-1216-test1-compression-8mA-0.01mm-min": {
+      "t_str": 0,
+      "t_cut": 24400,
+      "chan_filter": "[np.where((chan_3[:, 1] < 8700) | ((chan_3[:, 1] > 8800) & (chan_3[:, 1] < 9900)) | ((chan_3[:, 1] > 10020) & (chan_3[:, 1] < 10190)) | ((chan_3[:, 1] > 10220) & (chan_3[:, 1] < 10340)) | ((chan_3[:, 1] > 10440) & (chan_3[:, 1] < 24400)))[0]]"
     }
   },
   "Ni": {

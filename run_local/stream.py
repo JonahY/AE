@@ -292,7 +292,7 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
 def cut_stream(files, streamFold, saveFold):
     pbar = tqdm(files)
     for file in pbar:
-        pbar.set_description('File name: %s\n' % file[43:-4])
+        pbar.set_description('File name: %s' % file[43:-4])
 
         with open(os.path.join(streamFold, file), 'r') as f:
             for _ in range(4):
@@ -482,19 +482,19 @@ if __name__ == '__main__':
     file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))[354:1523]
     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
 
-    print("=" * 47 + " Start " + "=" * 46)
-    start = time.time()
-
-    # Multiprocessing acceleration
-    pool = multiprocessing.Pool(processes=opt.processor)
-    for idx, i in enumerate(range(0, len(file_list), each_core)):
-        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold, opt.saveFold))
-
-    pool.close()
-    pool.join()
-
-    end = time.time()
-    print("=" * 46 + " Report " + "=" * 46)
-    print("Calculation Info--Quantity of streaming data: %s" % len(file_list))
-    print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
-                                                                       (end - start) / 60))
+    # print("=" * 47 + " Start " + "=" * 46)
+    # start = time.time()
+    #
+    # # Multiprocessing acceleration
+    # pool = multiprocessing.Pool(processes=opt.processor)
+    # for idx, i in enumerate(range(0, len(file_list), each_core)):
+    #     pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold, opt.saveFold))
+    #
+    # pool.close()
+    # pool.join()
+    #
+    # end = time.time()
+    # print("=" * 46 + " Report " + "=" * 46)
+    # print("Calculation Info--Quantity of streaming data: %s" % len(file_list))
+    # print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
+    #                                                                    (end - start) / 60))
