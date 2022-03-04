@@ -460,9 +460,9 @@ energy = np.array(energy)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-streamF", "--streamFold", type=str, default='/home/Yuanbincheng/data/stream/threshold',
+    parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
                         help="Absolute path of streaming folder(add 'r' in front)")
-    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms',
+    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/mnt/yuanbincheng/Stream/waveforms',
                         help="Absolute path of storage folder(add 'r' in front)")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
