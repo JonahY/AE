@@ -76,6 +76,7 @@
       "LIM_CCDF": "[[[0, float('inf')], [0, 1000], [0, 3000]], [[0, float('inf')], [100, 3600], [80, 600]], [[0, float('inf')], [1, 3000], [0.5, 1500]]]"
     },
     "Ni-tension test-pure-1-0.01-AE-20201030": {
+      "t_str": 0,
       "t_cut": 38600,
       "random_state": 50,
       "chan_filter": "np.delete(chan_2, [2, 65], 0)",

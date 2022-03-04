@@ -4,6 +4,12 @@ from time import sleep
 from tqdm import tqdm
 import sys
 import os
+import multiprocessing
+from multiprocessing import cpu_count
+from multiprocessing.managers import BaseManager
+import threading
+import math
+import argparse
 
 
 # def Windows(width, parameter):
@@ -130,7 +136,53 @@ def zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
         for j in range(framelen - 1):
             if tmp[j] * tmp[j + 1] <= 0:
                 res[i] += 1
+
     return t, res / framelen
+
+
+def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
+    """
+    :param signal: raw signal of waveform, unit: μV
+    :param framelen: length of per frame, type: int
+    :param stride: length of translation per frame
+    :param fs: sampling rate per microsecond
+    :param window: window's function
+    :return: time_zcR, zcR
+    """
+    if signal.shape[0] <= framelen:
+        nf = 1
+    else:
+        nf = int(np.ceil((1.0 * signal.shape[0] - framelen + stride) / stride))
+    pad_length = int((nf - 1) * stride + framelen)
+    zeros = np.zeros((pad_length - signal.shape[0],))
+    pad_signal = np.concatenate((signal, zeros))
+    indices = np.tile(np.arange(0, framelen), (nf, 1)) + np.tile(np.arange(0, nf * stride, stride),
+                                                                 (framelen, 1)).T.astype(np.int32)
+    frames = pad_signal[indices]
+    allWindows = {'hamming': np.hamming(framelen), 'hanning': np.hanning(framelen), 'blackman': np.blackman(framelen),
+                  'bartlett': np.bartlett(framelen)}
+    t = np.arange(0, nf) * (stride * 1.0 / fs)
+    eny, res = np.zeros(nf), np.zeros(nf)
+
+    try:
+        windows = allWindows[window]
+    except:
+        print("Please select window's function from: hamming, hanning, blackman and bartlett.")
+        return t, eny, res
+
+    for i in range(nf):
+        frame = frames[i:i + 1][0]
+        # calculate zeros crossing rate
+        tmp = windows * frame
+        for j in range(framelen - 1):
+            if tmp[j] * tmp[j + 1] <= 0:
+                res[i] += 1
+
+        # calculate short term energy
+        b = np.square(frame) * windows / fs
+        eny[i] = np.sum(b)
+
+    return t, eny, res / framelen
 
 
 def cal_deriv(x, y):
@@ -153,6 +205,7 @@ def cal_deriv(x, y):
     deriv.append(slopes[-1])
 
     return deriv
+
 
 '''
 def zerosCountRate(audio_1, N, move):
@@ -187,36 +240,36 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
     last_end = end_backNoise
 
     while last_end < stE.shape[0] - 2:
-        print('\nStart to find waveform...\nLast End: %d, ITU: %f, IZCRT: %f' % (last_end, ITU_tmp, IZCRT_tmp))
+        # print('\nStart to find waveform...\nLast End: %d, ITU: %f, IZCRT: %f' % (last_end, ITU_tmp, IZCRT_tmp))
         try:
             start_temp = last_end + np.where(stE[last_end + 1:] >= ITU_tmp)[0][0]
         except IndexError:
             # print("\r100%|{}| [{:.2f}<?, ?it/s]".format("█" * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
             #       end="", flush=True)
-            print('No data with short-term energy greater than the threshold (ITU), the search ends.\n')
+            # print('No data with short-term energy greater than the threshold (ITU), the search ends.\n')
             return start, end
         start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp + 1]) <= 0)[0][-1] \
             if np.where(np.array(stE_dev[last_end:start_temp]) <= 0)[0].shape[0] else last_end
-        print('Successfully found the starting index! %d' % start_true)
+        # print('Successfully found the starting index! %d' % start_true)
 
         # Auto-adjust threshold
         ITU_tmp = ITU + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
             if last_end != start_true else ITU_tmp
         IZCRT_tmp = np.mean(zcR[last_end:start_true]) + alpha * np.std(zcR[last_end:start_true]) \
             if last_end != start_true else IZCRT_tmp
-        print('Auto-adjust threshold! ITU: %f, IZCRT: %f' % (ITU_tmp, IZCRT_tmp))
+        # print('Auto-adjust threshold! ITU: %f, IZCRT: %f' % (ITU_tmp, IZCRT_tmp))
 
         for j in range(start_temp + 1, stE.shape[0]):
             if stE[j] < ITU_tmp:
                 end_temp = j
                 break
         ITL = 0.368 * max(stE[start_true:end_temp+1]) if ITU_tmp > 0.368 * max(stE[start_true:end_temp+1]) else ITU_tmp
-        print('Successfully found the temporary ending index! End: %d, ITL: %f' % (end_temp, ITL))
+        # print('Successfully found the temporary ending index! End: %d, ITL: %f' % (end_temp, ITL))
 
         for k in range(end_temp, stE.shape[0]):
             if ((stE[k] < ITL) & (zcR[k] > IZCRT_tmp)) | (k == stE.shape[0] - 1):
                 end_true = k
-                print('Starting Index: %d, Ending Index: %d' % (start_true, end_true))
+                # print('Starting Index: %d, Ending Index: %d' % (start_true, end_true))
                 break
 
         if start_true >= end_true:
@@ -236,9 +289,10 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
     return start, end
 
 
-def cut_stream(streamFold, saveFold):
-    for file in tqdm(sorted(os.listdir(streamFold), key=lambda x: int(x.split('-')[-2]))):
-        print('File name: %s\n' % file)
+def cut_stream(files, streamFold, saveFold):
+    pbar = tqdm(files)
+    for file in pbar:
+        pbar.set_description('File name: %s\n' % file[43:-4])
 
         with open(os.path.join(streamFold, file), 'r') as f:
             for _ in range(4):
@@ -255,8 +309,7 @@ def cut_stream(streamFold, saveFold):
 
         width = int(fs * staLen)
         stride = int(width) - overlap
-        t_stE, stE, stA = shortTermEny(sig, width, stride, fs, staWin)
-        t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
+        t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, staWin)
         stE_dev = cal_deriv(t_stE, stE)
         start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
 
@@ -408,4 +461,40 @@ energy = np.array(energy)
 
 
 if __name__ == '__main__':
-    cut_stream(*sys.argv[1:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-streamF", "--streamFold", type=str, default=r'I:\Stream\threshold',
+                        help="Absolute path of streaming folder(add 'r' in front)")
+    parser.add_argument("-saveF", "--saveFold", type=str, default=r'I:\Stream\waveforms',
+                        help="Absolute path of storage folder(add 'r' in front)")
+    parser.add_argument("-cpu", "--processor", type=int, default=2, help="Number of Threads")
+    parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
+    parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
+    parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
+    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7, help="identification zero crossing rate threshold")
+    parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
+    parser.add_argument("-alpha", "--alpha", type=float, default=1.7, help="")
+    parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
+
+    opt = parser.parse_args()
+    print("=" * 44 + " Parameters " + "=" * 44)
+    print(opt)
+
+    file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))[354:1523]
+    each_core = int(math.ceil(len(file_list) / float(opt.processor)))
+
+    print("=" * 47 + " Start " + "=" * 46)
+    start = time.time()
+
+    # Multiprocessing acceleration
+    pool = multiprocessing.Pool(processes=opt.processor)
+    for idx, i in enumerate(range(0, len(file_list), each_core)):
+        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold, opt.saveFold))
+
+    pool.close()
+    pool.join()
+
+    end = time.time()
+    print("=" * 46 + " Report " + "=" * 46)
+    print("Calculation Info--Quantity of streaming data: %s" % len(file_list))
+    print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
+                                                                       (end - start) / 60))

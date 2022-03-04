@@ -419,7 +419,8 @@ class Features:
                 f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                 for j in range(len(ML_y)):
                     f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
-        plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right', frameon=self.frameon, fontname=self.font)
+        plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right', frameon=self.frameon,
+                  fontname=self.font)
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
@@ -690,7 +691,7 @@ class Features:
                 method = 'index'
             elif lim[1] == float('inf') or lim[1] > 0:
                 method = 'value'
-            res = list(time[1:] - (time[:-1] + dur[:-1]/1e6))
+            res = list(time[1:] - (time[:-1] + dur[:-1] / 1e6))
             if bin_method == 'linear':
                 inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
                 xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
@@ -728,7 +729,8 @@ class Features:
             INTERVAL_NUM = [8] * 3
         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 1000], [1000, 10000]]
         tmp_origin, tmp_1, tmp_2 = self.__cal_OmiroLaw_helper(tmp_origin, eny_lim), \
-                                   self.__cal_OmiroLaw_helper(tmp_1, eny_lim), self.__cal_OmiroLaw_helper(tmp_2, eny_lim)
+                                   self.__cal_OmiroLaw_helper(tmp_1, eny_lim), self.__cal_OmiroLaw_helper(tmp_2,
+                                                                                                          eny_lim)
         TMP, TITLE = [tmp_origin, tmp_1, tmp_2], ['Omori law_Whole', 'Omori law_Pop 1', 'Omori law_Pop 2']
         for idx, [tmp, interval_num, title] in enumerate(
                 zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]], TITLE[select[0]:select[1]])):
@@ -808,17 +810,20 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\ZPH'
-    fold = 'tini-50.8-gurong-hui-1'
-    info = js['TiNi'][fold]
+    path = r'F:\VALLEN\Ni'
+    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
 
     reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all', t_str=info['t_str'],
-                                                                                 t_cut=info['t_cut'] if type(info['t_cut']) == int else float(info['t_cut']))
+    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all',
+                                                                                 t_str=info['t_str'],
+                                                                                 t_cut=info['t_cut'] if type(
+                                                                                     info['t_cut']) == int else float(
+                                                                                     info['t_cut']))
     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
                                                                                  chan_3.shape[0], chan_4.shape[0]))
