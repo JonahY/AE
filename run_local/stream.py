@@ -464,6 +464,9 @@ if __name__ == '__main__':
                         help="Absolute path of streaming folder(add 'r' in front)")
     parser.add_argument("-saveF", "--saveFold", type=str, default=r'I:\Stream\waveforms',
                         help="Absolute path of storage folder(add 'r' in front)")
+    parser.add_argument("-f", "--first", type=str, default=True,
+                        help="only the [True] is passed in for the first calculation, and only the streaming file that "
+                             "appears in the storage location needs to be calculated later.")
     parser.add_argument("-cpu", "--processor", type=int, default=2, help="Number of Threads")
     parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
@@ -477,7 +480,14 @@ if __name__ == '__main__':
     print("=" * 44 + " Parameters " + "=" * 44)
     print(opt)
 
-    file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))[354:1523]
+    if not opt.first:
+        file_list = []
+        for file in os.listdir(opt.saveFold):
+            file_list.append('%s.txt' % file[:-6])
+        file_list = set(file_list)
+    else:
+        file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))
+
     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
 
     # print("=" * 47 + " Start " + "=" * 46)

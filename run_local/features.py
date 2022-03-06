@@ -179,6 +179,12 @@ class Features:
         return xx, yy
 
     def __cal_N_Naft(self, tmp, eny_lim):
+        """
+        Calculation of the number of aftershocks after the main shock.
+        :param tmp: Energy
+        :param eny_lim: Minimum value of each bin
+        :return:
+        """
         N_ms, N_as = 0, 0
         main_peak = np.where(eny_lim[0] < tmp)[0]
         if len(main_peak):
@@ -196,6 +202,12 @@ class Features:
         return N_ms + N_as, N_as
 
     def __cal_OmiroLaw_helper(self, tmp, eny_lim):
+        """
+        Calculate the probability density distribution of the corresponding interval energy
+        :param tmp: Energy
+        :param eny_lim: Minimum value of each bin
+        :return:
+        """
         res = [[] for _ in range(len(eny_lim))]
         for idx in range(len(eny_lim)):
             main_peak = np.where((eny_lim[idx][0] < tmp) & (tmp < eny_lim[idx][1]))[0]
@@ -214,8 +226,14 @@ class Features:
         return res
 
     def __cal_OmiroLaw_timeSeq_helper(self, tmp, cls_idx):
+        """
+        Calculate the triggering time of the main shock to aftershocks
+        :param tmp: Energy
+        :param cls_idx: Label
+        :return:
+        """
         res = []
-        main_peak = np.where(cls_idx == True)[0] if type(cls_idx[0]) == bool else cls_idx
+        main_peak = np.where(cls_idx is True)[0] if type(cls_idx[0]) == bool else cls_idx
         eny_lim = [min(tmp[cls_idx]), max(tmp[cls_idx])]
         if len(main_peak):
             for i in range(main_peak.shape[0] - 1):
@@ -424,6 +442,22 @@ class Features:
 
     def cal_contour(self, tmp_1, tmp_2, xlabel, ylabel, title, x_lim, y_lim, size_x=40, size_y=40,
                     method='linear_bin', padding=False, clabel=False):
+        """
+        Visualization of contour line between AE features
+        :param tmp_1: Energy/Amplitude/Duration in order of magnitude of original data
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of original data
+        :param xlabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param ylabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param title:
+        :param x_lim: Range of horizontal axis
+        :param y_lim: Range of vertical axis
+        :param size_x: Number of bins of horizontal axis
+        :param size_y: Number of bins of vertical axis
+        :param method: Method to divide the bin, Support linear partition and logarithmic partition, e.g., linear_bin, log_bin
+        :param padding: Whether to fill color between contour lines
+        :param clabel: Whether to add height and numbers
+        :return:
+        """
         tmp_1, tmp_2 = 20 * np.log10(tmp_1), 20 * np.log10(tmp_2)
         if method == 'log_bin':
             sum_x, sum_y = x_lim[1] - x_lim[0], y_lim[1] - y_lim[0]
@@ -469,6 +503,24 @@ class Features:
 
     def plot_correlation(self, tmp_1, tmp_2, xlabel, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None, fit=False,
                          status='A-D', x1_lim=None, x2_lim=None, plot_lim=None, title=''):
+        """
+        Visualization of Relationships Between Acoustic Emission Features
+        :param tmp_1: Energy/Amplitude/Duration in order of magnitude of original data
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of original data
+        :param xlabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param ylabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param cls_1: Label of population 1
+        :param cls_2: Label of population 2
+        :param idx_1: Highlight specific data in the population 1
+        :param idx_2: Highlight specific data in the population 2
+        :param fit: Whether to fit parameters, support True or False
+        :param status: Conditions used to determine the fit, e.g., 'E-A', 'E-D', 'A-D'
+        :param x1_lim: Fit range for the population 1 of data
+        :param x2_lim: Fit range for the population 2 of data
+        :param plot_lim: Range of fitted line
+        :param title:
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9], num='Correlation--%s & %s %s' % (ylabel, xlabel, title))
         fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
@@ -532,6 +584,19 @@ class Features:
 
     def plot_multi_correlation(self, tmp_1, tmp_2, cls_idx, xlabel, ylabel, fig_loc=None, color=None, sharex=True,
                                sharey=True):
+        """
+
+        :param tmp_1:
+        :param tmp_2:
+        :param cls_idx:
+        :param xlabel:
+        :param ylabel:
+        :param fig_loc: Group image format, e.g., [3, 1]
+        :param color: Color when drawing with original data, population I and population II respectively
+        :param sharex: Whether to share the horizontal axis
+        :param sharey: Whether to share the vertical axis
+        :return:
+        """
         if fig_loc is None:
             fig_loc = [3, 1]
         if not color:
@@ -555,6 +620,21 @@ class Features:
 
     def plot_3D_correlation(self, tmp_1, tmp_2, tmp_3, xlabel, ylabel, zlabel, cls_1=None, cls_2=None, idx_1=None,
                             idx_2=None, title=''):
+        """
+        3D visualization of amplitude-energy-duration
+        :param tmp_1: Amplitude of original data
+        :param tmp_2: Energy of population 1
+        :param tmp_3: Duration of population 2
+        :param xlabel: 'Amplitude (μV)'
+        :param ylabel: 'Energy (aJ)'
+        :param zlabel: 'Duration (μs)'
+        :param cls_1: Label of population 1
+        :param cls_2: Label of population 2
+        :param idx_1: Highlight specific data in the population 1
+        :param idx_2: Highlight specific data in the population 2
+        :param title:
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9], num='3D Correlation--%s & %s %s' % (xlabel, ylabel, zlabel))
         ax = plt.subplot(projection='3d')
         if cls_1 is not None and cls_2 is not None:
@@ -577,6 +657,19 @@ class Features:
 
     def plot_feature_time(self, tmp_1, tmp_2, ylabel, cls_1=None, cls_2=None, idx_1=None, idx_2=None, mode='scatter',
                           width=55):
+        """
+        Feature - time figure visualization
+        :param tmp_1: Time
+        :param tmp_2: Energy/Amplitude/Duration in order of magnitude of original data
+        :param ylabel: 'Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)'
+        :param cls_1: Label of Energy/Amplitude/Duration of population 1
+        :param cls_2: Label of Energy/Amplitude/Duration of population 2
+        :param idx_1: Highlight specific data in the population 1
+        :param idx_2: Highlight specific data in the population 2
+        :param mode: Visualize as a histogram or scatterplot, e.g., 'scatter', 'bar'
+        :param width: the width of each column, For histograms only and in combination with [:param mode].
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9], num='Time domain curve')
         fig.text(0.96, 0.2, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
@@ -605,6 +698,22 @@ class Features:
 
     def cal_BathLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log', select=None,
                     COLOR=None, LABEL=None):
+        """
+        Calculate the bath law for different classes of energy
+        :param tmp_origin: Energy in order of magnitude of original data
+        :param tmp_1: Energy in order of magnitude of population 1
+        :param tmp_2: Energy in order of magnitude of population 2
+        :param xlabel: 'Mainshock Energy (aJ)'
+        :param ylabel: r'$\mathbf{\Delta}$M'
+        :param INTERVAL_NUM: Number of bins divided in each order of magnitude
+        :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
+        :param select:The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :return:
+        """
         if select is None:
             select = [0, 3]
         if INTERVAL_NUM is None:
@@ -641,10 +750,8 @@ class Features:
                     x_eny = np.append(x_eny, np.array(tmp_xx))
             y = []
             for k in range(x.shape[0]):
-                N, Naft = self.__cal_N_Naft(tmp, [x[k], x[k + 1]]) if k != x.shape[0] - 1 else self.__cal_N_Naft(tmp,
-                                                                                                                 [x[k],
-                                                                                                                  float(
-                                                                                                                      'inf')])
+                N, Naft = self.__cal_N_Naft(tmp, [x[k], x[k + 1]]) if k != x.shape[0] - 1 else \
+                    self.__cal_N_Naft(tmp, [x[k], float('inf')])
                 if Naft != 0 and N != 0:
                     y.append(np.log10(N / Naft))
                 else:
@@ -664,6 +771,29 @@ class Features:
 
     def cal_WaitingTime(self, time_origin, time_1, time_2, dur_origin, dur_1, dur_2, xlabel, ylabel, INTERVAL_NUM=None,
                         bin_method='log', select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
+        """
+        Calculate the waiting time distribution for different classes of times
+        :param time_origin: Time in order of magnitude of original data
+        :param time_1: Time in order of magnitude of population 1
+        :param time_2: Time in order of magnitude of population 2
+        :param dur_origin: Duration in order of magnitude of original data
+        :param dur_1: Duration in order of magnitude of population 1
+        :param dur_2: Duration in order of magnitude of population 2
+        :param xlabel: r'$\mathbf{\Delta}$t (s)'
+        :param ylabel: r'P($\mathbf{\Delta}$t)'
+        :param INTERVAL_NUM: Number of bins divided in each order of magnitude
+        :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
+        :param select: The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param FIT: Whether to fit parameters, support True or False
+        :param LIM: Use in function fitting, support specific values or indexes,
+                    value: [0, float('inf')], [100, 900], ...
+                    index: [0, None], [11, -2], ...
+        :param COLOR: Color when drawing with original data, population I and population II respectively
+        :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :return:
+        """
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
         if select is None:
@@ -722,6 +852,21 @@ class Features:
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log', select=None,
                      FIT=False):
+        """
+        Calculate the probability density distribution of different classes and different interval energies
+        :param tmp_origin: Energy in order of magnitude of original data
+        :param tmp_1: Energy in order of magnitude of population 1
+        :param tmp_2: Energy in order of magnitude of population 2
+        :param xlabel: 'Energy (aJ)'
+        :param ylabel: 'PDF (E)'
+        :param INTERVAL_NUM: Number of bins divided in each order of magnitude
+        :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
+        :param select: The category displayed each time the function is called, like:
+                       [0, None]: Display the original data, the first population, the second population of calculation results.
+                       [1, 2]: Only display the first population of calculation results.
+        :param FIT: Whether to fit parameters, support True or False
+        :return:
+        """
         #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
         if select is None:
             select = [0, 3]
@@ -774,6 +919,16 @@ class Features:
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False):
+        """
+        Calculate the trigger relationship of two types of energy
+        :param tmp_origin: Energy
+        :param cls_idx_1: Label of class 1
+        :param cls_idx_2: Label of class 2
+        :param INTERVAL_NUM: Number of bins divided in each order of magnitude
+        :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
+        :param FIT: Whether to fit parameters, support True or False
+        :return:
+        """
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [3] * 2
         res_1 = self.__cal_OmiroLaw_timeSeq_helper(tmp_origin, cls_idx_1)
@@ -810,9 +965,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\Ni'
-    fold = 'Ni-tension test-pure-1-0.01-AE-20201030'
-    info = js['Ni'][fold]
+    path = r'F:\VALLEN\ZPH'
+    fold = 'tini-50.8-gurong-hui-1'
+    info = js['TiNi'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'

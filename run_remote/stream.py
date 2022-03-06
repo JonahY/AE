@@ -261,7 +261,8 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
             if stE[j] < ITU_tmp:
                 end_temp = j
                 break
-        ITL = 0.368 * max(stE[start_true:end_temp+1]) if ITU_tmp > 0.368 * max(stE[start_true:end_temp+1]) else ITU_tmp
+        ITL = 0.368 * max(stE[start_true:end_temp + 1]) if ITU_tmp > 0.368 * max(
+            stE[start_true:end_temp + 1]) else ITU_tmp
         # print('Successfully found the temporary ending index! End: %d, ITL: %f' % (end_temp, ITL))
 
         for k in range(end_temp, stE.shape[0]):
@@ -289,6 +290,12 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
 
 def cut_stream(files, streamFold, saveFold):
     pbar = tqdm(files)
+
+    try:
+        os.listdir(saveFold)
+    except FileNotFoundError:
+        os.mkdir(saveFold)
+
     for file in pbar:
         pbar.set_description('File name: %s' % file[43:-4])
 
@@ -464,11 +471,18 @@ if __name__ == '__main__':
                         help="Absolute path of streaming folder(add 'r' in front)")
     parser.add_argument("-saveF", "--saveFold", type=str, default=r'/mnt/yuanbincheng/Stream/waveforms',
                         help="Absolute path of storage folder(add 'r' in front)")
+    parser.add_argument("-f", "--first", type=int, default=1,
+                        help="Only the [1] is passed in for the first calculation, and only the streaming file that "
+                             "appears in the storage location needs to be calculated later.")
+    parser.add_argument("-saveFNew", "--saveFoldNew", type=str, default=r'/mnt/yuanbincheng/Stream/waveforms',
+                        help="Absolute path of new storage folder(add 'r' in front), "
+                             "Only used except for the first calculation.")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
-    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7, help="identification zero crossing rate threshold")
+    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
+                        help="identification zero crossing rate threshold")
     parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
     parser.add_argument("-alpha", "--alpha", type=float, default=1.7, help="")
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
@@ -477,7 +491,13 @@ if __name__ == '__main__':
     print("=" * 44 + " Parameters " + "=" * 44)
     print(opt)
 
-    file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))
+    if opt.first:
+        file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))
+    else:
+        file_list = []
+        for file in os.listdir(opt.saveFold):
+            file_list.append('%s.txt' % file[:-6])
+        file_list = list(set(file_list))
     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
 
     print("=" * 47 + " Start " + "=" * 46)
@@ -486,7 +506,8 @@ if __name__ == '__main__':
     # Multiprocessing acceleration
     pool = multiprocessing.Pool(processes=opt.processor)
     for idx, i in enumerate(range(0, len(file_list), each_core)):
-        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold, opt.saveFold))
+        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold,
+                                      opt.saveFold if opt.first else '%s_%s' % (opt.saveFoldNew, opt.ITU)))
 
     pool.close()
     pool.join()
