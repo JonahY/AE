@@ -16,7 +16,6 @@ from matplotlib.pylab import mpl
 from stream import *
 import cv2
 
-
 mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
@@ -81,7 +80,8 @@ class Reload:
         data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
         if mode == 'all' or mode == 'tra only':
             conn_tra = sqlite3.connect(self.path_tra)
-            result_tra = conn_tra.execute("Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
+            result_tra = conn_tra.execute(
+                "Select Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI FROM view_tr_data")
             N_tra = self.sqlite_read(self.path_tra)
             for _ in tqdm(range(N_tra), ncols=80):
                 i = result_tra.fetchone()
@@ -91,7 +91,8 @@ class Reload:
                     break
         if mode == 'all' or mode == 'pri only':
             conn_pri = sqlite3.connect(self.path_pri)
-            result_pri = conn_pri.execute("Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
+            result_pri = conn_pri.execute(
+                "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
             N_pri = self.sqlite_read(self.path_pri)
             for _ in tqdm(range(N_pri), ncols=80):
                 i = result_pri.fetchone()
@@ -512,8 +513,8 @@ def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):
 
 def find_nearest(ls, v):
     idx = np.searchsorted(ls, v, side="left")
-    if idx > 0 and (idx == len(ls) or abs(v - ls[idx-1]) < abs(v - ls[idx])):
-        return idx-1
+    if idx > 0 and (idx == len(ls) or abs(v - ls[idx - 1]) < abs(v - ls[idx])):
+        return idx - 1
     else:
         return idx
 
@@ -558,11 +559,11 @@ def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7,
 
 
 def remove_the_blackborder(image):
-    '''
+    """
     Crop black borders around the image
     :param image:
     :return:
-    '''
+    """
     image = cv2.imread(image)  # 读取图片
     img = cv2.medianBlur(image, 5)  # 中值滤波，去除黑色边际中可能含有的噪声干扰
     b = cv2.threshold(img, 3, 255, cv2.THRESH_BINARY)  # 调整裁剪效果
@@ -586,12 +587,12 @@ def remove_the_blackborder(image):
 
 
 def cal_mean_std(files_dir, files):
-    '''
+    """
     Calculate the mean and standard deviation of pictures
     :param files_dir:
     :param files:
     :return:
-    '''
+    """
     R = 0.
     G = 0.
     B = 0.

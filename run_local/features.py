@@ -314,10 +314,11 @@ class Features:
                           label='{}--{:.2f}'.format(label, abs(alpha)))
             else:
                 ax.loglog(xx, yy, '.', marker='.', markersize=8, color=color, label=label)
-            with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
-                f.write('{}, {}\n'.format(xlabel, ylabel))
-                for j in range(len(xx)):
-                    f.write('{}, {}\n'.format(xx[j], yy[j]))
+            if features_path:
+                with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
+                    f.write('{}, {}\n'.format(xlabel, ylabel))
+                    for j in range(len(xx)):
+                        f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, select=None, FIT=False,
@@ -376,10 +377,11 @@ class Features:
                 ax.loglog(xx, yy, color=color, label='{}--{:.2f}'.format(label, abs(alpha)))
             else:
                 ax.loglog(xx, yy, color=color, label=label)
-            with open(features_path[:-4] + '_{}_'.format(label) + 'CCDF(%s).txt' % xlabel[0], 'w') as f:
-                f.write('{}, {}\n'.format(xlabel, ylabel))
-                for j in range(len(xx)):
-                    f.write('{}, {}\n'.format(xx[j], yy[j]))
+            if features_path:
+                with open(features_path[:-4] + '_{}_'.format(label) + 'CCDF(%s).txt' % xlabel[0], 'w') as f:
+                    f.write('{}, {}\n'.format(xlabel, ylabel))
+                    for j in range(len(xx)):
+                        f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, ECOLOR=None,
@@ -433,10 +435,11 @@ class Features:
                                         capsize=2, ms=3, label=label, zorder=layer, alpha=0.8)
             _ = [bar.set_alpha(0.5) for bar in bars]
             _ = [cap.set_alpha(0.5) for cap in caps]
-            with open(features_path[:-4] + '_{}_'.format(label) + 'ML(%s).txt' % xlabel[0], 'w') as f:
-                f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
-                for j in range(len(ML_y)):
-                    f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
+            if features_path:
+                with open(features_path[:-4] + '_{}_'.format(label) + 'ML(%s).txt' % xlabel[0], 'w') as f:
+                    f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
+                    for j in range(len(ML_y)):
+                        f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
         plot_norm(ax, xlabel, ylabel, y_lim=[1.3, 2.6], legend_loc='upper right', frameon=self.frameon,
                   fontname=self.font)
 
@@ -843,10 +846,12 @@ class Features:
                           label='{}--{:.2f}'.format(label, abs(alpha)))
             else:
                 ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
-            with open(features_path[:-4] + '_{}_'.format(label) + 'WaitingTime.txt', 'w') as f:
-                f.write('{}, {}\n'.format(xlabel, ylabel))
-                for j in range(xx.shape[0]):
-                    f.write('{}, {}\n'.format(xx[j], yy[j]))
+
+            if features_path:
+                with open(features_path[:-4] + '_{}_'.format(label) + 'WaitingTime.txt', 'w') as f:
+                    f.write('{}, {}\n'.format(xlabel, ylabel))
+                    for j in range(xx.shape[0]):
+                        f.write('{}, {}\n'.format(xx[j], yy[j]))
 
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
@@ -910,11 +915,12 @@ class Features:
                     else:
                         ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
 
-                    with open(features_path[:-4] + '_{}_'.format(title) + '(%s).txt' %
-                              label.replace('<', ' ').replace('>', ' '), 'w') as f:
-                        f.write('t-t_{MS} (s), r_{AS}(t-t_{MS})(s^{-1})\n')
-                        for j in range(xx.shape[0]):
-                            f.write('{}, {}\n'.format(xx[j], yy[j]))
+                    if features_path:
+                        with open(features_path[:-4] + '_{}_'.format(title) + '(%s).txt' %
+                                  label.replace('<', ' ').replace('>', ' '), 'w') as f:
+                            f.write('t-t_{MS} (s), r_{AS}(t-t_{MS})(s^{-1})\n')
+                            for j in range(xx.shape[0]):
+                                f.write('{}, {}\n'.format(xx[j], yy[j]))
 
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
@@ -965,9 +971,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\ZPH'
-    fold = 'tini-50.8-gurong-hui-1'
-    info = js['TiNi'][fold]
+    path = r'F:\VALLEN\Ni'
+    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'

@@ -28,6 +28,54 @@ for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
     fig.clear()
 
 
+# ===================================================== Streaming ======================================================
+# ----------------------------------------------------------------------------------------------------------------------
+# Save waveform and ssq_cwt in batches
+waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\waveforms_650'
+saveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\Wave&SSWT_650'
+
+for file in tqdm(os.listdir(waveFold)):
+    with open(os.path.join(waveFold, file)) as f:
+        data = np.array([i.strip().split(',') for i in f.readlines()[1:]]).astype(float)
+
+    sig = data[:, 1]
+    time = data[:, 0] - data[0, 0]
+    fs = int(1e6 / time[1])
+
+    fig = plt.figure(figsize=(9.2, 3), num='0')
+    ax = fig.add_subplot(1, 2, 1)
+    ax.plot(time, sig, lw=1, color=[255 / 255, 0 / 255, 102 / 255])
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title=file[43:-4], legend=False, grid=True)
+    ax = fig.add_subplot(1, 2, 2)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=fs, t=time)
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+    try:
+        plt.savefig(os.path.join(saveFold, file[43:-4]), pad_inches=0)
+    except FileNotFoundError:
+        os.mkdir(saveFold)
+        plt.savefig(os.path.join(saveFold, file[43:-4]), pad_inches=0)
+    fig.clear()
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Calculation of waveform features
+waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\waveforms_650'
+Amp_Waveform, Dur_Waveform, Eny_Waveform = np.array([]), np.array([]), np.array([])
+
+for file in tqdm(os.listdir(waveFold)):
+    with open(os.path.join(waveFold, file)) as f:
+        data = np.array([i.strip().split(',') for i in f.readlines()[1:]]).astype(float)
+
+    sig = data[:, 1]
+    time = data[:, 0] - data[0, 0]
+    fs = int(1e6 / time[1])
+
+    Amp_Waveform = np.append(Amp_Waveform, max(abs(sig)))
+    Dur_Waveform = np.append(Dur_Waveform, time[-1])
+    Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
+
+
 # ======================================================= VALLEN =======================================================
 # Image normalization
 for idx, file in tqdm(enumerate(files, 1)):

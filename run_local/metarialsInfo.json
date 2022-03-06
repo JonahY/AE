@@ -81,6 +81,7 @@
       "t_cut": 24000
     },
     "Ni-tension test-electrolysis-1-0.01-AE-20201031": {
+      "t_str": 0,
       "t_cut": "inf",
       "random_state": 50,
       "chan_filter": "np.delete(chan_2, [3, 129, 509], 0)",
