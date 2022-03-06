@@ -61,18 +61,21 @@ for file in tqdm(os.listdir(waveFold)):
 # ----------------------------------------------------------------------------------------------------------------------
 # Calculation of waveform features
 waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\waveforms_650'
-Amp_Waveform, Dur_Waveform, Eny_Waveform = np.array([]), np.array([]), np.array([])
+Time_Waveform, Amp_Waveform, Dur_Waveform, Eny_Waveform = np.array([]), np.array([]), np.array([]), np.array([])
 
 for file in tqdm(os.listdir(waveFold)):
     with open(os.path.join(waveFold, file)) as f:
-        data = np.array([i.strip().split(',') for i in f.readlines()[1:]]).astype(float)
+        f.readline()
+        triggerTime = float(f.readline().strip())
+        data = np.array([i.strip().split(',') for i in f.readlines()[2:]]).astype(float)
 
     sig = data[:, 1]
-    time = data[:, 0] - data[0, 0]
-    fs = int(1e6 / time[1])
+    time = data[:, 0]
+    fs = int(1e6 / (time[1] - time[0]))
 
+    Time_Waveform = np.append(Time_Waveform, triggerTime + time[0] / 1e6)
     Amp_Waveform = np.append(Amp_Waveform, max(abs(sig)))
-    Dur_Waveform = np.append(Dur_Waveform, time[-1])
+    Dur_Waveform = np.append(Dur_Waveform, time[-1] - time[0])
     Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
 
 
