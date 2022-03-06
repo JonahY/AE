@@ -1,6 +1,5 @@
 import numpy as np
 import time
-from time import sleep
 from tqdm import tqdm
 import sys
 import os
@@ -289,10 +288,10 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
 
 
 def cut_stream(files, streamFold, saveFold):
-    pbar = tqdm(files)
+    pbar = tqdm(files, ncols=100)
 
     try:
-        os.listdir(saveFold)
+        os.path.exists(saveFold)
     except FileNotFoundError:
         os.mkdir(saveFold)
 
@@ -302,8 +301,10 @@ def cut_stream(files, streamFold, saveFold):
         with open(os.path.join(streamFold, file), 'r') as f:
             for _ in range(4):
                 f.readline()
-
             fs = int(f.readline().strip().split()[-1]) * 1e-3
+            for _ in range(2):
+                f.readline()
+            trigger_time = float(f.readline().strip()[15:])
             sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[4:-1])))
             t_initial = np.array([i / fs for i in range(len(sig_initial))])
 
@@ -320,10 +321,11 @@ def cut_stream(files, streamFold, saveFold):
 
         for out, [s, e] in enumerate(zip(start, end), 1):
             with open(os.path.join(saveFold, '{}-{}.txt'.format(file[:-4], out)), 'w') as f:
+                f.write('Trigger time (s):%.8f\n' % trigger_time)
                 f.write('Time (μs), Amplitude (μV)\n')
                 for i, j in zip(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
                                 sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2]):
-                    f.write('%f, %f\n' % (i, j))
+                    f.write('%.1f, %f\n' % (i, j))
 
 
 '''
