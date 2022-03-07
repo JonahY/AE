@@ -36,7 +36,7 @@ saveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\W
 
 for file in tqdm(os.listdir(waveFold)):
     with open(os.path.join(waveFold, file)) as f:
-        data = np.array([i.strip().split(',') for i in f.readlines()[1:]]).astype(float)
+        data = np.array([i.strip().split(',') for i in f.readlines()[4:]]).astype(float)
 
     sig = data[:, 1]
     time = data[:, 0] - data[0, 0]

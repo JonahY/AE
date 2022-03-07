@@ -27,12 +27,15 @@ def cut_stream(files, streamFold, saveFold):
                     f.write('Trigger time (s)\n%.8f\n\n' % trigger_time)
                     f.write(old)
 
+                with open(os.path.join(saveFold, 'log'), 'a') as f:
+                    f.write('%s\n' % file)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
                         help="Absolute path of streaming folder(add 'r' in front)")
-    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/mnt/yuanbincheng/Stream/waveforms_800',
+    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_650',
                         help="Absolute path of storage folder(add 'r' in front)")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     opt = parser.parse_args()
@@ -41,7 +44,8 @@ if __name__ == '__main__':
 
     file_list = []
     for file in os.listdir(opt.saveFold):
-        file_list.append('%s.txt' % file[:-6])
+        if file != 'log':
+            file_list.append('%s_ch1.txt' % file.split('_')[0])
     file_list = list(set(file_list))
     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
 
