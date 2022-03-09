@@ -475,7 +475,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
                         help="Absolute path of streaming folder(add 'r' in front)")
-    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_650',
+    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_500',
                         help="Absolute path of storage folder(add 'r' in front)")
     parser.add_argument("-f", "--first", type=int, default=1, choices=[0, 1],
                         help="Only the [1] is passed in for the first calculation, and only the streaming file that "
@@ -484,6 +484,7 @@ if __name__ == '__main__':
                         help="Absolute path of new storage folder(add 'r' in front), "
                              "Only used except for the first calculation.")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
+    parser.add_argument("-detect", "--detection", type=int, default=0, choices=[0, 1], help="Whether to detect log file")
     parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
@@ -505,6 +506,20 @@ if __name__ == '__main__':
             if file != 'log':
                 file_list.append('%s_ch1.txt' % file.split('_')[0])
         file_list = list(set(file_list))
+
+    # 对比初始文件夹检测当前log文件中未计算的波形流数据
+    if opt.detection:
+        with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
+            for _ in range(10):
+                f.readline()
+            calculatedFiles = [i.strip() for i in f.readlines()]
+
+        notCalculated = []
+        for i in file_list:
+            if i not in calculatedFiles:
+                notCalculated.append(i)
+        file_list = notCalculated
+
     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
 
     if not os.path.exists(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU)):
