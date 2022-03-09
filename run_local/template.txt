@@ -78,6 +78,12 @@ for file in tqdm(os.listdir(waveFold)):
     Dur_Waveform = np.append(Dur_Waveform, time[-1] - time[0])
     Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
 
+valid_sort = np.argsort(Time_Waveform)
+Time_Waveform = Time_Waveform[valid_sort]
+Amp_Waveform = Amp_Waveform[valid_sort]
+Dur_Waveform = Dur_Waveform[valid_sort]
+Eny_Waveform = Eny_Waveform[valid_sort]
+
 
 # ======================================================= VALLEN =======================================================
 # Image normalization
