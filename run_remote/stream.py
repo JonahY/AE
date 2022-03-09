@@ -477,7 +477,7 @@ if __name__ == '__main__':
                         help="Absolute path of streaming folder(add 'r' in front)")
     parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_650',
                         help="Absolute path of storage folder(add 'r' in front)")
-    parser.add_argument("-f", "--first", type=int, default=1,
+    parser.add_argument("-f", "--first", type=int, default=1, choices=[0, 1],
                         help="Only the [1] is passed in for the first calculation, and only the streaming file that "
                              "appears in the storage location needs to be calculated later.")
     parser.add_argument("-saveFNew", "--saveFoldNew", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms',
