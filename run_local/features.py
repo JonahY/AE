@@ -249,7 +249,7 @@ class Features:
                     res.append(k)
         return res
 
-    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, INTERVAL_NUM=None,
+    def cal_PDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path=None, LIM=None, INTERVAL_NUM=None,
                 bin_method='log', select=None, FIT=False, COLOR=None, LABEL=None):
         """
         Calculate Probability Density Distribution Function
@@ -321,7 +321,7 @@ class Features:
                         f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
-    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, LIM=None, select=None, FIT=False,
+    def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path=None, LIM=None, select=None, FIT=False,
                  COLOR=None, LABEL=None):
         """
         Calculate Complementary Cumulative Distribution Function
@@ -384,7 +384,7 @@ class Features:
                         f.write('{}, {}\n'.format(xx[j], yy[j]))
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
-    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path, select=None, COLOR=None, ECOLOR=None,
+    def cal_ML(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path=None, select=None, COLOR=None, ECOLOR=None,
                LABEL=None):
         """
         Calculate the maximum likelihood function distribution
@@ -773,7 +773,7 @@ class Features:
         plot_norm(ax, xlabel, ylabel, y_lim=[-1, 4], legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_WaitingTime(self, time_origin, time_1, time_2, dur_origin, dur_1, dur_2, xlabel, ylabel, INTERVAL_NUM=None,
-                        bin_method='log', select=None, FIT=False, LIM=None, COLOR=None, LABEL=None):
+                        bin_method='log', select=None, FIT=False, LIM=None, COLOR=None, LABEL=None, features_path=None):
         """
         Calculate the waiting time distribution for different classes of times
         :param time_origin: Time in order of magnitude of original data
@@ -825,6 +825,8 @@ class Features:
             elif lim[1] == float('inf') or lim[1] > 0:
                 method = 'value'
             res = list(time[1:] - (time[:-1] + dur[:-1] / 1e6))
+            valid = np.where(np.array(res) != 0)[0]
+            res = np.array(res)[valid].tolist()
             if bin_method == 'linear':
                 inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
                 xx, yy = self.__cal_linear(sorted(np.array(res)), inter, mid, interval_num)
@@ -856,7 +858,7 @@ class Features:
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_OmoriLaw(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, INTERVAL_NUM=None, bin_method='log', select=None,
-                     FIT=False):
+                     FIT=False, features_path=None):
         """
         Calculate the probability density distribution of different classes and different interval energies
         :param tmp_origin: Energy in order of magnitude of original data
@@ -971,9 +973,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\Ni'
-    fold = 'Ni-tension test-electrolysis-1-0.01-AE-20201031'
-    info = js['Ni'][fold]
+    path = r'F:\VALLEN\ZPH'
+    fold = 'tini-50.8-gurong-hui-1'
+    info = js['TiNi'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
