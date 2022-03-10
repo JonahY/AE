@@ -825,7 +825,7 @@ class Features:
             elif lim[1] == float('inf') or lim[1] > 0:
                 method = 'value'
             res = list(time[1:] - (time[:-1] + dur[:-1] / 1e6))
-            valid = np.where(np.array(res) != 0)[0]
+            valid = np.where(np.array(res) > 0)[0]
             res = np.array(res)[valid].tolist()
             if bin_method == 'linear':
                 inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
