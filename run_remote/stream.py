@@ -507,7 +507,7 @@ if __name__ == '__main__':
                 file_list.append('%s_ch1.txt' % file.split('_')[0])
         file_list = list(set(file_list))
 
-    # 对比初始文件夹检测当前log文件中未计算的波形流数据
+    # Compare the initial folder to detect the uncalculated streaming file in the current log file
     if opt.detection:
         with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
             for _ in range(10):
