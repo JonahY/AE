@@ -61,6 +61,7 @@ for file in tqdm(os.listdir(waveFold)):
 # ----------------------------------------------------------------------------------------------------------------------
 # Calculation of waveform features
 waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\thershold cutting\ITU_650\waveforms_650'
+features_path = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\thershold cutting\ITU_650\.txt'
 Time_Waveform, Amp_Waveform, Dur_Waveform, Eny_Waveform = np.array([]), np.array([]), np.array([]), np.array([])
 
 for file in tqdm(os.listdir(waveFold)):
@@ -90,7 +91,6 @@ xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
 color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
 color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
 features = Features(color_1, color_2, Time_Waveform, '')
-features_path = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\thershold cutting\ITU_650\.txt'
 features.cal_WaitingTime(Time_Waveform, Time_Waveform, Time_Waveform, Dur_Waveform, Dur_Waveform, Dur_Waveform, r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [4, 8, 8], bin_method='log', select=[0, 1], FIT=True, features_path=features_path)
 features.cal_PDF(sorted(Eny_Waveform), sorted(Eny_Waveform), sorted(Eny_Waveform), xlabelz[2], 'PDF (%s)' % xlabelz[2][0], features_path, [[3, None], [2, -2], [2, -4]], [4, 8, 8], bin_method='log', select=[0, 1], FIT=True)
 
