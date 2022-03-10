@@ -3,6 +3,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+from tqdm import tqdm
+
+
+"""
+# Crop size of TB
+height, width = [105, 1201 + 105], [0, 1599]
+
+# Crop size of IPF
+height, width = [0, 414], [0, None]
+"""
+
+
+def crop_image(folder, height, width):
+    for file in tqdm(os.listdir(folder)[0]):
+        img = cv2.imread(os.path.join(folder, file))
+        cv2.imshow("crop", img[height[0]:height[1], width[0]:width[1]])
+        cv2.imwrite(os.path.join(folder, file), img[height[0]:height[1], width[0]:width[1]])
 
 
 def ebsd_post_processing(path, low_hsv, high_hsv, plot=False):
