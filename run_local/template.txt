@@ -93,6 +93,7 @@ color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
 features = Features(color_1, color_2, Time_Waveform, '')
 features.cal_WaitingTime(Time_Waveform, Time_Waveform, Time_Waveform, Dur_Waveform, Dur_Waveform, Dur_Waveform, r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [4, 8, 8], bin_method='log', select=[0, 1], FIT=True, features_path=features_path)
 features.cal_PDF(sorted(Eny_Waveform), sorted(Eny_Waveform), sorted(Eny_Waveform), xlabelz[2], 'PDF (%s)' % xlabelz[2][0], features_path, [[3, None], [2, -2], [2, -4]], [4, 8, 8], bin_method='log', select=[0, 1], FIT=True)
+features.cal_PDF(sorted(Dur_Waveform), sorted(Dur_Waveform), sorted(Dur_Waveform), xlabelz[1], 'PDF (%s)' % xlabelz[1][0], features_path, [[3, None], [2, -2], [2, -4]], [4, 8, 8], bin_method='log', select=[0, 1], FIT=True)
 
 # ======================================================= VALLEN =======================================================
 # Image normalization
