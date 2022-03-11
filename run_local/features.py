@@ -176,6 +176,7 @@ class Features:
 
         xx, y, interval = xx[y != 0], y[y != 0], interval[y != 0]
         yy = y / (sum(y) * interval)
+        # yy = y / sum(y)
         return xx, yy
 
     def __cal_N_Naft(self, tmp, eny_lim):
