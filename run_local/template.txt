@@ -31,12 +31,20 @@ for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
 # ===================================================== Streaming ======================================================
 # ----------------------------------------------------------------------------------------------------------------------
 # Save waveform and ssq_cwt in batches
-waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\waveforms_650'
-saveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\Wave&SSWT_650'
+waveFold = '/home/Yuanbincheng/data/stream/waveforms_550'
+saveFold = '/home/Yuanbincheng/data/stream/Wave&SSWT_550'
+if not os.path.exists(saveFold):
+    os.mkdir(saveFold)
+saveFiles = os.listdir(saveFold)
 
 for file in tqdm(os.listdir(waveFold)):
-    with open(os.path.join(waveFold, file)) as f:
-        data = np.array([i.strip().split(',') for i in f.readlines()[4:]]).astype(float)
+    if f'{file[43:-4]}.png' in saveFiles:
+        continue
+    try:
+        with open(os.path.join(waveFold, file)) as f:
+            data = np.array([i.strip().split(',') for i in f.readlines()[4:]]).astype(float)
+    except ValueError:
+        continue
 
     sig = data[:, 1]
     time = data[:, 0] - data[0, 0]
@@ -50,11 +58,7 @@ for file in tqdm(os.listdir(waveFold)):
     Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=fs, t=time)
     plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
     plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
-    try:
-        plt.savefig(os.path.join(saveFold, file[43:-4]), pad_inches=0)
-    except FileNotFoundError:
-        os.mkdir(saveFold)
-        plt.savefig(os.path.join(saveFold, file[43:-4]), pad_inches=0)
+    plt.savefig(os.path.join(saveFold, file[43:-4]), pad_inches=0)
     fig.clear()
 
 
