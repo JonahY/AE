@@ -974,9 +974,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'H:\AE-vallen\AM-Cu\lattice structure\20201208-3.5mA-test2-channel3'
-    fold = "AM-Cu-1208-test2-compression-3.5mA-0.01mm-min"
-    info = js['Cu'][fold]
+    path = r'F:\VALLEN\Nano Ni'
+    fold = "Nano Ni-compression text-3-0.003-20200920"
+    info = js['Nano Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'

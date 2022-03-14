@@ -125,6 +125,7 @@
       "chan_filter": "[np.where(chan_3[:, 1] < 16880)[0]]"
     },
     "Nano Ni-compression text-3-0.003-20200920": {
+      "t_str": 0,
       "t_cut": "inf",
       "chan_filter": "[np.where((chan_3[:, 1] < 10210) | ((chan_3[:, 1] > 10260) & (chan_3[:, 1] < 10500)) | ((chan_3[:, 1] > 10550) & (chan_3[:, 1] < 14200)) | ((chan_3[:, 1] > 14300) & (chan_3[:, 1] < 17350)))[0]]"
     },

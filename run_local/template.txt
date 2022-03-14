@@ -99,6 +99,28 @@ features.cal_WaitingTime(Time_Waveform, Time_Waveform, Time_Waveform, Dur_Wavefo
 features.cal_PDF(sorted(Eny_Waveform), sorted(Eny_Waveform), sorted(Eny_Waveform), xlabelz[2], 'PDF (%s)' % xlabelz[2][0], features_path, [[3, None], [2, -2], [2, -4]], [4, 8, 8], bin_method='log', select=[0, 1], FIT=True)
 features.cal_PDF(sorted(Dur_Waveform), sorted(Dur_Waveform), sorted(Dur_Waveform), xlabelz[1], 'PDF (%s)' % xlabelz[1][0], features_path, [[3, None], [2, -2], [2, -4]], [4, 8, 8], bin_method='log', select=[0, 1], FIT=True)
 
+# classification
+formula = lambda x, a, b:  pow(x, a) * pow(10, b)
+fit_x = cal_fitx(Amp_Waveform, 1000)
+fit_y = [formula(i, 2, -3) for i in fit_x]
+label = cal_label(Amp_Waveform, Eny_Waveform, formula, [2], [-3])
+idx_1 = np.where(np.array(label) == 0)[0]
+idx_2 = np.where(np.array(label) == 1)[0]
+
+fig = plt.figure(figsize=[6, 3.9])
+ax = plt.subplot()
+ax.loglog(Amp_Waveform[idx_1], Eny_Waveform[idx_1], '.', Marker='.', markersize=5, color=color_1, label='Pop 1')
+ax.loglog(Amp_Waveform[idx_2], Eny_Waveform[idx_2], '.', Marker='.', markersize=5, color=color_2, label='Pop 2')
+ax.loglog(fit_x, fit_y, '.', Marker='.', markersize=0.5, color='black')
+plot_norm(ax, xlabelz[0], xlabelz[2], legend=True)
+
+df_pop1 = pd.DataFrame({'Time_pop1': Time_Waveform[idx_1], 'Amp_pop1': Amp_Waveform[idx_1], 'Eny_pop1': Eny_Waveform[idx_1], 'Dur_pop1': Dur_Waveform[idx_1]})
+df_pop2 = pd.DataFrame({'Time_pop2': Time_Waveform[idx_2], 'Amp_pop2': Amp_Waveform[idx_2], 'Eny_pop2': Eny_Waveform[idx_2], 'Dur_pop2': Dur_Waveform[idx_2]})
+df_pop1.to_csv(os.path.join(features_path[:-5], 'EAD-T_pop1.csv'), index=None)
+df_pop2.to_csv(os.path.join(features_path[:-5], 'EAD-T_pop2.csv'), index=None)
+features.cal_ML(sorted(Eny_Waveform), sorted(Eny_Waveform[idx_1]), sorted(Eny_Waveform[idx_2]), xlabelz[2], 'ML (%s)' % xlabelz[2][0], features_path, select=[0, 3])
+
+
 # ======================================================= VALLEN =======================================================
 # Image normalization
 for idx, file in tqdm(enumerate(files, 1)):

@@ -475,12 +475,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
                         help="Absolute path of streaming folder(add 'r' in front)")
-    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_500',
+    parser.add_argument("-saveF", "--saveFold", type=str,
+                        default=r'/home/Yuanbincheng/data/stream/alpha_1.3/waveforms_500',
                         help="Absolute path of storage folder(add 'r' in front)")
     parser.add_argument("-f", "--first", type=int, default=1, choices=[0, 1],
                         help="Only the [1] is passed in for the first calculation, and only the streaming file that "
                              "appears in the storage location needs to be calculated later.")
-    parser.add_argument("-saveFNew", "--saveFoldNew", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms',
+    parser.add_argument("-saveFNew", "--saveFoldNew", type=str,
+                        default=r'/home/Yuanbincheng/data/stream/alpha_1.3/waveforms',
                         help="Absolute path of new storage folder(add 'r' in front), "
                              "Only used except for the first calculation.")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
@@ -491,7 +493,8 @@ if __name__ == '__main__':
     parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
                         help="identification zero crossing rate threshold")
     parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
-    parser.add_argument("-alpha", "--alpha", type=float, default=1.7, help="")
+    parser.add_argument("-alpha", "--alpha", type=float, default=1.3,
+                        help="Parameters for automatic adjustment of ITU and IZCRT.")
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
 
     opt = parser.parse_args()
@@ -509,7 +512,8 @@ if __name__ == '__main__':
 
     # Compare the initial folder to detect the uncalculated streaming file in the current log file
     if opt.detection:
-        with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
+        # with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
+        with open('/home/Yuanbincheng/data/stream/waveforms_600/log', 'r') as f:
             for _ in range(10):
                 f.readline()
             calculatedFiles = [i.strip() for i in f.readlines()]

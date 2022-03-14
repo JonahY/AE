@@ -144,7 +144,7 @@ def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming
     :param framelen: length of per frame, type: int
     :param stride: length of translation per frame
     :param fs: sampling rate per microsecond
-    :param window: window's function
+    :param window: window's function, e.g., hamming, hanning, blackman, bartlett
     :return: time_zcR, zcR
     """
     if signal.shape[0] <= framelen:
