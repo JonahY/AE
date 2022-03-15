@@ -441,13 +441,12 @@ energy = np.array(energy)
 #
 # width = int(fs * staLen)
 # stride = int(width) - overlap
-# t_stE, stE, stA = shortTermEny(sig, width, stride, fs, staWin)
-# t_zcR, zcR = zerosCrossingRate(sig, width, stride, fs, staWin)
+# t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, staWin)
 # stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
 #
 # #====================================================== 图形展示 ======================================================
-# x = [t_initial, t_stE, t_stE, t_zcR]
+# x = [t, t_stE, t_stE, t_stE]
 # y = [sig, stE, stE_dev, zcR]
 # color = ['black', 'green', 'gray', 'purple']
 # ylabel = [r'$Amplitude$ $(μV)$', r'$STEnergy$ $(μV^2 \cdot μs)$', r'$S\dot{T}E$ $(μV^2)$', r'$ST\widehat{Z}CR$ $(\%)$']
