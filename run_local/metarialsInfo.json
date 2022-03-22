@@ -26,10 +26,12 @@
   },
   "Cu": {
     "Cu-20210914-test1-tension-0.1mm-min": {
+      "t_str": 0,
       "t_cut": 13730,
       "random_state": 100
     },
     "AM-Cu-20210928-test2-tension-0.05mm-min": {
+      "t_str": 0,
       "t_cut": 34508,
       "slope": 2,
       "intercept": -2.9,

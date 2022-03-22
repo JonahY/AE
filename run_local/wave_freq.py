@@ -290,7 +290,6 @@ class Frequency:
         self.thr = pow(10, thr_dB / 20)
 
     def cal_frequency(self, k, valid=True):
-
         if self.device == 'vallen':
             i = self.data_tra[k]
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -327,6 +326,7 @@ class Frequency:
         num = 0
         for j in TRAI:
             half_frq, normalization_half, time = self.cal_frequency(j - 1, valid=valid)
+            # normalization_half /= max(normalization_half)     # Normalization
             if time[-1] < t_lim:
                 continue
             valid_idx = int((pow(10, 6) / max(half_frq)) * half_frq.shape[0])

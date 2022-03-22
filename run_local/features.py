@@ -316,10 +316,11 @@ class Features:
             else:
                 ax.loglog(xx, yy, '.', marker='.', markersize=8, color=color, label=label)
             if features_path:
-                with open(features_path[:-4] + '_{}_'.format(label) + ylabel + '.txt', 'w') as f:
+                with open(f'{features_path[:-4]}_{label}_{ylabel}.txt', 'w') as f:
                     f.write('{}, {}\n'.format(xlabel, ylabel))
                     for j in range(len(xx)):
                         f.write('{}, {}\n'.format(xx[j], yy[j]))
+
         plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
     def cal_CCDF(self, tmp_origin, tmp_1, tmp_2, xlabel, ylabel, features_path=None, LIM=None, select=None, FIT=False,
@@ -379,7 +380,7 @@ class Features:
             else:
                 ax.loglog(xx, yy, color=color, label=label)
             if features_path:
-                with open(features_path[:-4] + '_{}_'.format(label) + 'CCDF(%s).txt' % xlabel[0], 'w') as f:
+                with open(f'{features_path[:-4]}_{label}_CCDF({xlabel[0]}).txt', 'w') as f:
                     f.write('{}, {}\n'.format(xlabel, ylabel))
                     for j in range(len(xx)):
                         f.write('{}, {}\n'.format(xx[j], yy[j]))
@@ -437,7 +438,7 @@ class Features:
             _ = [bar.set_alpha(0.5) for bar in bars]
             _ = [cap.set_alpha(0.5) for cap in caps]
             if features_path:
-                with open(features_path[:-4] + '_{}_'.format(label) + 'ML(%s).txt' % xlabel[0], 'w') as f:
+                with open(f'{features_path[:-4]}_{label}_ML({xlabel[0]}).txt', 'w') as f:
                     f.write('{}, {}, Error bar\n'.format(xlabel, ylabel))
                     for j in range(len(ML_y)):
                         f.write('{}, {}, {}\n'.format(tmp[j], ML_y[j], Error_bar[j]))
@@ -796,6 +797,7 @@ class Features:
                     index: [0, None], [11, -2], ...
         :param COLOR: Color when drawing with original data, population I and population II respectively
         :param LABEL: Format of legend, default ['Whole', 'Pop 1', 'Pop 2']
+        :param features_path: Absolute path of output data
         :return:
         """
         if INTERVAL_NUM is None:
@@ -851,7 +853,7 @@ class Features:
                 ax.loglog(xx, yy, '.', markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
 
             if features_path:
-                with open(features_path[:-4] + '_{}_'.format(label) + 'WaitingTime.txt', 'w') as f:
+                with open(f'{features_path[:-4]}_{label}_WaitingTime.txt', 'w') as f:
                     f.write('{}, {}\n'.format(xlabel, ylabel))
                     for j in range(xx.shape[0]):
                         f.write('{}, {}\n'.format(xx[j], yy[j]))
@@ -873,6 +875,7 @@ class Features:
                        [0, None]: Display the original data, the first population, the second population of calculation results.
                        [1, 2]: Only display the first population of calculation results.
         :param FIT: Whether to fit parameters, support True or False
+        :param features_path: Absolute path of output data
         :return:
         """
         #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
@@ -898,6 +901,8 @@ class Features:
                                                             '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
                                                             '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{3}aJ$',
                                                             '$10^{3}aJ<E_{MS}<10^{4}aJ$'])):
+                valid = np.where(np.array(tmp[i]) > 0)[0]
+                tmp[i] = np.array(tmp[i])[valid].tolist()
                 if len(tmp[i]):
                     if bin_method == 'linear':
                         inter, mid = self.__cal_negtive_interval(tmp[i], 0.9 / interval_num)
@@ -919,15 +924,15 @@ class Features:
                         ax.loglog(xx, yy, markersize=8, marker=marker, mec=color, mfc='none', color=color, label=label)
 
                     if features_path:
-                        with open(features_path[:-4] + '_{}_'.format(title) + '(%s).txt' %
-                                  label.replace('<', ' ').replace('>', ' '), 'w') as f:
+                        with open(f"{features_path[:-4]}_{title}_{label.replace('<', ' ').replace('>', ' ')}.txt", 'w') as f:
                             f.write('t-t_{MS} (s), r_{AS}(t-t_{MS})(s^{-1})\n')
                             for j in range(xx.shape[0]):
                                 f.write('{}, {}\n'.format(xx[j], yy[j]))
 
             plot_norm(ax, xlabel, ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
-    def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False):
+    def cal_OmoriLaw_timeSeq(self, tmp_origin, cls_idx_1, cls_idx_2, INTERVAL_NUM=None, bin_method='log', FIT=False,
+                             features_path=None):
         """
         Calculate the trigger relationship of two types of energy
         :param tmp_origin: Energy
@@ -936,6 +941,7 @@ class Features:
         :param INTERVAL_NUM: Number of bins divided in each order of magnitude
         :param bin_method: Method to divide the bin, Support linear partition and logarithmic partition
         :param FIT: Whether to fit parameters, support True or False
+        :param features_path: Absolute path of output data
         :return:
         """
         if INTERVAL_NUM is None:
@@ -949,6 +955,8 @@ class Features:
             fig = plt.figure(figsize=[6, 3.9], num=title)
             fig.text(0.16, 0.21, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
+            valid = np.where(np.array(res) > 0)[0]
+            res = np.array(res)[valid].tolist()
             if len(res):
                 if bin_method == 'linear':
                     inter, mid = self.__cal_negtive_interval(res, 0.9 / interval_num)
@@ -966,6 +974,13 @@ class Features:
                     ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
                 else:
                     ax.loglog(xx, yy, '.', markersize=8, marker='o', mec='g', mfc='none', color='g')
+
+            if features_path:
+                with open(f'{features_path[:-4]}_{title}.txt', 'w') as f:
+                    f.write(f'Time (s), {ylabel}\n')
+                    for j in range(xx.shape[0]):
+                        f.write('{}, {}\n'.format(xx[j], yy[j]))
+
             plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
 
@@ -974,9 +989,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\Nano Ni'
-    fold = "Nano Ni-compression text-3-0.003-20200920"
-    info = js['Nano Ni'][fold]
+    path = r'F:\VALLEN\HDD'
+    fold = "AM-Cu-20210928-test1-tension-0.05mm-min"
+    info = js['Cu'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
