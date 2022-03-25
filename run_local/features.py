@@ -990,7 +990,7 @@ if __name__ == "__main__":
         js = json.load(f)
 
     path = r'F:\VALLEN\HDD'
-    fold = "AM-Cu-20210928-test1-tension-0.05mm-min"
+    fold = "AM-Cu-20220325-test1-tension-0.05mm-min"
     info = js['Cu'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
