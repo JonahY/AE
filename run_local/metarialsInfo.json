@@ -25,6 +25,10 @@
     }
   },
   "Cu": {
+    "AM-Cu-20220328-test1-tension-0.05mm-min": {
+      "t_str": 0,
+      "t_cut": "inf"
+    },
     "AM-Cu-20220325-test1-tension-0.05mm-min": {
       "t_str": 0,
       "t_cut": "inf"
