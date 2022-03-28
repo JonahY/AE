@@ -990,12 +990,25 @@ if __name__ == "__main__":
         js = json.load(f)
 
     path = r'F:\VALLEN\HDD'
-    fold = "AM-Cu-20220325-test1-tension-0.05mm-min"
+    fold = "AM-Cu-20220328-test1-tension-0.05mm-min"
     info = js['Cu'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
+
+    # 说明文件入参检测
+    try:
+        for param in ['t_str', 't_cut']:
+            if param in info.keys():
+                if (type(info[param]) != int) and (info[param] != 'inf'):
+                    raise Exception(
+                        f"Check the type of the '{param}' input parameter in the database specification file.")
+            else:
+                raise Exception(f"No '{param}' parameter in the database specification file.")
+    except Exception as e:
+        print(e)
+        sys.exit(0)
 
     reload = Reload(path_pri, path_tra, fold)
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all',
