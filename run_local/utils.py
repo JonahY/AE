@@ -441,7 +441,7 @@ def cal_label(tmp1, tmp2, formula, slope, intercept):
 
 
 def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
-    idx_1, idx_2 = [], []
+    idx_1, idx_2, idx_3 = [], [], []
     formula = lambda x, a, b: pow(x, a) * pow(10, b)
     fit_x = cal_fitx(tmp1, 1000)
     if len(slope) == 1:
@@ -477,7 +477,7 @@ def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
     else:
         print("Current function don't support fit more than two lines.")
 
-    return idx_1, idx_2
+    return idx_1, idx_2, idx_3
 
 
 def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):
