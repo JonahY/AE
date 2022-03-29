@@ -541,10 +541,12 @@ class Frequency:
             plt.margins(0, 0)
             plt.savefig(os.path.join(save_path, '%s-%i.jpg' % (wavelet_name, TRAI)), pad_inches=0)
 
-    def plot_tf_wsst(self, TRAI, save_path=None):
+    def plot_tf_wsst(self, TRAI, wavelet_name='morlet', save_path=None):
         """
         Synchrosqueezing Wavelet Transform Visualization of Discrete Signals
         :param TRAI: waveform-specific serial number
+        :param wavelet_name: builtin wavelet in Package - "pywt".
+                            Execute the python command - "pywt.wavelist()" to check all wavelet families
         :param save_path: image storage location
         :return:
         """
@@ -556,7 +558,7 @@ class Frequency:
         elif self.device == 'stream':
             sig = np.multiply(array.array('h', bytes(i[-1])), i[-2])
             time = np.linspace(0, pow(i[3], -1) * (i[4] - 1) * pow(10, 6), i[4])
-        Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=i[3], t=time)
+        Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet=wavelet_name, scales='log-piecewise', fs=i[3], t=time)
         fig, ax = plt.subplots(figsize=(5.12, 5.12))
         # plt.imshow(np.abs(Twxo), aspect='auto', vmin=0, vmax=.2, cmap='jet')
         plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
