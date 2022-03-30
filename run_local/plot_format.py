@@ -8,7 +8,8 @@ def formatnum(x, pos):
 
 def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y_lim=[], z_lim=[], legend=True,
               grid=False, frameon=True, legend_loc='upper left', font_color='black', legendsize=11, labelsize=14,
-              titlesize=15, ticksize=13, linewidth=2, fontname='Arial'):
+              titlesize=15, ticksize=13, linewidth=2, fontname='Arial', legendWeight='normal', labelWeight='bold',
+              titleWeight='bold'):
     ax.spines['bottom'].set_linewidth(linewidth)
     ax.spines['left'].set_linewidth(linewidth)
     ax.spines['right'].set_linewidth(linewidth)
@@ -19,9 +20,9 @@ def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y
     labels = ax.get_xticklabels() + ax.get_yticklabels()
     [label.set_fontname(fontname) for label in labels]
 
-    font_legend = {'family': fontname, 'weight': 'normal', 'size': legendsize}
-    font_label = {'family': fontname, 'weight': 'bold', 'size': labelsize, 'color': font_color}
-    font_title = {'family': fontname, 'weight': 'bold', 'size': titlesize, 'color': font_color}
+    font_legend = {'family': fontname, 'weight': legendWeight, 'size': legendsize}
+    font_label = {'family': fontname, 'weight': labelWeight, 'size': labelsize, 'color': font_color}
+    font_title = {'family': fontname, 'weight': titleWeight, 'size': titlesize, 'color': font_color}
 
     if x_lim:
         ax.set_xlim(x_lim[0], x_lim[1])

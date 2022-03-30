@@ -989,9 +989,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\Ni'
-    fold = "Ni-tension test-electrolysis-1-0.01-AE-20201031"
-    info = js['Ni'][fold]
+    path = r'F:\VALLEN\HDD'
+    fold = "AM-Cu-20220328-test1-tension-0.05mm-min"
+    info = js['Cu'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
@@ -1076,6 +1076,7 @@ if __name__ == "__main__":
     # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], Dur, Dur[cls_KKM[0]], Dur[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
     # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
+    # waveform.plot_envelope([TRAI[idx_1], TRAI[idx_crack], TRAI[idx_rotation]], ['black', color_1, color_2], features_path)
     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])

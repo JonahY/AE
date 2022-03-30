@@ -12,13 +12,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -70,7 +71,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -89,13 +90,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -147,7 +149,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -162,13 +164,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -220,7 +223,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -235,13 +238,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -293,7 +297,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -312,13 +316,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -370,7 +375,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -385,13 +390,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2\cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -443,7 +449,7 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -458,13 +464,14 @@ stride = int(width) - overlap
 t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, 20, staWin)
 stE_dev = cal_deriv(t_stE, stE)
 # start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU, alpha=alpha, t_backNoise=t_backNoise)
-start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT, ITU=ITU,
-                                                                   alpha=alpha, t_backNoise=t_backNoise)
+start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=IZCRT,
+                                                                               ITU=ITU, alpha=alpha,
+                                                                               t_backNoise=t_backNoise)
 
 x = [t, t_stE, t_stE, t_stE]
 y = [sig, stE, stE_dev, zcR]
 color = ['black', 'green', 'gray', 'purple']
-ylabel = [r'$Amplitude$/$μV$', r'$STEnergy$/$μV^2 \cdot μs$', r'$S\dot{T}E$/$μV^2$', r'$ST\widehat{Z}CR$/$\%$']
+ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
 fig, axes = plt.subplots(4, 1, sharex=True, figsize=(5, 8))
 for idx, ax in enumerate(axes):
     ax.plot(x[idx], y[idx], lw=1, color=color[idx])
@@ -516,6 +523,6 @@ for idx, ax in enumerate(axes):
                 ax.axvspan(x[idx][end[i-1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
 
     ax.grid(linewidth=0.3)
-    plot_norm(ax, r'$Time$/$μs$' if idx == 3 else '', ylabel[idx], legend=False)
+    plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
 
 plt.subplots_adjust(wspace=0, hspace=0)

@@ -102,45 +102,11 @@ class Reload:
 
 
 if __name__ == "__main__":
-    """
-    AE数据的说明文件需放在此脚本同目录下，命名为“metarialsInfo.json”
-    格式：
-        {
-          "316L": {
-            "AM-Cu-20220328-test1-tension-0.05mm-min": {
-              "t_str": 0,
-              "t_cut": "inf"
-            }
-        }
-    说明：
-        1. 先按不同材料类别进行划分，key为材料类别，value字典用于存储对应材料的AE数据信息
-        2. 同一材料中将字典的key命名为数据库名字，value字典包含但不限于"t_str"和"t_cut"两个参数。
-            "t_str"参数只能为整数，用于特定时间范围筛选的起始时刻。
-            "t_cut"参数只能为整数和"inf"，用于特定时间范围筛选的终止时刻。
-    """
-    with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
-        js = json.load(f)
-
-    path = r'F:\VALLEN\316L'  # 数据库文件夹上一级的绝对路径
-    fold = "AM-Cu-20220328-test1-tension-0.05mm-min"  # 数据库名
-    info = js['Cu'][fold]  # 需与说明文件中的材料类别相对应
+    path = r'F:\VALLEN\Ni'  # 数据库文件夹上一级的绝对路径
+    fold = "Ni-tension test-electrolysis-1-0.01-AE-20201031"  # 数据库名
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
-    features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
-
-    # 说明文件入参检测
-    try:
-        for param in ['t_str', 't_cut']:
-            if param in info.keys():
-                if (type(info[param]) != int) and (info[param] != 'inf'):
-                    raise Exception(
-                        f"Check the type of the '{param}' input parameter in the database specification file.")
-            else:
-                raise Exception(f"No '{param}' parameter in the database specification file.")
-    except Exception as e:
-        print(e)
-        sys.exit(0)
 
     reload = Reload(path_pri, path_tra, fold)
     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all',
