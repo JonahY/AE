@@ -1,5 +1,9 @@
 {
   "Fe": {
+    "gongyechuntie-800-1.5h-1-1-6xunhuan": {
+      "t_str": 0,
+      "t_cut": 3000
+    },
     "gongyechuntie-700-1.5h-0.1-3-2": {
       "t_cut": 3500,
       "chan_filter": "[np.where((chan_4[:, 1] < 2004) | (chan_4[:, 1] > 2006))[0]]"
