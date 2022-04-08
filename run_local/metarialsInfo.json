@@ -96,6 +96,7 @@
   },
   "Ni": {
     "Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115": {
+      "t_str": 0,
       "t_cut": 24000
     },
     "Ni-tension test-electrolysis-1-0.01-AE-20201031": {

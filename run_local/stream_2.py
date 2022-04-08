@@ -193,8 +193,8 @@ if __name__ == '__main__':
         sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
         t_initial = np.array([i / fs for i in range(len(sig_initial))])
 
-    staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.5, 0
-    t_str, t_end = 0, 1e7
+    staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.5, 1e4
+    t_str, t_end = 9e6, 1e7
     t = t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])]
     sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
 
@@ -227,9 +227,7 @@ if __name__ == '__main__':
                            lw=1)
                 ax.axvline(x=t[int(t_stE[e] // t[1]) + 1], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid',
                            lw=1)
-            ax.set_xticks(np.array(range(0, 251, 25)))
         elif idx == 1:
-            ax.set_yticks(np.array(range(-1000, 10000, 2500)))
             ax.fill_between(np.linspace(0, 5, 10), -1000, [500] * 10, facecolor='orange', alpha=0.2)
             ax.fill_between(x[idx], -1000, y[idx], facecolor=[95 / 255, 158 / 255, 160 / 255], alpha=0.2)
             ax.plot(np.linspace(0, x[idx][endTmp[0]], 100), [ITUTmp[0]] * 100, color='orange', linestyle='dashed', lw=1)
@@ -248,12 +246,10 @@ if __name__ == '__main__':
                                     facecolor=[0, 1, 1],
                                     alpha=0.5)
         elif idx == 2:
-            ax.set_yticks(np.array(range(-2000, 2500, 1000)))
             for i in range(len(start)):
                 ax.axvspan(x[idx][start[i]], x[idx][startTmp[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)
                 ax.axvline(x=x[idx][startTmp[i]], color='k', linestyle='dashdot', lw=1)
         else:
-            ax.set_yticks(np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5]))
             ax.axvspan(0, 5, facecolor='orange', alpha=0.2)
             for i in range(len(start)):
                 ax.axvspan(x[idx][endTmp[i]], x[idx][end[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)

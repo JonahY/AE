@@ -540,72 +540,72 @@ energy = np.array(energy)
 #             f.write('%f, %f\n' % (i, j))
 
 
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
-#                         help="Absolute path of streaming folder(add 'r' in front)")
-#     parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_650',
-#                         help="Absolute path of storage folder(add 'r' in front)")
-#     parser.add_argument("-f", "--first", type=int, default=1,
-#                         help="Only the [1] is passed in for the first calculation, and only the streaming file that "
-#                              "appears in the storage location needs to be calculated later.")
-#     parser.add_argument("-saveFNew", "--saveFoldNew", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms',
-#                         help="Absolute path of new storage folder(add 'r' in front), "
-#                              "Only used except for the first calculation.")
-#     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
-#     parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
-#     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
-#     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
-#     parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
-#                         help="identification zero crossing rate threshold")
-#     parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
-#     parser.add_argument("-alpha", "--alpha", type=float, default=1.7, help="")
-#     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
-#
-#     opt = parser.parse_args()
-#     print("=" * 44 + " Parameters " + "=" * 44)
-#     print(opt)
-#
-#     if opt.first:
-#         file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))
-#     else:
-#         file_list = []
-#         for file in os.listdir(opt.saveFold):
-#             if file != 'log':
-#                 file_list.append('%s_ch1.txt' % file.split('_')[0])
-#         file_list = list(set(file_list))
-#     each_core = int(math.ceil(len(file_list) / float(opt.processor)))
-#
-#     if not os.path.exists(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU)):
-#         os.mkdir(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU))
-#
-#     with open(os.path.join(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), 'log'), 'a') as f:
-#         f.write('Parameters config\n')
-#         f.write('StaLen\t%d\n' % opt.staLen)
-#         f.write('Overlap\t%d\n' % opt.overlap)
-#         f.write('StaWin\t%s\n' % opt.staWin)
-#         f.write('IZCRT\t%f\n' % opt.IZCRT)
-#         f.write('ITU\t%d\n' % opt.ITU)
-#         f.write('Alpha\t%f\n' % opt.alpha)
-#         f.write('BackNoise time\t%d\n\n' % opt.t_backNoise)
-#         f.write('Calculated Files\n')
-#
-#     print("=" * 47 + " Start " + "=" * 46)
-#     start = time.time()
-#
-#     # Multiprocessing acceleration
-#     pool = multiprocessing.Pool(processes=opt.processor)
-#     for idx, i in enumerate(range(0, len(file_list), each_core)):
-#         pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold,
-#                                       opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt, ))
-#
-#     pool.close()
-#     pool.join()
-#
-#     # cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
-#
-#     end = time.time()
-#     print("=" * 46 + " Report " + "=" * 46)
-#     print("Calculation Info--Quantity of streaming data: %s" % len(file_list))
-#     print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
-#                                                                        (end - start) / 60))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-streamF", "--streamFold", type=str, default='/mnt/yuanbincheng/Stream/threshold',
+                        help="Absolute path of streaming folder(add 'r' in front)")
+    parser.add_argument("-saveF", "--saveFold", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms_650',
+                        help="Absolute path of storage folder(add 'r' in front)")
+    parser.add_argument("-f", "--first", type=int, default=1,
+                        help="Only the [1] is passed in for the first calculation, and only the streaming file that "
+                             "appears in the storage location needs to be calculated later.")
+    parser.add_argument("-saveFNew", "--saveFoldNew", type=str, default=r'/home/Yuanbincheng/data/stream/waveforms',
+                        help="Absolute path of new storage folder(add 'r' in front), "
+                             "Only used except for the first calculation.")
+    parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
+    parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
+    parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
+    parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
+    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
+                        help="identification zero crossing rate threshold")
+    parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
+    parser.add_argument("-alpha", "--alpha", type=float, default=1.7, help="")
+    parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
+
+    opt = parser.parse_args()
+    print("=" * 44 + " Parameters " + "=" * 44)
+    print(opt)
+
+    if opt.first:
+        file_list = sorted(os.listdir(opt.streamFold), key=lambda x: int(x.split('-')[-2]))
+    else:
+        file_list = []
+        for file in os.listdir(opt.saveFold):
+            if file != 'log':
+                file_list.append('%s_ch1.txt' % file.split('_')[0])
+        file_list = list(set(file_list))
+    each_core = int(math.ceil(len(file_list) / float(opt.processor)))
+
+    if not os.path.exists(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU)):
+        os.mkdir(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU))
+
+    with open(os.path.join(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), 'log'), 'a') as f:
+        f.write('Parameters config\n')
+        f.write('StaLen\t%d\n' % opt.staLen)
+        f.write('Overlap\t%d\n' % opt.overlap)
+        f.write('StaWin\t%s\n' % opt.staWin)
+        f.write('IZCRT\t%f\n' % opt.IZCRT)
+        f.write('ITU\t%d\n' % opt.ITU)
+        f.write('Alpha\t%f\n' % opt.alpha)
+        f.write('BackNoise time\t%d\n\n' % opt.t_backNoise)
+        f.write('Calculated Files\n')
+
+    print("=" * 47 + " Start " + "=" * 46)
+    start = time.time()
+
+    # Multiprocessing acceleration
+    pool = multiprocessing.Pool(processes=opt.processor)
+    for idx, i in enumerate(range(0, len(file_list), each_core)):
+        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold,
+                                      opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt, ))
+
+    pool.close()
+    pool.join()
+
+    # cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
+
+    end = time.time()
+    print("=" * 46 + " Report " + "=" * 46)
+    print("Calculation Info--Quantity of streaming data: %s" % len(file_list))
+    print("Finishing time: {}  |  Time consumption: {:.3f} min".format(time.asctime(time.localtime(time.time())),
+                                                                       (end - start) / 60))

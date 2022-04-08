@@ -989,15 +989,15 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\ZPH'
-    fold = "gongyechuntie-800-1.5h-1-1-6xunhuan"
-    info = js['Fe'][fold]
+    path = r'F:\VALLEN\PAC&VALLEN'
+    fold = "Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115"
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
     os.chdir('/'.join([path, fold]))
 
-    # 说明文件入参检测
+    # ================================================= 说明文件入参检测 ==================================================
     try:
         for param in ['t_str', 't_cut']:
             if param in info.keys():
