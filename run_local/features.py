@@ -237,7 +237,7 @@ class Features:
         main_peak = np.where(cls_idx is True)[0] if type(cls_idx[0]) == bool else cls_idx
         eny_lim = [min(tmp[cls_idx]), max(tmp[cls_idx])]
         if len(main_peak):
-            for i in range(main_peak.shape[0] - 1):
+            for i in range(len(main_peak) - 1):
                 for j in range(main_peak[i] + 1, main_peak[i + 1] + 1):
                     if tmp[j] < eny_lim[1]:
                         k = self.time[j] - self.time[main_peak[i]]
@@ -989,8 +989,8 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\PAC&VALLEN'
-    fold = "Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115"
+    path = r'F:\VALLEN\Ni'
+    fold = "Ni-tension test-pure-1-0.01-AE-20201030"
     info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
