@@ -270,7 +270,7 @@ class Waveform:
         os.chdir(self.path)
         for idx, j in enumerate(tqdm(TRAI)):
             i = self.data_tra[j - 1]
-            valid_time, valid_data = self.cal_wave(i)
+            valid_time, valid_data = self.cal_wave(i, False)
             with open(self.path_pri[:-6] + '_pop%s-%d' % (pop, idx + 1) + '.txt', 'w') as f:
                 f.write('Time, Signal\n')
                 for k in range(valid_data.shape[0]):
