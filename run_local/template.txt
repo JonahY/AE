@@ -147,6 +147,73 @@ ax = fig.add_subplot()
 ax.plot(grid / 1000, Res / max(Res), lw=1, color=color_1)
 plot_norm(ax, x_lim=[0, 800], xlabel='Frequency (kHz)', ylabel='Normalized Amplitude', title='Average Frequency')
 
+# ------------------------------------------------- Merge sub waveforms ------------------------------------------------
+waveFold = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\stream\thershold cutting\alpha_1.3\ITU_650\waveforms_650'
+t_all, sig_all = [], []
+
+for file in tqdm(os.listdir(waveFold)):
+    if file == 'log':
+        continue
+    with open(os.path.join(waveFold, file)) as f:
+        f.readline()
+        triggerTime = float(f.readline().strip())
+        data = np.array([i.strip().split(',') for i in f.readlines()[2:]]).astype(float)
+
+    sig = data[:, 1]
+    time = data[:, 0] / 1e6 + triggerTime
+    t_all.extend([2 * time[0] - time[1]])
+    t_all.extend(list(time))
+    t_all.extend([2 * time[-1] - time[-2]])
+    sig_all.extend([0])
+    sig_all.extend(list(sig))
+    sig_all.extend([0])
+
+with open(os.path.join(waveFold[:-13], 'ITU650_Waveforms.txt'), 'w') as f:
+    f.write('Time (s), Amplitude (μV)\n')
+    for i in tqdm(range(len(t_all))):
+        f.write(f'{t_all[i]}, {sig_all[i]}\n')
+
+# ------------------------------------- Merge sub waveforms and Stress-Strain curve ------------------------------------
+stretcherFile = r'F:\VALLEN\PAC&VALLEN\Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115\Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115.is_tens_RawData\Specimen_RawData_2.csv'
+time, displace, load, strain, stress = load_stress(stretcherFile)
+waveformFigStart, waveformFigEnd = -1000, 37500
+stressStrainFigStart, stressStrainFigEnd = -0.61682, 23.13104
+strain_max = strain[-1] * waveformFigEnd / time[-1]
+
+for idx, label, color in zip([idx_1, idx_2], ['Dislocation', 'Twinning-Detwinning'], [[1, 0, 0.4], [0, 0.53, 0.8]]):
+    t_all, sig_all = [0], [0]
+    for file in tqdm(np.array(ls)[idx]):
+        with open(os.path.join(waveFold, file)) as f:
+            f.readline()
+            triggerTime = float(f.readline().strip())
+            data = np.array([i.strip().split(',') for i in f.readlines()[2:]]).astype(float)
+
+        sig = data[:, 1]
+        time = data[:, 0] / 1e6 + triggerTime
+        t_all.extend([2 * time[0] - time[1]])
+        t_all.extend(list(time))
+        t_all.extend([2 * time[-1] - time[-2]])
+        sig_all.extend([0])
+        sig_all.extend(list(sig))
+        sig_all.extend([0])
+
+    fig = plt.figure(figsize=[6, 3.9])
+    fig.text(0.86, 0.18, '', fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+             horizontalalignment="right")
+    ax = fig.add_subplot()
+    ax.plot(t_all, sig_all, color=color, label=label)
+    plot_norm(ax, 'Time (s)', xlabelz[0], x_lim=[waveformFigStart, waveformFigEnd], frameon=False, legend_loc='upper right')
+
+    ax2 = ax.twinx()
+    # ax2.plot(time, stress, color_stretcher, lw=3)
+    plot_norm(ax2, 'Time (s)', 'Stress (MPa)', x_lim=[waveformFigStart, waveformFigEnd], y_lim=[0, 500], legend=False, font_color='purple')
+
+    ax3 = ax2.twiny()
+    for key in ['right', 'top']:
+        ax3.spines[key].set_color('purple')
+    ax3.plot(strain, stress, 'purple', lw=3)
+    plot_norm(ax3, 'Strain (%)', x_lim=[stressStrainFigStart, stressStrainFigEnd], y_lim=[0, 500], legend=False, font_color='purple')
+
 
 # ======================================================= VALLEN =======================================================
 # ------------------------------------------------- Image normalization ------------------------------------------------
