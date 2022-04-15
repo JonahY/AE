@@ -487,7 +487,7 @@ if __name__ == '__main__':
                              "Only used except for the first calculation.")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-detect", "--detection", type=int, default=0, choices=[0, 1], help="Whether to detect log file")
-    parser.add_argument("-sL", "--staLen", type=int, default=5, help="the width of window")
+    parser.add_argument("-sL", "--staLen", type=int, default=2, help="the width of window")
     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
     parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
@@ -512,8 +512,8 @@ if __name__ == '__main__':
 
     # Compare the initial folder to detect the uncalculated streaming file in the current log file
     if opt.detection:
-        # with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
-        with open('/home/Yuanbincheng/data/stream/waveforms_600/log', 'r') as f:
+        with open(os.path.join(opt.saveFold, 'log'), 'r') as f:
+        # with open('/home/Yuanbincheng/data/stream/waveforms_600/log', 'r') as f:
             for _ in range(10):
                 f.readline()
             calculatedFiles = [i.strip() for i in f.readlines()]
