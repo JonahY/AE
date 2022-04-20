@@ -878,12 +878,16 @@ class Features:
         :param features_path: Absolute path of output data
         :return:
         """
-        #         eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 100], [100, 1000]]
         if select is None:
             select = [0, 3]
         if INTERVAL_NUM is None:
             INTERVAL_NUM = [8] * 3
-        eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 1000], [1000, 10000]]
+        # eny_lim = [[0.01, 0.1], [0.1, 1], [1, 10], [10, 1000], [1000, 10000]]
+        eny_lim = [[0.1, 1], [1, 10], [10, 100], [100, 1000]]
+        Marker = ['>', 'o', 'p', 'h', 'H'][:len(eny_lim)]
+        Color = [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0], [0.5, 0.5, 0.5]][:len(eny_lim)]
+        Label = ['$10^{-1}aJ<E_{MS}<10^{0}aJ$', '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{2}aJ$',
+                 '$10^{2}aJ<E_{MS}<10^{3}aJ$', '$10^{3}aJ<E_{MS}<10^{4}aJ$'][:len(eny_lim)]
         tmp_origin, tmp_1, tmp_2 = self.__cal_OmiroLaw_helper(tmp_origin, eny_lim), \
                                    self.__cal_OmiroLaw_helper(tmp_1, eny_lim), self.__cal_OmiroLaw_helper(tmp_2,
                                                                                                           eny_lim)
@@ -891,16 +895,9 @@ class Features:
         for idx, [tmp, interval_num, title] in enumerate(
                 zip(TMP[select[0]:select[1]], INTERVAL_NUM[select[0]:select[1]], TITLE[select[0]:select[1]])):
             fig = plt.figure(figsize=[6, 3.9], num=title)
-            #             fig = plt.figure(figsize=[6, 3.9])
             fig.text(0.16, 0.21, self.status, fontdict={'family': self.font, 'fontweight': 'bold', 'fontsize': 12})
             ax = plt.subplot()
-            for i, [marker, color, label] in enumerate(zip(['>', 'o', 'p', 'h', 'H'],
-                                                           [[1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 0, 0],
-                                                            [0.5, 0.5, 0.5]],
-                                                           ['$10^{-2}aJ<E_{MS}<10^{-1}aJ$',
-                                                            '$10^{-1}aJ<E_{MS}<10^{0}aJ$',
-                                                            '$10^{0}aJ<E_{MS}<10^{1}aJ$', '$10^{1}aJ<E_{MS}<10^{3}aJ$',
-                                                            '$10^{3}aJ<E_{MS}<10^{4}aJ$'])):
+            for i, [marker, color, label] in enumerate(zip(Marker, Color, Label)):
                 valid = np.where(np.array(tmp[i]) > 0)[0]
                 tmp[i] = np.array(tmp[i])[valid].tolist()
                 if len(tmp[i]):
@@ -984,160 +981,160 @@ class Features:
             plot_norm(ax, 'Time (s)', ylabel, legend_loc='upper right', frameon=self.frameon, fontname=self.font)
 
 
-if __name__ == "__main__":
-    # '''
-    with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
-        js = json.load(f)
-
-    path = r'F:\VALLEN\Ni'
-    fold = "Ni-tension test-pure-1-0.01-AE-20201030"
-    info = js['Ni'][fold]
-    path_pri = fold + '.pridb'
-    path_tra = fold + '.tradb'
-    features_path = fold + '.txt'
-    os.chdir('/'.join([path, fold]))
-
-    # ================================================= 说明文件入参检测 ==================================================
-    try:
-        for param in ['t_str', 't_cut']:
-            if param in info.keys():
-                if (type(info[param]) != int) and (info[param] != 'inf'):
-                    raise Exception(
-                        f"Check the type of the '{param}' input parameter in the database specification file.")
-            else:
-                raise Exception(f"No '{param}' parameter in the database specification file.")
-    except Exception as e:
-        print(e)
-        sys.exit(0)
-
-    reload = Reload(path_pri, path_tra, fold)
-    data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all',
-                                                                                 t_str=info['t_str'],
-                                                                                 t_cut=info['t_cut'] if type(
-                                                                                     info['t_cut']) == int else float(
-                                                                                     info['t_cut']))
-    # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
-    print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
-                                                                                 chan_3.shape[0], chan_4.shape[0]))
-    # '''
-    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # chan = chan_2
-    # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
-    #                                                 chan[:, 8], chan[:, 9], chan[:, -1].astype(int)
-
-    # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
-    # feature_idx = [Amp, Dur, Eny]
-    # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
-    # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
-    # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
-    # status = fold.split('-')[0] + '-' + fold.split('-')[2]
-    # features = Features(color_1, color_2, Time, status)
-
-    # # ICA and Kernel K-Means
-    # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
-    # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
-    # pred = km.fit_predict(S_)
-    # cls_KKM = []
-    # for i in range(2):
-    #     cls_KKM.append(pred == i)
-    # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
-
-    # waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
-    # frequency = Frequency(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
-
-    # PackEny = []
-    # for trai in tqdm(chan[:, -1].astype(int)):
-    #     _, sig = waveform.cal_wave(data_tra[trai - 1])
-    #     _, _, energy = frequency.cla_wtpacket(sig, 'db8', 3, False)
-    #     PackEny.append([i / sum(energy) for i in energy])
-    # PackEny = np.array(PackEny)
-
-    # freq, stage_idx = frequency.cal_freq_max(chan[:, -1].astype(int), 0, status='peak')
-
-    # df = pd.DataFrame(
-    #     {'Amp': Amp, 'RiseT': RiseT, 'Dur': Dur, 'Eny': Eny, 'RMS': RMS, 'Counts': Counts, 'PeakFreq': freq,
-    #      'PackEny1': PackEny[:, 0], 'PackEny2': PackEny[:, 1], 'PackEny3': PackEny[:, 2], 'PackEny4': PackEny[:, 3],
-    #      'PackEny5': PackEny[:, 4], 'PackEny6': PackEny[:, 5], 'PackEny7': PackEny[:, 6], 'PackEny8': PackEny[:, 7],
-    #      'Pop': cls_KKM[0].astype(int)})
-    # df.to_csv('Ni_electrolysis_chan2.csv', index=None)
-
-    # for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
-    #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
-    #     frequency.plot_ave_freq(Res, N, title)
-
-    # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
-    #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
-    #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, bin_method='log', select=[1, None], FIT=True)
-    #     features.cal_ML(tmp, tmp_1, tmp_2, xlabelz[idx], 'ML (%s)' % xlabelz[idx][0], features_path, select=[1, None])
-    #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
-
-    # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
-    # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
-    # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], Dur, Dur[cls_KKM[0]], Dur[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
-    # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
-    # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
-    # waveform.plot_envelope([TRAI[idx_1], TRAI[idx_crack], TRAI[idx_rotation]], ['black', color_1, color_2], features_path)
-    # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
-    #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
-    # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
-    # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
-    # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # from sklearn.svm import SVC
-    # from sklearn.model_selection import train_test_split
-    # from sklearn.preprocessing import StandardScaler
-    # from sklearn.ensemble import RandomForestClassifier
-    # import pandas as pd
-    # import seaborn as sns
-    # from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
-    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_pure.csv'
-    # data = pd.read_csv(fold).astype(np.float32)
-    # feature = data.iloc[:, :-1].values
-    # label = np.array(data.iloc[:, -1].tolist()).reshape(-1, 1)
-    # # ext = np.zeros([label.shape[0], 1]).astype(np.float32)
-    # # ext[np.where(label == 0)[0]] = 1
-    # # label = np.concatenate((label, ext), axis=1)
-    #
-    # df_temp = train_test_split(feature, label, test_size=0.2, stratify=label, random_state=69)
-    # stdScaler = StandardScaler().fit(df_temp[0])
-    # trainStd = stdScaler.transform(df_temp[0])
-    # testStd = stdScaler.transform(df_temp[1])
-    #
-    # svm = SVC(max_iter=200, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
-    # print('建立的SVM模型为：\n', svm)
-    #
-    # rf = RandomForestClassifier(max_depth=10, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
-    # print('建立的RF模型为：\n', rf)
-    # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan2_pop2.csv'
-    # data = pd.read_csv(fold).astype(np.float32)
-    # nano_ni = data.values
-    # stdScaler = StandardScaler().fit(nano_ni)
-    # trainStd = stdScaler.transform(nano_ni)
-    # target_pred = svm.predict(trainStd)
-
-    # fig = plt.figure(figsize=[6, 3.9])
-    # fig.text(0.96, 0.2, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
-    #          horizontalalignment="right")
-    # ax = plt.subplot()
-    # ax.loglog(Amp[pop1], Eny[pop1], '.', marker='.', markersize=8, color=color_1, label='Pop 1')
-    # ax.loglog(Amp[pop2_1], Eny[pop2_1], '.', marker='.', markersize=8, color=color_2, label='Pop 2-1')
-    # ax.loglog(Amp[pop2_2], Eny[pop2_2], '.', marker='.', markersize=8, color='orange', label='Pop 2-2')
-    # plot_norm(ax, xlabelz[0], xlabelz[2])
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # data_1 = pd.DataFrame(
-    #     {'Time_1': Time[cls_KKM[0]], 'Eny_1': Eny[cls_KKM[0]], 'Amp_1': Amp[cls_KKM[0]], 'Dur_1': Dur[cls_KKM[0]]})
-    # data_2 = pd.DataFrame(
-    #     {'Time_2': Time[cls_KKM[1]], 'Eny_2': Eny[cls_KKM[1]], 'Amp_2': Amp[cls_KKM[1]], 'Dur_2': Dur[cls_KKM[1]]})
-    # data_1.to_csv(r'', index=None)
-    # data_2.to_csv(r'', index=None)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # for trai, title, c in zip([TRAI[pop1], TRAI[pop2_1], TRAI[pop2_both]], ['Pop 1', 'Pop 2_1', 'Pop 2_2'],
-    #                           [color_1, color_2, 'orange']):
-    #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
-    #     frequency.plot_ave_freq(Res, N, title, c)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # idx_1, idx_2 = linear_matching(Amp, Eny, xlabelz[0], xlabelz[2], [2], [-3])
+# if __name__ == "__main__":
+#     # '''
+#     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
+#         js = json.load(f)
+#
+#     path = r'F:\VALLEN\PAC&VALLEN'
+#     fold = "Pure Ni-tension test-0.01-2-AE PAC&Vallen-20211115"
+#     info = js['Ni'][fold]
+#     path_pri = fold + '.pridb'
+#     path_tra = fold + '.tradb'
+#     features_path = fold + '.txt'
+#     os.chdir('/'.join([path, fold]))
+#
+#     # ================================================= 说明文件入参检测 ==================================================
+#     try:
+#         for param in ['t_str', 't_cut']:
+#             if param in info.keys():
+#                 if (type(info[param]) not in [int, float]) and (info[param] != 'inf'):
+#                     raise Exception(
+#                         f"Check the type of the '{param}' input parameter in the database specification file.")
+#             else:
+#                 raise Exception(f"No '{param}' parameter in the database specification file.")
+#     except Exception as e:
+#         print(e)
+#         sys.exit(0)
+#
+#     reload = Reload(path_pri, path_tra, fold)
+#     data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_vallen_data(lower=2, mode='all',
+#                                                                                  t_str=info['t_str'],
+#                                                                                  t_cut=info['t_cut'] if type(
+#                                                                                      info['t_cut']) == int else float(
+#                                                                                      info['t_cut']))
+#     # data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = reload.read_stream_data(mode='all', t_cut=float('inf'))
+#     print('Channel 1: {} | Channel 2: {} | Channel 3: {} | Channel 4: {}'.format(chan_1.shape[0], chan_2.shape[0],
+#                                                                                  chan_3.shape[0], chan_4.shape[0]))
+#     # '''
+#     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+#     # chan = chan_2
+#     # Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 4], chan[:, 5], chan[:, 6], chan[:, 7], \
+#     #                                                 chan[:, 8], chan[:, 9], chan[:, -1].astype(int)
+#
+#     # # SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI
+#     # feature_idx = [Amp, Dur, Eny]
+#     # xlabelz = ['Amplitude (μV)', 'Duration (μs)', 'Energy (aJ)']
+#     # color_1 = [255 / 255, 0 / 255, 102 / 255]  # red
+#     # color_2 = [0 / 255, 136 / 255, 204 / 255]  # blue
+#     # status = fold.split('-')[0] + '-' + fold.split('-')[2]
+#     # features = Features(color_1, color_2, Time, status)
+#
+#     # # ICA and Kernel K-Means
+#     # S_, A_ = ICA(2, np.log10(Amp), np.log10(Eny), np.log10(Dur))
+#     # km = KernelKMeans(n_clusters=2, max_iter=100, random_state=100, verbose=1, kernel="rbf")
+#     # pred = km.fit_predict(S_)
+#     # cls_KKM = []
+#     # for i in range(2):
+#     #     cls_KKM.append(pred == i)
+#     # cls_KKM[0], cls_KKM[1] = pred == 1, pred == 0
+#
+#     # waveform = Waveform(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
+#     # frequency = Frequency(color_1, color_2, data_tra, path, path_pri, status, 'vallen')
+#
+#     # PackEny = []
+#     # for trai in tqdm(chan[:, -1].astype(int)):
+#     #     _, sig = waveform.cal_wave(data_tra[trai - 1])
+#     #     _, _, energy = frequency.cla_wtpacket(sig, 'db8', 3, False)
+#     #     PackEny.append([i / sum(energy) for i in energy])
+#     # PackEny = np.array(PackEny)
+#
+#     # freq, stage_idx = frequency.cal_freq_max(chan[:, -1].astype(int), 0, status='peak')
+#
+#     # df = pd.DataFrame(
+#     #     {'Amp': Amp, 'RiseT': RiseT, 'Dur': Dur, 'Eny': Eny, 'RMS': RMS, 'Counts': Counts, 'PeakFreq': freq,
+#     #      'PackEny1': PackEny[:, 0], 'PackEny2': PackEny[:, 1], 'PackEny3': PackEny[:, 2], 'PackEny4': PackEny[:, 3],
+#     #      'PackEny5': PackEny[:, 4], 'PackEny6': PackEny[:, 5], 'PackEny7': PackEny[:, 6], 'PackEny8': PackEny[:, 7],
+#     #      'Pop': cls_KKM[0].astype(int)})
+#     # df.to_csv('Ni_electrolysis_chan2.csv', index=None)
+#
+#     # for trai, title in zip([TRAI_all, TRAI_1_all, TRAI_2_all], ['Whole', 'Population 1', 'Population 2']):
+#     #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
+#     #     frequency.plot_ave_freq(Res, N, title)
+#
+#     # for idx, lim_pdf, lim_ccdf, inerval_num in zip([0, 1, 2], LIM_PDF, LIM_CCDF, INTERVAL_NUM):
+#     #     tmp, tmp_1, tmp_2 = sorted(feature_idx[idx]), sorted(feature_idx[idx][cls_KKM[0]]), sorted(feature_idx[idx][cls_KKM[1]])
+#     #     features.cal_PDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'PDF (%s)' % xlabelz[idx][0], features_path, lim_pdf, inerval_num, bin_method='log', select=[1, None], FIT=True)
+#     #     features.cal_ML(tmp, tmp_1, tmp_2, xlabelz[idx], 'ML (%s)' % xlabelz[idx][0], features_path, select=[1, None])
+#     #     features.cal_CCDF(tmp, tmp_1, tmp_2, xlabelz[idx], 'CCD C(s)', features_path, lim_ccdf, select=[1, None], FIT=True)
+#
+#     # features.cal_contour(Amp, Eny, '$20 \log_{10} A(\mu V)$', '$20 \log_{10} E(aJ)$', 'Contour', [20, 55], [-20, 40], 50, 50, method='log_bin')
+#     # features.cal_BathLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], 'Mainshock Energy (aJ)', r'$\mathbf{\Delta}$M', [8, 15, 15], bin_method='log', select=[1, None])
+#     # features.cal_WaitingTime(Time, Time[cls_KKM[0]], Time[cls_KKM[1]], Dur, Dur[cls_KKM[0]], Dur[cls_KKM[1]], r'$\mathbf{\Delta}$t (s)', r'P($\mathbf{\Delta}$t)', [8, 22, 26], bin_method='log', select=[1, None], FIT=True)
+#     # features.cal_OmoriLaw(Eny, Eny[cls_KKM[0]], Eny[cls_KKM[1]], r'$\mathbf{t-t_{MS}\;(s)}$', r'$\mathbf{r_{AS}(t-t_{MS})\;(s^{-1})}$', [8, 36, 19], bin_method='log', select=[1, None], FIT=True)
+#     # features.cal_OmoriLaw_timeSeq(Eny, cls_KKM[0], cls_KKM[1], INTERVAL_NUM=[2, 4], bin_method='log', FIT=True)
+#     # waveform.plot_envelope([TRAI[idx_1], TRAI[idx_crack], TRAI[idx_rotation]], ['black', color_1, color_2], features_path)
+#     # ave, alpha, b, A, B = features.plot_correlation(Dur, Amp, xlabelz[0], xlabelz[2], cls_1=cls_KKM[0], cls_2=cls_KKM[1], status='A-D', x1_lim=[pow(10, 2.75), float('inf')],
+#     #                                                 x2_lim=[pow(10, 1.7), pow(10, 2.0)], plot_lim=[150, 30], fit=True)
+#     # features.plot_correlation(Dur, Amp, xlabelz[1], xlabelz[0], cls_KKM[0], cls_KKM[1])
+#     # features.plot_correlation(Dur, Eny, xlabelz[1], xlabelz[2], cls_KKM[0], cls_KKM[1])
+#     # features.plot_correlation(Amp, Eny, xlabelz[0], xlabelz[2], cls_KKM[0], cls_KKM[1])
+#
+#     # ------------------------------------------------------------------------------------------------------------------
+#     # from sklearn.svm import SVC
+#     # from sklearn.model_selection import train_test_split
+#     # from sklearn.preprocessing import StandardScaler
+#     # from sklearn.ensemble import RandomForestClassifier
+#     # import pandas as pd
+#     # import seaborn as sns
+#     # from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score, cohen_kappa_score, roc_curve, auc, confusion_matrix
+#     # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_pure.csv'
+#     # data = pd.read_csv(fold).astype(np.float32)
+#     # feature = data.iloc[:, :-1].values
+#     # label = np.array(data.iloc[:, -1].tolist()).reshape(-1, 1)
+#     # # ext = np.zeros([label.shape[0], 1]).astype(np.float32)
+#     # # ext[np.where(label == 0)[0]] = 1
+#     # # label = np.concatenate((label, ext), axis=1)
+#     #
+#     # df_temp = train_test_split(feature, label, test_size=0.2, stratify=label, random_state=69)
+#     # stdScaler = StandardScaler().fit(df_temp[0])
+#     # trainStd = stdScaler.transform(df_temp[0])
+#     # testStd = stdScaler.transform(df_temp[1])
+#     #
+#     # svm = SVC(max_iter=200, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+#     # print('建立的SVM模型为：\n', svm)
+#     #
+#     # rf = RandomForestClassifier(max_depth=10, random_state=100).fit(trainStd, df_temp[2].reshape(-1))
+#     # print('建立的RF模型为：\n', rf)
+#     # fold = r'C:\Users\Yuan\Desktop\Ni dataset\Ni\Ni_electrolysis_chan2_pop2.csv'
+#     # data = pd.read_csv(fold).astype(np.float32)
+#     # nano_ni = data.values
+#     # stdScaler = StandardScaler().fit(nano_ni)
+#     # trainStd = stdScaler.transform(nano_ni)
+#     # target_pred = svm.predict(trainStd)
+#
+#     # fig = plt.figure(figsize=[6, 3.9])
+#     # fig.text(0.96, 0.2, status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
+#     #          horizontalalignment="right")
+#     # ax = plt.subplot()
+#     # ax.loglog(Amp[pop1], Eny[pop1], '.', marker='.', markersize=8, color=color_1, label='Pop 1')
+#     # ax.loglog(Amp[pop2_1], Eny[pop2_1], '.', marker='.', markersize=8, color=color_2, label='Pop 2-1')
+#     # ax.loglog(Amp[pop2_2], Eny[pop2_2], '.', marker='.', markersize=8, color='orange', label='Pop 2-2')
+#     # plot_norm(ax, xlabelz[0], xlabelz[2])
+#
+#     # ------------------------------------------------------------------------------------------------------------------
+#     # data_1 = pd.DataFrame(
+#     #     {'Time_1': Time[cls_KKM[0]], 'Eny_1': Eny[cls_KKM[0]], 'Amp_1': Amp[cls_KKM[0]], 'Dur_1': Dur[cls_KKM[0]]})
+#     # data_2 = pd.DataFrame(
+#     #     {'Time_2': Time[cls_KKM[1]], 'Eny_2': Eny[cls_KKM[1]], 'Amp_2': Amp[cls_KKM[1]], 'Dur_2': Dur[cls_KKM[1]]})
+#     # data_1.to_csv(r'', index=None)
+#     # data_2.to_csv(r'', index=None)
+#
+#     # ------------------------------------------------------------------------------------------------------------------
+#     # for trai, title, c in zip([TRAI[pop1], TRAI[pop2_1], TRAI[pop2_both]], ['Pop 1', 'Pop 2_1', 'Pop 2_2'],
+#     #                           [color_1, color_2, 'orange']):
+#     #     Res, N = frequency.cal_ave_freq(trai, valid=False, t_lim=50)
+#     #     frequency.plot_ave_freq(Res, N, title, c)
+#
+#     # ------------------------------------------------------------------------------------------------------------------
+#     # idx_1, idx_2 = linear_matching(Amp, Eny, xlabelz[0], xlabelz[2], [2], [-3])
