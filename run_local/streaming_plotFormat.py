@@ -2,7 +2,7 @@
 t_initial, sig_initial = waveform.cal_wave(data_tra[18481 - 1], False)
 
 
-staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.5, 0
+staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.4, 0
 t_str, t_end = 0, 1e7
 t = t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])]
 sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]

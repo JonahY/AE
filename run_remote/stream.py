@@ -227,7 +227,6 @@ def zerosCountRate(audio_1, N, move):
 def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNoise=0):
     start, end = [], []
     last_end = 0
-    t0 = time.perf_counter()
 
     # Background noise level
     end_backNoise = np.where(t_stE <= t_backNoise)[0][-1]
@@ -238,24 +237,18 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
     last_end = end_backNoise
 
     while last_end < stE.shape[0] - 2:
-        # print('\nStart to find waveform...\nLast End: %d, ITU: %f, IZCRT: %f' % (last_end, ITU_tmp, IZCRT_tmp))
         try:
             start_temp = last_end + np.where(stE[last_end + 1:] >= ITU_tmp)[0][0]
         except IndexError:
-            # print("\r100%|{}| [{:.2f}<?, ?it/s]".format("█" * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
-            #       end="", flush=True)
-            # print('No data with short-term energy greater than the threshold (ITU), the search ends.\n')
             return start, end
         start_true = last_end + np.where(np.array(stE_dev[last_end:start_temp + 1]) <= 0)[0][-1] \
             if np.where(np.array(stE_dev[last_end:start_temp]) <= 0)[0].shape[0] else last_end
-        # print('Successfully found the starting index! %d' % start_true)
 
         # Auto-adjust threshold
         ITU_tmp = ITU + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
-            if last_end != start_true else ITU_tmp
+            if start_true - last_end > 10 else ITU_tmp
         IZCRT_tmp = np.mean(zcR[last_end:start_true]) + alpha * np.std(zcR[last_end:start_true]) \
-            if last_end != start_true else IZCRT_tmp
-        # print('Auto-adjust threshold! ITU: %f, IZCRT: %f' % (ITU_tmp, IZCRT_tmp))
+            if start_true - last_end > 10 else IZCRT_tmp
 
         for j in range(start_temp + 1, stE.shape[0]):
             if stE[j] < ITU_tmp:
@@ -263,27 +256,18 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
                 break
         ITL = 0.368 * max(stE[start_true:end_temp + 1]) if ITU_tmp > 0.368 * max(
             stE[start_true:end_temp + 1]) else ITU_tmp
-        # print('Successfully found the temporary ending index! End: %d, ITL: %f' % (end_temp, ITL))
 
         for k in range(end_temp, stE.shape[0]):
             if ((stE[k] < ITL) & (zcR[k] > IZCRT_tmp)) | (k == stE.shape[0] - 1):
                 end_true = k
-                # print('Starting Index: %d, Ending Index: %d' % (start_true, end_true))
                 break
 
         if start_true >= end_true:
-            # print("\r100%|{}| [{:.2f}<?, ?it/s]".format(" " * int((stE.shape[0] - 1) / 10), time.perf_counter() - t0),
-            #       end="", flush=True)
             return start, end
 
         last_end = end_true
         start.append(start_true)
         end.append(end_true)
-
-        progressbar = "█" * int(last_end / 10)
-        space = " " * (int((stE.shape[0] - 2) / 10) - int(last_end / 10))
-        # print("\r{:^3.0f}%|{}{}| [{:.2f}<?, ?it/s]".format((last_end / (stE.shape[0] - 1)) * 100, progressbar, space,
-        #                                                    time.perf_counter() - t0), end="", flush=True)
 
     return start, end
 
@@ -306,7 +290,8 @@ def cut_stream(files, streamFold, saveFold, config):
                 t_initial = np.array([i / fs for i in range(len(sig_initial))])
 
             t_str, t_end = 0, 1e7
-            t = t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])]
+            t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[
+                int(t_str // t_initial[1])], decimals=1)
             sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
 
             width = int(fs * config.staLen)
@@ -487,13 +472,13 @@ if __name__ == '__main__':
                              "Only used except for the first calculation.")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-detect", "--detection", type=int, default=0, choices=[0, 1], help="Whether to detect log file")
-    parser.add_argument("-sL", "--staLen", type=int, default=2, help="the width of window")
+    parser.add_argument("-sL", "--staLen", type=int, default=3, help="the width of window")
     parser.add_argument("-oL", "--overlap", type=int, default=1, help="the overlap of window")
     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
-    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.7,
+    parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.1,
                         help="identification zero crossing rate threshold")
     parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
-    parser.add_argument("-alpha", "--alpha", type=float, default=1.3,
+    parser.add_argument("-alpha", "--alpha", type=float, default=1.5,
                         help="Parameters for automatic adjustment of ITU and IZCRT.")
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
 
