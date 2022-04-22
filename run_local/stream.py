@@ -236,6 +236,8 @@ def find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5
         if last_end != end_backNoise else ITU
     IZCRT_tmp = np.mean(zcR[last_end:end_backNoise]) + alpha * np.std(zcR[last_end:end_backNoise]) \
         if last_end != end_backNoise else IZCRT
+    ITUTmp.append(ITU_tmp)
+    IZCRTTmp.append(IZCRT_tmp)
     last_end = end_backNoise
 
     while last_end < stE.shape[0] - 2:
@@ -253,10 +255,12 @@ def find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5
         print('Successfully found the starting index! %d' % start_true)
 
         # Auto-adjust threshold
-        ITU_tmp = ITU_tmp + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
-            if last_end != start_true else ITU_tmp
+        # ITU_tmp = ITU_tmp + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
+        #     if last_end != start_true else ITU_tmp
+        ITU_tmp = ITU + np.mean(stE[last_end:start_true]) + alpha * np.std(stE[last_end:start_true]) \
+            if start_true - last_end > 10 else ITU_tmp
         IZCRT_tmp = np.mean(zcR[last_end:start_true]) + alpha * np.std(zcR[last_end:start_true]) \
-            if last_end != start_true else IZCRT_tmp
+            if start_true - last_end > 10 else IZCRT_tmp
         print('Auto-adjust threshold! ITU: %f, IZCRT: %f' % (ITU_tmp, IZCRT_tmp))
         ITUTmp.append(ITU_tmp)
         IZCRTTmp.append(IZCRT_tmp)

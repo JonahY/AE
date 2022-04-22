@@ -84,6 +84,8 @@ def find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5
         if last_end != end_backNoise else ITU
     IZCRT_tmp = np.mean(zcR[last_end:end_backNoise]) + alpha * np.std(zcR[last_end:end_backNoise]) \
         if last_end != end_backNoise else IZCRT
+    ITUTmp.append(ITU_tmp)
+    IZCRTTmp.append(IZCRT_tmp)
     last_end = end_backNoise
 
     while last_end < stE.shape[0] - 2:
@@ -196,78 +198,79 @@ if __name__ == '__main__':
         sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
         t_initial = np.array([i / fs for i in range(len(sig_initial))])
 
-    # staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.5, 1e4
-    # t_str, t_end = 9e6, 1e7
-    # t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])], decimals=1)
-    # sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
-    #
-    # width = int(fs * staLen)
-    # stride = int(width) - overlap
-    # t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, staWin)
-    # stE_dev = cal_deriv(t_stE, stE)
-    # start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE,
-    #                                                                                IZCRT=IZCRT,
-    #                                                                                ITU=ITU, alpha=alpha,
-    #                                                                                t_backNoise=t_backNoise)
-    #
-    # x = [t, t_stE, t_stE, t_stE]
-    # y = [sig, stE, stE_dev, zcR]
-    # color = ['black', 'green', 'gray', 'purple']
-    # ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
-    # try:
-    #     fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
-    #     for idx, ax in enumerate(axes):
-    #         ax.plot(x[idx], y[idx], lw=1, color=color[idx])
-    #         if idx == 0:
-    #             for s, e in tqdm(zip(start, end)):
-    #                 ax.plot(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
-    #                         sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2], lw=1, color='red')
-    #                 print(t[int(t_stE[s] // t[1]) + 1], t[int(t_stE[e] // t[1]) + 1],
-    #                       t[int(t_stE[e] // t[1]) + 1] - t[int(t_stE[s] // t[1]) + 1])
-    #                 ax.axvspan(t[int(t_stE[s] // t[1]) + 1], t[int(t_stE[e] // t[1]) + 1],
-    #                            facecolor=[84 / 255, 1, 159 / 255],
-    #                            alpha=0.5)
-    #                 ax.axvline(x=t[int(t_stE[s] // t[1]) + 1], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid',
-    #                            lw=1)
-    #                 ax.axvline(x=t[int(t_stE[e] // t[1]) + 1], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid',
-    #                            lw=1)
-    #         elif idx == 1:
-    #             ax.fill_between(np.linspace(0, t_backNoise, 10), -1000, [500] * 10, facecolor='orange', alpha=0.2)
-    #             ax.fill_between(x[idx], -1000, y[idx], facecolor=[95 / 255, 158 / 255, 160 / 255], alpha=0.2)
-    #             ax.plot(np.linspace(0, x[idx][endTmp[0]], 100), [ITUTmp[0]] * 100, color='orange', linestyle='dashed', lw=1)
-    #             for i in range(len(start)):
-    #                 ax.axvspan(x[idx][startTmp[i]], x[idx][endTmp[i]], facecolor=[95 / 255, 158 / 255, 160 / 255],
-    #                            alpha=0.2)
-    #                 ax.fill_between(x[idx][startTmp[i]:endTmp[i] + 1], -1000, y[idx][startTmp[i]:endTmp[i] + 1],
-    #                                 facecolor=[28 / 255, 28 / 255, 28 / 255], alpha=0.5)
-    #                 ax.axvline(x=x[idx][startTmp[i]], color='k', linestyle='dashdot', lw=1)
-    #                 ax.axvline(x=x[idx][endTmp[i]], color='orange', linestyle='dashed', lw=1)
-    #                 ax.axvline(x=x[idx][end[i]], color=[70 / 255, 130 / 255, 180 / 255], linestyle='solid', lw=1)
-    #                 if i:
-    #                     ax.plot(np.linspace(x[idx][end[i - 1]], x[idx][endTmp[i]], 100), [ITUTmp[i]] * 100, color='orange',
-    #                             linestyle='dashed', lw=1)
-    #                     ax.fill_between(np.linspace(x[idx][end[i - 1]], x[idx][start[i]], 100), -1000, [500] * 100,
-    #                                     facecolor=[0, 1, 1],
-    #                                     alpha=0.5)
-    #         elif idx == 2:
-    #             for i in range(len(start)):
-    #                 ax.axvspan(x[idx][start[i]], x[idx][startTmp[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)
-    #                 ax.axvline(x=x[idx][startTmp[i]], color='k', linestyle='dashdot', lw=1)
-    #         else:
-    #             ax.axvspan(0, 5, facecolor='orange', alpha=0.2)
-    #             for i in range(len(start)):
-    #                 ax.axvspan(x[idx][endTmp[i]], x[idx][end[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)
-    #                 ax.axvline(x=x[idx][endTmp[i]], color='orange', linestyle='dashed', lw=1)
-    #                 ax.axvline(x=x[idx][end[i]], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid', lw=1)
-    #                 ax.plot(np.linspace(x[idx][endTmp[i]], x[idx][end[i]], 100), [IZCRTTmp[i]] * 100,
-    #                         color=[70 / 255, 130 / 255, 180 / 255],
-    #                         linestyle='dashed', lw=1)
-    #                 if i:
-    #                     ax.axvspan(x[idx][end[i - 1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
-    #
-    #         ax.grid(linewidth=0.3)
-    #         plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
-    #
-    #     plt.subplots_adjust(wspace=0, hspace=0)
-    # except IndexError:
-    #     print('No AE events detected')
+    staLen, overlap, staWin = 3, 1, 'hamming'
+    t_str, t_end = 0, 1e7
+    t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[int(t_str // t_initial[1])],decimals=1)
+    sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
+    width = int(fs * staLen)
+    stride = int(width) - overlap
+    t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, staWin)
+    stE_dev = cal_deriv(t_stE, stE)
+
+    IZCRT, ITU, alpha, t_backNoise = 0.1, 850, 1.3, 1e4
+    start, end, startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = find_wave_multiOutput(stE, stE_dev, zcR, t_stE,
+                                                                                   IZCRT=IZCRT,
+                                                                                   ITU=ITU, alpha=alpha,
+                                                                                   t_backNoise=t_backNoise)
+
+    x = [t, t_stE, t_stE, t_stE]
+    y = [sig, stE, stE_dev, zcR]
+    color = ['black', 'green', 'gray', 'purple']
+    ylabel = [r'$Amplitude$ /μV', r'$STEnergy$ /μV$^2 \cdot$μs', r'$S\dot{T}E$ /μV$^2$', r'$ST\widehat{Z}CR$ /%']
+    try:
+        fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
+        for idx, ax in enumerate(axes):
+            ax.plot(x[idx], y[idx], lw=1, color=color[idx])
+            if idx == 0:
+                for s, e in tqdm(zip(start, end)):
+                    ax.plot(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
+                            sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2], lw=1, color='red')
+                    print(t[int(t_stE[s] // t[1]) + 1], t[int(t_stE[e] // t[1]) + 1],
+                          t[int(t_stE[e] // t[1]) + 1] - t[int(t_stE[s] // t[1]) + 1])
+                    ax.axvspan(t[int(t_stE[s] // t[1]) + 1], t[int(t_stE[e] // t[1]) + 1],
+                               facecolor=[84 / 255, 1, 159 / 255],
+                               alpha=0.5)
+                    ax.axvline(x=t[int(t_stE[s] // t[1]) + 1], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid',
+                               lw=1)
+                    ax.axvline(x=t[int(t_stE[e] // t[1]) + 1], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid',
+                               lw=1)
+            elif idx == 1:
+                ax.fill_between(np.linspace(0, t_backNoise, 10), -1000, [500] * 10, facecolor='orange', alpha=0.2)
+                ax.fill_between(x[idx], -1000, y[idx], facecolor=[95 / 255, 158 / 255, 160 / 255], alpha=0.2)
+                ax.plot(np.linspace(0, x[idx][endTmp[0]], 100), [ITUTmp[0]] * 100, color='orange', linestyle='dashed', lw=1)
+                for i in range(len(start)):
+                    ax.axvspan(x[idx][startTmp[i]], x[idx][endTmp[i]], facecolor=[95 / 255, 158 / 255, 160 / 255],
+                               alpha=0.2)
+                    ax.fill_between(x[idx][startTmp[i]:endTmp[i] + 1], -1000, y[idx][startTmp[i]:endTmp[i] + 1],
+                                    facecolor=[28 / 255, 28 / 255, 28 / 255], alpha=0.5)
+                    ax.axvline(x=x[idx][startTmp[i]], color='k', linestyle='dashdot', lw=1)
+                    ax.axvline(x=x[idx][endTmp[i]], color='orange', linestyle='dashed', lw=1)
+                    ax.axvline(x=x[idx][end[i]], color=[70 / 255, 130 / 255, 180 / 255], linestyle='solid', lw=1)
+                    if i:
+                        ax.plot(np.linspace(x[idx][end[i - 1]], x[idx][endTmp[i]], 100), [ITUTmp[i]] * 100, color='orange',
+                                linestyle='dashed', lw=1)
+                        ax.fill_between(np.linspace(x[idx][end[i - 1]], x[idx][start[i]], 100), -1000, [500] * 100,
+                                        facecolor=[0, 1, 1],
+                                        alpha=0.5)
+            elif idx == 2:
+                for i in range(len(start)):
+                    ax.axvspan(x[idx][start[i]], x[idx][startTmp[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)
+                    ax.axvline(x=x[idx][startTmp[i]], color='k', linestyle='dashdot', lw=1)
+            else:
+                ax.axvspan(0, 5, facecolor='orange', alpha=0.2)
+                for i in range(len(start)):
+                    ax.axvspan(x[idx][endTmp[i]], x[idx][end[i]], facecolor=[84 / 255, 1, 159 / 255], alpha=0.5)
+                    ax.axvline(x=x[idx][endTmp[i]], color='orange', linestyle='dashed', lw=1)
+                    ax.axvline(x=x[idx][end[i]], color=[78 / 255, 238 / 255, 148 / 255], linestyle='solid', lw=1)
+                    ax.plot(np.linspace(x[idx][endTmp[i]], x[idx][end[i]], 100), [IZCRTTmp[i]] * 100,
+                            color=[70 / 255, 130 / 255, 180 / 255],
+                            linestyle='dashed', lw=1)
+                    if i:
+                        ax.axvspan(x[idx][end[i - 1]], x[idx][start[i]], facecolor=[0, 1, 1], alpha=0.5)
+
+            ax.grid(linewidth=0.3)
+            plot_norm(ax, r'$Time$ /μs' if idx == 3 else '', ylabel[idx], legend=False, labelWeight='normal')
+
+        plt.subplots_adjust(wspace=0, hspace=0)
+    except IndexError:
+        print('No AE events detected')

@@ -478,7 +478,7 @@ if __name__ == '__main__':
     parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.1,
                         help="identification zero crossing rate threshold")
     parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
-    parser.add_argument("-alpha", "--alpha", type=float, default=1.5,
+    parser.add_argument("-alpha", "--alpha", type=float, default=1.3,
                         help="Parameters for automatic adjustment of ITU and IZCRT.")
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
 
@@ -536,8 +536,6 @@ if __name__ == '__main__':
 
     pool.close()
     pool.join()
-
-    # cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
 
     end = time.time()
     print("=" * 46 + " Report " + "=" * 46)
