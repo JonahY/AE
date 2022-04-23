@@ -279,24 +279,54 @@ def cut_stream(files, streamFold, saveFold, config):
         for file in pbar:
             pbar.set_description('File name: %s' % file[43:-4])
 
-            with open(os.path.join(streamFold, file), 'r') as f:
-                for _ in range(4):
-                    f.readline()
-                fs = int(f.readline().strip().split()[-1]) * 1e-3
-                for _ in range(2):
-                    f.readline()
-                trigger_time = float(f.readline().strip()[15:])
-                sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
-                t_initial = np.array([i / fs for i in range(len(sig_initial))])
+            if file not in os.listdir(config.featuresFold):
+                with open(os.path.join(streamFold, file), 'r') as f:
+                    for _ in range(4):
+                        f.readline()
+                    fs = int(f.readline().strip().split()[-1]) * 1e-3
+                    for _ in range(2):
+                        f.readline()
+                    trigger_time = float(f.readline().strip()[15:])
+                    sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
+                    t_initial = np.array([i / fs for i in range(len(sig_initial))])
 
-            t_str, t_end = 0, 1e7
-            t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[
-                int(t_str // t_initial[1])], decimals=1)
-            sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
+                t_str, t_end = 0, 1e7
+                t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[
+                    int(t_str // t_initial[1])], decimals=1)
+                sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
 
-            width = int(fs * config.staLen)
-            stride = int(width) - config.overlap
-            t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, config.staWin)
+                width = int(fs * config.staLen)
+                stride = int(width) - config.overlap
+                t_stE, stE, zcR = shortTermEny_zerosCrossingRate(sig, width, stride, fs, config.staWin)
+
+                # save calculated values
+                with open(os.path.join(config.featuresFold, f'{file}'), 'w') as f:
+                    f.write('Trigger time (s)\n%.8f\n\n' % trigger_time)
+                    f.write('Parameters config\n')
+                    f.write('StaLen\t%d\n' % config.staLen)
+                    f.write('Overlap\t%d\n' % config.overlap)
+                    f.write('StaWin\t%s\n' % config.staWin)
+                    f.write('IZCRT\t%f\n' % width)
+                    f.write('IZCRT\t%f\n\n' % stride)
+                    f.write('t_stE, stE, zcR\n')
+                    for idx in range(t_stE.shape[0]):
+                        f.write(f'{t_stE[idx]:.1f}, {stE[idx]:.8f}, {zcR[idx]:.3f}\n')
+            else:
+                with open(os.path.join(streamFold, file), 'r') as f:
+                    for _ in range(4):
+                        f.readline()
+                    fs = int(f.readline().strip().split()[-1]) * 1e-3
+                    for _ in range(2):
+                        f.readline()
+                    trigger_time = float(f.readline().strip()[15:])
+                    sig = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
+                    t = np.array([i / fs for i in range(len(sig))])
+
+                with open(os.path.join(config.featuresFold, f'{file}'), 'r') as f:
+                    features = np.array([i.strip().split(', ') for i in f.readlines()[8:]])
+
+                t_stE, stE, zcR = features[:, 0].astype(float), features[:, 1].astype(float), features[:, 2].astype(float)
+
             stE_dev = cal_deriv(t_stE, stE)
             start, end = find_wave(stE, stE_dev, zcR, t_stE, IZCRT=config.IZCRT, ITU=config.ITU, alpha=config.alpha,
                                    t_backNoise=config.t_backNoise)
@@ -470,6 +500,9 @@ if __name__ == '__main__':
                         default=r'/home/Yuanbincheng/data/stream/alpha_1.3/waveforms',
                         help="Absolute path of new storage folder(add 'r' in front), "
                              "Only used except for the first calculation.")
+    parser.add_argument("-featuresF", "--featuresFold", type=str,
+                        default=r'/home/Yuanbincheng/data/stream/alpha_1.3/waveforms_features',
+                        help="Absolute path of new storage folder(add 'r' in front)")
     parser.add_argument("-cpu", "--processor", type=int, default=cpu_count(), help="Number of Threads")
     parser.add_argument("-detect", "--detection", type=int, default=0, choices=[0, 1], help="Whether to detect log file")
     parser.add_argument("-sL", "--staLen", type=int, default=3, help="the width of window")
@@ -513,6 +546,9 @@ if __name__ == '__main__':
 
     if not os.path.exists(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU)):
         os.mkdir(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU))
+
+    if not os.path.exists(opt.featuresFold):
+        os.mkdir(opt.featuresFold)
 
     with open(os.path.join(opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), 'log'), 'a') as f:
         f.write('Parameters config\n')
