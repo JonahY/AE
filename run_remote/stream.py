@@ -287,13 +287,7 @@ def cut_stream(files, streamFold, saveFold, config):
                     for _ in range(2):
                         f.readline()
                     trigger_time = float(f.readline().strip()[15:])
-                    sig_initial = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
-                    t_initial = np.array([i / fs for i in range(len(sig_initial))])
-
-                t_str, t_end = 0, 1e7
-                t = np.around(t_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1] - t_initial[
-                    int(t_str // t_initial[1])], decimals=1)
-                sig = sig_initial[int(t_str // t_initial[1]):int(t_end // t_initial[1]) + 1]
+                    sig = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
 
                 width = int(fs * config.staLen)
                 stride = int(width) - config.overlap
@@ -306,8 +300,8 @@ def cut_stream(files, streamFold, saveFold, config):
                     f.write('StaLen\t%d\n' % config.staLen)
                     f.write('Overlap\t%d\n' % config.overlap)
                     f.write('StaWin\t%s\n' % config.staWin)
-                    f.write('IZCRT\t%f\n' % width)
-                    f.write('IZCRT\t%f\n\n' % stride)
+                    f.write('Width\t%f\n' % width)
+                    f.write('Stride\t%f\n\n' % stride)
                     f.write('t_stE, stE, zcR\n')
                     for idx in range(t_stE.shape[0]):
                         f.write(f'{t_stE[idx]:.1f}, {stE[idx]:.8f}, {zcR[idx]:.3f}\n')
@@ -320,7 +314,6 @@ def cut_stream(files, streamFold, saveFold, config):
                         f.readline()
                     trigger_time = float(f.readline().strip()[15:])
                     sig = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
-                    t = np.array([i / fs for i in range(len(sig))])
 
                 with open(os.path.join(config.featuresFold, f'{file}'), 'r') as f:
                     features = np.array([i.strip().split(', ') for i in f.readlines()[8:]])
@@ -333,11 +326,11 @@ def cut_stream(files, streamFold, saveFold, config):
 
             for out, [s, e] in enumerate(zip(start, end), 1):
                 with open(os.path.join(saveFold, '{}-{}.txt'.format(file[:-4], out)), 'w') as f:
-                    f.write('Trigger time (s)\n%.8f\n\n' % trigger_time)
-                    f.write('Time (μs), Amplitude (μV)\n')
-                    for i, j in zip(t[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2],
-                                    sig[int(t_stE[s] // t[1]) + 1:int(t_stE[e] // t[1]) + 2]):
-                        f.write('%.1f, %f\n' % (i, j))
+                    f.write(f'Trigger time of stream file (s)\n{trigger_time:.8f}\n')
+                    f.write(f'Trigger time of AE event (μs)\n{(int(t_stE[s] // (1 / fs)) + 1) / fs:.1f}\n\n')
+                    f.write('Amplitude (μV)\n')
+                    for i in range(int(t_stE[s] // (1 / fs)) + 1, int(t_stE[e] // (1 / fs)) + 2):
+                        f.write(f'{sig[i]}\n')
 
             with open(os.path.join(saveFold, 'log'), 'a') as f:
                 f.write('%s\n' % file)
@@ -510,7 +503,7 @@ if __name__ == '__main__':
     parser.add_argument("-sW", "--staWin", type=str, default='hamming', help="window's function")
     parser.add_argument("-izcrt", "--IZCRT", type=float, default=0.1,
                         help="identification zero crossing rate threshold")
-    parser.add_argument("-itu", "--ITU", type=int, default=650, help="identification threshold upper")
+    parser.add_argument("-itu", "--ITU", type=float, default=650, help="identification threshold upper")
     parser.add_argument("-alpha", "--alpha", type=float, default=1.3,
                         help="Parameters for automatic adjustment of ITU and IZCRT.")
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
@@ -572,6 +565,8 @@ if __name__ == '__main__':
 
     pool.close()
     pool.join()
+
+    # cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
 
     end = time.time()
     print("=" * 46 + " Report " + "=" * 46)

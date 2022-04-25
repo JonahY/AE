@@ -440,7 +440,7 @@ def cal_label(tmp1, tmp2, formula, slope, intercept):
     return label
 
 
-def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
+def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept, plot=True):
     idx_1, idx_2, idx_3 = [], [], []
     formula = lambda x, a, b: pow(x, a) * pow(10, b)
     fit_x = cal_fitx(tmp1, 1000)
@@ -450,12 +450,13 @@ def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
         idx_1 = np.where(np.array(label) == 0)[0]
         idx_2 = np.where(np.array(label) == 1)[0]
 
-        fig = plt.figure(figsize=[6, 3.9])
-        ax = plt.subplot()
-        ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='red', label='Pop 1')
-        ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='blue', label='Pop 2')
-        ax.loglog(fit_x, fit_y, '.', Marker='.', markersize=0.5, color='black')
-        plot_norm(ax, xlabel, ylabel, legend=True)
+        if plot:
+            fig = plt.figure(figsize=[6, 3.9])
+            ax = plt.subplot()
+            ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='red', label='Pop 1')
+            ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='blue', label='Pop 2')
+            ax.loglog(fit_x, fit_y, '.', Marker='.', markersize=0.5, color='black')
+            plot_norm(ax, xlabel, ylabel, legend=True)
 
     elif len(slope) == 2:
         fit_y1 = [formula(i, slope[0], intercept[0]) for i in fit_x]
@@ -465,14 +466,15 @@ def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept):
         idx_2 = np.where(np.array(label) == 1)[0]
         idx_3 = np.where(np.array(label) == 2)[0]
 
-        fig = plt.figure(figsize=[6, 3.9])
-        ax = plt.subplot()
-        ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='black', label='Pop 1')
-        ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='r', label='Pop 2')
-        ax.loglog(tmp1[idx_3], tmp2[idx_3], '.', Marker='.', markersize=8, color='b', label='Pop 3')
-        ax.loglog(fit_x, fit_y1, '.', Marker='.', markersize=0.5, color='black')
-        ax.loglog(fit_x, fit_y2, '.', Marker='.', markersize=0.5, color='black')
-        plot_norm(ax, xlabel, ylabel, legend=True)
+        if plot:
+            fig = plt.figure(figsize=[6, 3.9])
+            ax = plt.subplot()
+            ax.loglog(tmp1[idx_1], tmp2[idx_1], '.', Marker='.', markersize=8, color='black', label='Pop 1')
+            ax.loglog(tmp1[idx_2], tmp2[idx_2], '.', Marker='.', markersize=8, color='r', label='Pop 2')
+            ax.loglog(tmp1[idx_3], tmp2[idx_3], '.', Marker='.', markersize=8, color='b', label='Pop 3')
+            ax.loglog(fit_x, fit_y1, '.', Marker='.', markersize=0.5, color='black')
+            ax.loglog(fit_x, fit_y2, '.', Marker='.', markersize=0.5, color='black')
+            plot_norm(ax, xlabel, ylabel, legend=True)
 
     else:
         print("Current function don't support fit more than two lines.")
