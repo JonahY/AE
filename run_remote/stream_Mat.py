@@ -208,7 +208,7 @@ if __name__ == '__main__':
     parser.add_argument("-noiseT", "--t_backNoise", type=int, default=1e4, help="background noise assessment duration")
 
     opt = parser.parse_args()
-    opt.featuresFold = f'{opt.featuresFold}_sL{opt.staLen}_oL{opt.oL}'
+    opt.featuresFold = f'{opt.featuresFold}_sL{opt.staLen}_oL{opt.overlap}'
     print("=" * 44 + " Parameters " + "=" * 44)
     print(opt)
 
