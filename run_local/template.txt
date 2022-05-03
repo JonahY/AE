@@ -40,13 +40,12 @@ for file in tqdm(os.listdir(waveFold)):
         continue
     try:
         with open(os.path.join(waveFold, file)) as f:
-            data = np.array([i.strip().split(',') for i in f.readlines()[4:]]).astype(float)
+            sig = np.array([i.strip().split(',') for i in f.readlines()[6:]]).astype(float)
     except ValueError:
         continue
 
-    sig = data[:, 1]
-    time = data[:, 0] - data[0, 0]
-    fs = int(1e6 / time[1])
+    fs = int(1e6 / 0.2)
+    time = np.linspace(0, 0.2 * (sig.shape[0] - 1), sig.shape[0])
 
     fig = plt.figure(figsize=(9.2, 3), num='0')
     ax = fig.add_subplot(1, 2, 1)
@@ -69,16 +68,15 @@ for file in tqdm(os.listdir(waveFold)):
         continue
     with open(os.path.join(waveFold, file)) as f:
         f.readline()
-        triggerTime = float(f.readline().strip())
-        data = np.array([i.strip().split(',') for i in f.readlines()[2:]]).astype(float)
+        triggerTime_file = float(f.readline().strip())
+        f.readline()
+        triggerTime_event = float(f.readline().strip())
+        sig = np.array([i.strip() for i in f.readlines()[2:]]).astype(float)
+        fs = int(1e6 / 0.2)
 
-    sig = data[:, 1]
-    time = data[:, 0]
-    fs = int(1e6 / (time[1] - time[0]))
-
-    Time_Waveform = np.append(Time_Waveform, triggerTime + time[0] / 1e6)
+    Time_Waveform = np.append(Time_Waveform, triggerTime_file + triggerTime_event / 1e6)
     Amp_Waveform = np.append(Amp_Waveform, max(abs(sig)))
-    Dur_Waveform = np.append(Dur_Waveform, time[-1] - time[0])
+    Dur_Waveform = np.append(Dur_Waveform, (sig.shape[0] - 1) * 0.2)
     Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
 
 valid_sort = np.argsort(Time_Waveform)
@@ -101,6 +99,12 @@ df_pop1 = pd.DataFrame({'Time_pop1': Time_Waveform[idx_1], 'Amp_pop1': Amp_Wavef
 df_pop2 = pd.DataFrame({'Time_pop2': Time_Waveform[idx_2], 'Amp_pop2': Amp_Waveform[idx_2], 'Eny_pop2': Eny_Waveform[idx_2], 'Dur_pop2': Dur_Waveform[idx_2]})
 df_pop1.to_csv(os.path.join(features_path[:-5], 'ITU550_EAD-T_pop1.csv'), index=None)
 df_pop2.to_csv(os.path.join(features_path[:-5], 'ITU550_EAD-T_pop2.csv'), index=None)
+Dur1_sort = np.argsort(Dur_Waveform[idx_1])
+Dur2_sort = np.argsort(Dur_Waveform[idx_2])
+df_pop1 = pd.DataFrame({'Amp_pop1': Amp_Waveform[idx_1][Dur1_sort], 'Dur_pop1': Dur_Waveform[idx_1][Dur1_sort]})
+df_pop2 = pd.DataFrame({'Amp_pop2': Amp_Waveform[idx_2][Dur2_sort], 'Dur_pop2': Dur_Waveform[idx_2][Dur2_sort]})
+df_pop1.to_csv(os.path.join(features_path[:-5], 'ITU675_A-D_pop1.csv'), index=None)
+df_pop2.to_csv(os.path.join(features_path[:-5], 'ITU675_A-D_pop2.csv'), index=None)
 
 features.cal_ML(sorted(Eny_Waveform), sorted(Eny_Waveform[idx_1]), sorted(Eny_Waveform[idx_2]), xlabelz[2], 'ML (%s)' % xlabelz[2][0], features_path, select=[0, 3])
 features.cal_OmoriLaw_timeSeq(Eny_Waveform, idx_1, idx_2, INTERVAL_NUM=[8, 8], bin_method='log', FIT=True, features_path=features_path)
@@ -216,6 +220,27 @@ for idx, label, color in zip([idx_1, idx_2], ['Dislocation', 'Twinning-Detwinnin
 
 
 # ======================================================= VALLEN =======================================================
+# -------------------------------------- Merge erengy-time and Stress-Strain curve -------------------------------------
+stretcherFile = r'F:\VALLEN\CT\04-sfs-0424\Specimen_RawData_1.csv'
+time, displace, load, strain, stress = load_stress(stretcherFile)
+stressStrainFigStart, waveformFigStart, waveformFigEnd = 0, 0, 3e3
+strain_max = strain[-1] * waveformFigEnd / time[-1]
+
+fig = plt.figure(figsize=[6, 3.9])
+fig.text(0.86, 0.18, '', fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12}, horizontalalignment="right")
+ax = fig.add_subplot()
+ax.semilogy(Time, Eny, '.', Marker='.', color=color_2)
+plot_norm(ax, 'Time (s)', xlabelz[2], x_lim=[waveformFigStart, waveformFigEnd], y_lim=[0, 1e10], frameon=False, legend_loc='upper right')
+
+ax2 = ax.twinx()
+plot_norm(ax2, 'Time (s)', 'Stress (MPa)', x_lim=[waveformFigStart, waveformFigEnd], y_lim=[0, 225], legend=False, font_color='purple')
+
+ax3 = ax2.twiny()
+for key in ['right', 'top']:
+    ax3.spines[key].set_color('purple')
+ax3.plot(strain, stress, 'purple', lw=3)
+plot_norm(ax3, 'Strain (%)', x_lim=[stressStrainFigStart, strain_max], y_lim=[0, 225], legend=False, font_color='purple')
+
 # ------------------------------------------------- Image normalization ------------------------------------------------
 for idx, file in tqdm(enumerate(files, 1)):
     img = cv2.imread(os.path.join(files_dir, file))

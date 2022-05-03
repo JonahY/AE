@@ -257,15 +257,15 @@ if __name__ == '__main__':
     start = time.time()
 
     # Multiprocessing acceleration
-    pool = multiprocessing.Pool(processes=opt.processor)
-    for idx, i in enumerate(range(0, len(file_list), each_core)):
-        pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold,
-                                      opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt,))
+    # pool = multiprocessing.Pool(processes=opt.processor)
+    # for idx, i in enumerate(range(0, len(file_list), each_core)):
+    #     pool.apply_async(cut_stream, (file_list[i:i + each_core], opt.streamFold,
+    #                                   opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt,))
+    #
+    # pool.close()
+    # pool.join()
 
-    pool.close()
-    pool.join()
-
-    # cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
+    cut_stream(file_list, opt.streamFold, opt.saveFold if opt.first else '%s_%d' % (opt.saveFoldNew, opt.ITU), opt)
 
     end = time.time()
     print("=" * 46 + " Report " + "=" * 46)
