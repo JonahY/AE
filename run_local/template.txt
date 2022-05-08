@@ -40,7 +40,7 @@ for file in tqdm(os.listdir(waveFold)):
         continue
     try:
         with open(os.path.join(waveFold, file)) as f:
-            sig = np.array([i.strip().split(',') for i in f.readlines()[6:]]).astype(float)
+            sig = np.array([float(i.strip()) for i in f.readlines()[6:]])
     except ValueError:
         continue
 

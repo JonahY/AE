@@ -18,17 +18,18 @@ def convert_stream(files, streamFold, saveFold):
         for file in pbar:
             pbar.set_description('File name: %s' % file[43:-4])
 
-            with open(os.path.join(streamFold, file), 'r') as f:
-                for _ in range(4):
-                    f.readline()
-                fs = int(f.readline().strip().split()[-1]) * 1e-3
-                for _ in range(2):
-                    f.readline()
-                trigger_time = float(f.readline().strip()[15:])
-                sig = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
+            if not os.path.exists(os.path.join(saveFold, f'{file[:-4]}.mat')):
+                with open(os.path.join(streamFold, file), 'r') as f:
+                    for _ in range(4):
+                        f.readline()
+                    fs = int(f.readline().strip().split()[-1]) * 1e-3
+                    for _ in range(2):
+                        f.readline()
+                    trigger_time = float(f.readline().strip()[15:])
+                    sig = np.array(list(map(lambda x: float(x.strip()) * 1e4, f.readlines()[1:-1])))
 
-            scio.savemat(os.path.join(saveFold, f'{file[:-4]}.mat'), {'Sampling rate': fs, 'Trigger time': trigger_time,
-                                                                      'Voltage': sig})
+                scio.savemat(os.path.join(saveFold, f'{file[:-4]}.mat'), {'Sampling rate': fs, 'Trigger time': trigger_time,
+                                                                          'Voltage': sig})
 
             with open(os.path.join(saveFold, 'log'), 'a') as f:
                 f.write(f'{file}\n')
