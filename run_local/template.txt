@@ -1,5 +1,34 @@
 # ======================================================== PAC =========================================================
 # ---------------------------------------- Save waveform and ssq_cwt in batches ----------------------------------------
+path = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115'
+savePath = r'F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\pop1_dur100-200'
+files = np.array(sorted(os.listdir(path), key=lambda x: int(x.split('_')[-2])))
+for file in tqdm(files):
+    if int(file.split('_')[-2]) in trai_pac[cls_pac[0]][valid_dur_pac]:
+        with open(os.path.join(path, file), 'r') as f:
+            sig = np.array([float(j.strip()) for j in f.readlines()[12:]]) * 1e4
+
+        time = np.linspace(0, (sig.shape[0] - 1) * 0.2, sig.shape[0])
+        for tmp_tail, s in enumerate(sig[::-1]):
+            if s != 0:
+                tail = -tmp_tail if tmp_tail > 0 else None
+                break
+        time, sig = time[:tail], sig[:tail]
+
+        fig = plt.figure(figsize=(9.2, 3), num='1')
+        ax = fig.add_subplot(1, 2, 1)
+        ax.plot(time, sig, lw=1, color=color_1)
+        plt.axhline(abs(pow(10, 17.7827941)), 0, sig.shape[0], linewidth=1, color="black")
+        plt.axhline(-abs(pow(10, 17.7827941)), 0, sig.shape[0], linewidth=1, color="black")
+        plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', y_lim=[-((max(abs(sig)) // 10) + 1) * 10, ((max(abs(sig)) // 10) + 1) * 10], title='TRAI:%d' % i, legend=False, grid=True)
+        ax = fig.add_subplot(1, 2, 2)
+        Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=1/0.0000002, t=time)
+        plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
+        plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+        plt.savefig(os.path.join(savePath, f"TRAI-{file.split('_')[-2]}.jpg"), pad_inches=0)
+        fig.clear()
+
+# ---------------------------------------- Save waveform and ssq_cwt in batches ----------------------------------------
 for idx, i in tqdm(enumerate(TRAI[valid_pac][cls_pac[0]], 1)):
     tmp = data_tra_1[int(i - 1)]
     if i != tmp[-1]:
