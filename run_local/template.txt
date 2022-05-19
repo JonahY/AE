@@ -179,6 +179,18 @@ for file in tqdm(os.listdir(waveFold)):
     Dur_Waveform = np.append(Dur_Waveform, (sig.shape[0] - 1) * 0.2)
     Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
 
+    # with open(os.path.join(waveFold, file)) as f:
+    #     f.readline()
+    #     triggerTime_file = float(f.readline().strip())
+    #     data = np.array([i.strip().split(', ') for i in f.readlines()[2:]]).astype(float)
+    #     fs = int(1e6 / 0.2)
+    # sig = data[:, 1]
+    # t = data[:, 0] / 1e6
+    # Time_Waveform = np.append(Time_Waveform, triggerTime_file + t[0])
+    # Amp_Waveform = np.append(Amp_Waveform, max(abs(sig)))
+    # Dur_Waveform = np.append(Dur_Waveform, (sig.shape[0] - 1) * 0.2)
+    # Eny_Waveform = np.append(Eny_Waveform, np.sum(np.multiply(pow(sig, 2), pow(10, 6) / fs)) / pow(10, 4))
+
 valid_sort = np.argsort(Time_Waveform)
 Time_Waveform = Time_Waveform[valid_sort]
 Amp_Waveform = Amp_Waveform[valid_sort]
