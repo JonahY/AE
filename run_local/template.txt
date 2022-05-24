@@ -469,6 +469,42 @@ for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
     plt.savefig(os.path.join(r'C:/Users/Yuan/Desktop', '%i.jpg' % i), pad_inches=0)
     fig2.clear()
 
+# -------------------------------------- Save waveform, ssq_cwt and ft in batches --------------------------------------
+for idx, i in tqdm(enumerate(TRAI[:1], 1)):
+    tmp = data_tra[int(i - 1)]
+    if i != tmp[-1]:
+        print('Error: TRAI is incorrect!')
+        continue
+    sig = np.multiply(array.array('h', bytes(tmp[-2])), tmp[-3] * 1000)
+    time = np.linspace(0, pow(tmp[-5], -1) * (tmp[-4] - 1) * pow(10, 6), tmp[-4])
+
+    fig = plt.figure(figsize=(13, 3), num='0')
+    ax = fig.add_subplot(1, 3, 1)
+    ax.plot(time, sig, lw=1, color=color_2)
+    plt.axhline(abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plt.axhline(-abs(tmp[2]), 0, sig.shape[0], linewidth=1, color="black")
+    plot_norm(ax, 'Time (μs)', 'Amplitude (μV)', title='TRAI:%d' % i, legend=False, grid=True)
+
+    ax = fig.add_subplot(1, 3, 2)
+    Twxo, Wxo, ssq_freqs, *_ = ssq_cwt(sig, wavelet='morlet', scales='log-piecewise', fs=tmp[3], t=time)
+    plt.contourf(time, ssq_freqs * 1000, pow(abs(Twxo), 0.5), cmap='cubehelix_r')
+    plot_norm(ax, r'Time (μs)', r'Frequency (kHz)', y_lim=[min(ssq_freqs * 1000), 1000], legend=False)
+
+    Fs = tmp[3]
+    N = sig.shape[0]
+    fft_y = fft(sig)
+    abs_y = np.abs(fft_y)
+    normalization = abs_y / N
+    normalization_half = normalization[range(int(N / 2))]
+    frq = (np.arange(N) / N) * Fs
+    half_frq = frq[range(int(N / 2))]
+    ax = fig.add_subplot(1, 3, 3)
+    ax.plot(half_frq / 1000, normalization_half, lw=1, color=color_2)
+    plot_norm(ax, 'Frequency (kHz)', '|Y(frequency)|', x_lim=[0, pow(10, 3)], legend=False)
+
+    plt.savefig('./Ni electrolysis/subdivision_Entanglement/waveFreq_pop1/TRAI-%d.jpg' % i, pad_inches=0)
+    fig.clear()
+
 # ---------------------------------------- Save waveform and ssq_cwt in batches ----------------------------------------
 for idx, i in tqdm(enumerate(TRAI[pop1], 1)):
     tmp = data_tra[int(i - 1)]

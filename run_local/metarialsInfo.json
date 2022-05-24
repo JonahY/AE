@@ -1,5 +1,9 @@
 {
   "Fe": {
+    "Fe-800-1.5h-fengguan-1-1-AE-0.1": {
+      "t_str": 0,
+      "t_cut": "inf"
+    },
     "gongyechuntie-800-1.5h-1-1-6xunhuan": {
       "t_str": 0,
       "t_cut": 3000
