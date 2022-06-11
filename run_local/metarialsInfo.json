@@ -1,5 +1,9 @@
 {
   "Fe": {
+    "tini50.8-cw40-aged400-1h-1-2-AE-0.05": {
+      "t_str": 0,
+      "t_cut": "inf"
+    },
     "Fe-800-1.5h-fengguan-1-1-AE-0.1": {
       "t_str": 0,
       "t_cut": "inf"

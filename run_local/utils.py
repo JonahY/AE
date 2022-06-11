@@ -15,21 +15,29 @@ import matplotlib.pyplot as plt
 from matplotlib.pylab import mpl
 from stream import *
 import cv2
-
-mpl.rcParams['axes.unicode_minus'] = False  # 显示负号
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['ytick.direction'] = 'in'
+import warnings
 
 
 class Reload:
     def __init__(self, path_pri, path_tra, fold):
+        """
+        数据载入类
+        :param path_pri: .pridb数据库文件全称
+        :param path_tra: .tradb数据库文件全称
+        :param fold: 数据库文件名
+        """
         self.path_pri = path_pri
         self.path_tra = path_tra
         self.fold = fold
 
     def sqlite_read(self, path, mode='vallen'):
         """
-        python读取sqlite数据库文件
+        读取sqlite数据库文件
+        :param path: 文件绝对路径
+        :param mode: 读取模式，可选参数：['vallen', 'stream']
+                    vallen: 适用于vallen数据库
+                    stream: 适用于波形流数据库
+        :return:
         """
         mydb = sqlite3.connect(path)  # 链接数据库
         mydb.text_factory = lambda x: str(x, 'gbk', 'ignore')
@@ -53,6 +61,13 @@ class Reload:
         return int(res)
 
     def read_with_time(self, time):
+        """
+        按照时间载入
+        :param time:
+        :return:
+        """
+        warnings.warn("some_old_function is deprecated", DeprecationWarning)
+
         conn_pri = sqlite3.connect(self.path_pri)
         result_pri = conn_pri.execute(
             "Select SetID, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI FROM view_ae_data")
@@ -77,6 +92,17 @@ class Reload:
         return t, chan_1, chan_2, chan_3, chan_4
 
     def read_vallen_data(self, lower=2, t_str=0, t_cut=float('inf'), mode='all'):
+        """
+        vallen数据库载入主函数
+        :param lower: 载入时counts的阈值
+        :param t_str: 载入特定时间范围的开始时刻
+        :param t_cut: 载入特定时间范围的终止时刻
+        :param mode: 载入模式，可选参数：['all', 'pri only', 'tra only']
+                    all: 同时载入波形文件.tradb与特征文件.pridb
+                    pri only: 仅载入特征文件
+                    tra only: 仅载入波形文件
+        :return:
+        """
         data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
         if mode == 'all' or mode == 'tra only':
             conn_tra = sqlite3.connect(self.path_tra)
@@ -118,6 +144,16 @@ class Reload:
         return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
     def read_stream_data(self, t_str=0, t_cut=float('inf'), mode='all'):
+        """
+        波形流数据库载入主函数
+        :param t_str: 载入特定时间范围的开始时刻
+        :param t_cut: 载入特定时间范围的终止时刻
+        :param mode: 载入模式，可选参数：['all', 'pri only', 'tra only']
+                    all: 同时载入波形文件.tradb与特征文件.pridb
+                    pri only: 仅载入特征文件
+                    tra only: 仅载入波形文件
+        :return:
+        """
         data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
         if mode == 'all' or mode == 'tra only':
             conn_tra = sqlite3.connect(self.path_tra)
@@ -154,36 +190,9 @@ class Reload:
         chan_4 = np.array(chan_4)
         return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
 
-    def read_pac_data(self, path, lower=2):
-        os.chdir(path)
-        dir_features = os.listdir(path)[0]
-        data_tra, data_pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], [], []
-        with open(dir_features, 'r') as f:
-            data_pri = np.array([j.strip(', ') for i in f.readlines()[1:] for j in i.strip("\n")])
-        for _ in tqdm(range(N_tra), ncols=80):
-            i = result_tra.fetchone()
-            data_tra.append(i)
-        for _ in tqdm(range(N_pri), ncols=80):
-            i = result_pri.fetchone()
-            if i[-2] is not None and i[-2] > lower and i[-1] > 0:
-                data_pri.append(i)
-                if i[2] == 1:
-                    chan_1.append(i)
-                if i[2] == 2:
-                    chan_2.append(i)
-                elif i[2] == 3:
-                    chan_3.append(i)
-                elif i[2] == 4:
-                    chan_4.append(i)
-        data_tra = sorted(data_tra, key=lambda x: x[-1])
-        data_pri = np.array(data_pri)
-        chan_1 = np.array(chan_1)
-        chan_2 = np.array(chan_2)
-        chan_3 = np.array(chan_3)
-        chan_4 = np.array(chan_4)
-        return data_tra, data_pri, chan_1, chan_2, chan_3, chan_4
-
     def export_feature(self, t, time):
+        warnings.warn("some_old_function is deprecated", DeprecationWarning)
+
         for i in range(len(time) - 1):
             with open(self.fold + '-%d-%d.txt' % (time[i], time[i + 1]), 'w') as f:
                 f.write('SetID, TRAI, Time, Chan, Thr, Amp, RiseT, Dur, Eny, RMS, Counts\n')
@@ -195,6 +204,8 @@ class Reload:
 
 class Export:
     def __init__(self, chan, data_tra, features_path):
+        warnings.warn("some_old_class is deprecated", DeprecationWarning)
+
         self.data_tra = data_tra
         self.features_path = features_path
         self.chan = chan
@@ -271,6 +282,8 @@ class Export:
 
 
 def material_status(component, status):
+    warnings.warn("some_old_function is deprecated", DeprecationWarning)
+
     if component == 'pure':
         if status == 'random':
             # 0.508, 0.729, 1.022, 1.174, 1.609
@@ -310,6 +323,14 @@ def material_status(component, status):
 
 
 def validation(data_tra, k, filter=False, btype='bandstop'):
+    """
+    波形提取并计算特征，支持滤波操作（详细用法见[template.txt]中[#Feature calculation after filtering]）
+    :param data_tra: 存储波形信息的列表
+    :param k: 波形编号
+    :param filter: 是否滤波
+    :param btype: 滤波模式，可选参数：['bandstop', 'bandpass']
+    :return:
+    """
     # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
     i = data_tra[k - 1]
     sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -350,6 +371,12 @@ def validation(data_tra, k, filter=False, btype='bandstop'):
 
 
 def val_TRAI(data_pri, TRAI):
+    """
+    Vallen系统特征输出
+    :param data_pri: 存储特征信息的列表
+    :param TRAI: 波形编号，列表
+    :return:
+    """
     # Time, Amp, RiseTime, Dur, Eny, Counts, TRAI
     for i in TRAI:
         vallen = data_pri[i - 1]
@@ -360,6 +387,19 @@ def val_TRAI(data_pri, TRAI):
 
 
 def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM, time, displace, smooth_load, strain, smooth_stress):
+    """
+    特征文件存储
+    :param Time: 时间
+    :param Eny: 能量
+    :param cls_1_KKM: 分支列表
+    :param cls_2_KKM: 分支列表
+    :param time: 拉伸机时间
+    :param displace: 拉伸机位移
+    :param smooth_load: 拉伸机载荷（平滑）
+    :param strain: 拉伸机应变
+    :param smooth_stress: 拉伸机应力（平滑）
+    :return:
+    """
     df_1 = pd.DataFrame({'time_pop1': Time[cls_KKM[0]], 'energy_pop1': Eny[cls_KKM[0]]})
     df_2 = pd.DataFrame({'time_pop2': Time[cls_KKM[1]], 'energy_pop2': Eny[cls_KKM[1]]})
     df_3 = pd.DataFrame(
@@ -370,6 +410,11 @@ def save_E_T(Time, Eny, cls_1_KKM, cls_2_KKM, time, displace, smooth_load, strai
 
 
 def load_stress(path_curve):
+    """
+    拉伸机数据载入，详细用法见[template.txt]
+    :param path_curve: .csv数据路径
+    :return:
+    """
     data = pd.read_csv(path_curve, encoding='gbk').drop(index=[0]).astype('float32')
     data_drop = data.drop_duplicates(['拉伸应变 (应变 1)'])
     time = np.array(data_drop.iloc[:, 0])
@@ -383,33 +428,36 @@ def load_stress(path_curve):
     return time, displace, load, strain, stress
 
 
-def smooth_curve(time, stress, window_length=99, polyorder=1, epoch=200, curoff=[2500, 25000]):
+def smooth_curve(time, stress, window_length=99, polyorder=1, epoch=200, cutoff=[2500, 25000]):
+    """
+    数据平滑
+    :param time: 拉伸机时间
+    :param stress: 拉伸机应力
+    :param window_length: 窗口长度
+    :param polyorder: 多项式阶数
+    :param epoch: 迭代次数
+    :param cutoff: 拉伸机打滑时间范围，即需要高度平滑的时间范围
+    :return:
+    """
     y_smooth = savgol_filter(stress, window_length, polyorder, mode='nearest')
     for i in range(epoch):
         if i == 5:
             front = y_smooth
         y_smooth = savgol_filter(y_smooth, window_length, polyorder, mode='nearest')
 
-    front_idx = np.where(time < curoff[0])[0][-1]
-    rest_idx = np.where(time > curoff[1])[0][0]
+    front_idx = np.where(time < cutoff[0])[0][-1]
+    rest_idx = np.where(time > cutoff[1])[0][0]
     res = np.concatenate((stress[:40], front[40:front_idx], y_smooth[front_idx:rest_idx], stress[rest_idx:]))
     return res
 
 
-def filelist_convert(data_path, tar=None):
-    file_list = os.listdir(data_path)
-    if tar:
-        tar += '.txt'
-    else:
-        tar = data_path.split('/')[-1] + '.txt'
-    if tar in file_list:
-        exist_idx = np.where(np.array(file_list) == tar)[0][0]
-        file_list.pop(exist_idx)
-    file_idx = np.array([np.array(i[:-4].split('_')[1:]).astype('int64') for i in file_list])
-    return file_list, file_idx
-
-
 def cal_fitx(tmp, interval_num=1000):
+    """
+    格子划分，确认用于划分的直线横坐标
+    :param tmp: Amplitude or Energy
+    :param interval_num: 每量级划分格子数
+    :return:
+    """
     tmp_min = math.floor(np.log10(min(tmp)))
     tmp_max = math.ceil(np.log10(max(tmp)))
     inter = [i for i in range(tmp_min, tmp_max + 1)]
@@ -423,6 +471,15 @@ def cal_fitx(tmp, interval_num=1000):
 
 
 def cal_label(tmp1, tmp2, formula, slope, intercept):
+    """
+    依据直线提取不同区域的数据索引
+    :param tmp1: Amplitude
+    :param tmp2: Energy
+    :param formula: 拟合公式
+    :param slope: 斜率
+    :param intercept: 截距
+    :return:
+    """
     label = []
     for point in tqdm(zip(tmp1, tmp2)):
         if len(slope) == 2:
@@ -441,6 +498,20 @@ def cal_label(tmp1, tmp2, formula, slope, intercept):
 
 
 def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept, plot=True):
+    """
+    E-A多分支划分
+    :param tmp1: Amplitude
+    :param tmp2: Energy
+    :param xlabel: 'Amplitude (μV)'
+    :param ylabel: 'Energy (aJ)'
+    :param slope: 斜率，如[2]，[2, 2.1]
+    :param intercept: 截距，如[-3]，[-3, -2.9]，
+                      注：slope与intercept列表长度需一致，
+                         若均为长度1的列表，表示使用一条直线划分两个区域，
+                         若均为长度2的列表，表示使用两条直线划分三个区域。
+    :param plot: 是否可视化
+    :return:
+    """
     idx_1, idx_2, idx_3 = [], [], []
     formula = lambda x, a, b: pow(x, a) * pow(10, b)
     fit_x = cal_fitx(tmp1, 1000)
@@ -484,12 +555,12 @@ def linear_matching(tmp1, tmp2, xlabel, ylabel, slope, intercept, plot=True):
 
 def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):
     """
-    Input :
-    s: 1d-array, data signal from which to extract high and low envelopes
-    dmin, dmax: int, optional, size of chunks, use this if the size of the input signal is too big
-    split: bool, optional, if True, split the signal in half along its mean, might help to generate the envelope in some cases
-    Output :
-    lmin,lmax : high/low envelope idx of input signal s
+    提取波形的包络线
+    :param s: 1d-array, data signal from which to extract high and low envelopes
+    :param dmin: int, optional, size of chunks, use this if the size of the input signal is too big
+    :param dmax: int, optional, size of chunks, use this if the size of the input signal is too big
+    :param split: bool, optional, if True, split the signal in half along its mean, might help to generate the envelope in some cases
+    :return: lmin,lmax : high/low envelope idx of input signal s
     """
 
     # locals min
@@ -514,6 +585,8 @@ def hl_envelopes_idx(s, dmin=1, dmax=1, split=False):
 
 
 def find_nearest(ls, v):
+    warnings.warn("some_old_function is deprecated", DeprecationWarning)
+
     idx = np.searchsorted(ls, v, side="left")
     if idx > 0 and (idx == len(ls) or abs(v - ls[idx - 1]) < abs(v - ls[idx])):
         return idx - 1
@@ -522,6 +595,8 @@ def find_nearest(ls, v):
 
 
 def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7, ITU=550, alpha=1.7, t_backNoise=1e4):
+    warnings.warn("some_old_function is deprecated", DeprecationWarning)
+
     # ====================================================== 数据读取 ======================================================
     with open(file, 'r') as f:
         for _ in range(4):
@@ -562,7 +637,7 @@ def stream(file, t_str, t_end, staLen=5, overlap=1, staWin='hamming', IZCRT=0.7,
 
 def remove_the_blackborder(image):
     """
-    Crop black borders around the image
+    裁剪图像周围的黑色边框
     :param image:
     :return:
     """
@@ -590,7 +665,7 @@ def remove_the_blackborder(image):
 
 def cal_mean_std(files_dir, files):
     """
-    Calculate the mean and standard deviation of pictures
+    计算图片的均值和标准差
     :param files_dir:
     :param files:
     :return:
@@ -636,6 +711,8 @@ def cal_mean_std(files_dir, files):
 
 
 '''
+# 波形流信息写入为数据流类型
+
 wave_ls = sorted(os.listdir('./wave/txt/'), key=lambda x: int(x.split('-')[0][5:]))
 channel = [3]
 SampleRate = 2 * pow(10, 7)

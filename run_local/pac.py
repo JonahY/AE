@@ -26,6 +26,9 @@ np.seterr(invalid='ignore')
 
 
 class GlobalV():
+    """
+    多进程间通信
+    """
     def __init__(self):
         self.tra_1 = []
         self.tra_2 = []
@@ -59,6 +62,14 @@ class GlobalV():
 
 class Preprocessing:
     def __init__(self, idx, thr_dB, magnification_dB, data_path, processor):
+        """
+        PAC系统数据的核心分析程序
+        :param idx: 实例化此类的进程ID
+        :param thr_dB: PAC系统采集时的阈值
+        :param magnification_dB: PAC系统采集时的前放倍数
+        :param data_path: 存储波形文件的绝对路径，此路径内不得含有除波形、特征外的其余文件
+        :param processor: 调用的进程数
+        """
         self.idx = idx
         self.thr_dB = thr_dB
         self.magnification_dB = magnification_dB
@@ -79,11 +90,18 @@ class Preprocessing:
         self.data_path = data_path
         self.processor = processor
 
-    def skip_n_column(self, file, n=3):
+    def __skip_n_column(self, file, n=3):
         for _ in range(n):
             file.readline()
 
-    def cal_features(self, dataset, time_label, valid_wave_idx):
+    def __cal_features(self, dataset, time_label, valid_wave_idx):
+        """
+        特征计算
+        :param dataset: 电压数值
+        :param time_label: 时间
+        :param valid_wave_idx: 经阈值筛选后的有效信号起止索引
+        :return:
+        """
         start = time_label[valid_wave_idx[0]]
         end = time_label[valid_wave_idx[-1]]
         self.duration = end - start
@@ -95,14 +113,25 @@ class Preprocessing:
         self.RMS = math.sqrt(self.energy / self.duration)
         return valid_data
 
-    def cal_counts(self, valid_data):
+    def __cal_counts(self, valid_data):
+        """
+        振铃数计算
+        :param valid_data: 经阈值筛选后的有效信号
+        :return:
+        """
         self.counts = 0
         N = len(valid_data)
         for idx in range(1, N):
             if valid_data[idx - 1] <= self.thr_V <= valid_data[idx]:
                 self.counts += 1
 
-    def cal_freq(self, valid_data, valid_wave_idx):
+    def __cal_freq(self, valid_data, valid_wave_idx):
+        """
+        频谱计算
+        :param valid_data: 经阈值筛选后的有效信号
+        :param valid_wave_idx: 经阈值筛选后的有效信号起止索引
+        :return:
+        """
         Fs = 1 / self.sample_interval
         N = valid_wave_idx[-1] - valid_wave_idx[0] + 1
         frq = (np.arange(N) / N) * Fs
@@ -113,7 +142,12 @@ class Preprocessing:
         abs_y_half[0] = 0
         self.freq_max = half_frq[np.argmax(abs_y_half)]
 
-    def save_features(self, result):
+    def __save_features(self, result):
+        """
+        特征文件写入
+        :param result: 特征列表
+        :return:
+        """
         valid, tra_1, tra_2, tra_3, tra_4 = [], [], [], [], []
         txt_name = self.data_path.split('/')[-1] + '.txt'
         f = open(txt_name, "w")
@@ -132,13 +166,24 @@ class Preprocessing:
         # print(valid_data)
         return valid
 
-    def main(self, file_name, obj, load_wave=False, min_cnts=2, data=[]):
+    def main(self, file_name, obj, load_wave=False, min_cnts=2, data=None):
+        """
+        波形文件载入并计算主程序
+        :param file_name: 待计算的波形文件
+        :param obj: 存储特征用于多进程间的通信
+        :param load_wave: 计算结束后是否载入特征及波形信息
+        :param min_cnts: 预设的最低振铃数
+        :param data: 存储特征的列表，默认为空
+        :return:
+        """
+        if data is None:
+            data = []
         pbar = tqdm(file_name, ncols=100)
         for name in pbar:
             with open(name, "r") as f:
-                self.skip_n_column(f)
+                self.__skip_n_column(f)
                 self.sample_interval = float(f.readline()[29:])
-                self.skip_n_column(f)
+                self.__skip_n_column(f)
                 points_num = int(f.readline()[36:])
                 self.channel_num = int(f.readline().strip()[16:])
                 self.hit_num = int(f.readline()[12:])
@@ -163,11 +208,11 @@ class Preprocessing:
                         obj.append_4([self.time, self.channel_num, self.sample_interval, points_num, dataset*pow(10, 6), self.hit_num])
                     share_lock.release()
                 if valid_wave_idx.shape[0] > 1:
-                    valid_data = self.cal_features(dataset, time_label, valid_wave_idx)
+                    valid_data = self.__cal_features(dataset, time_label, valid_wave_idx)
                     del dataset, time_label
-                    self.cal_counts(valid_data)
+                    self.__cal_counts(valid_data)
                     if self.counts > min_cnts:
-                        self.cal_freq(valid_data, valid_wave_idx)
+                        self.__cal_freq(valid_data, valid_wave_idx)
                         del valid_data
                         tmp_feature = '{}, {:.7f}, {}, {:.8f}, {:.1f}, {:.8f}, {:.1f}, {:.7f}, {:.7f}, {:.8f}, {:.8f}' \
                                       ', {:.8f}, {}\n'.format(self.hit_num, self.time, self.channel_num,
@@ -186,13 +231,30 @@ class Preprocessing:
 
         return data
 
-    def read_pac_data(self, file_name, tra_1=[], tra_2=[], tra_3=[], tra_4=[]):
+    def read_pac_data(self, file_name, tra_1=None, tra_2=None, tra_3=None, tra_4=None):
+        """
+        加载PAC系统采集到的信号波形
+        :param file_name: 待载入的波形文件名称
+        :param tra_1: 通道1存储的特征
+        :param tra_2: 通道2存储的特征
+        :param tra_3: 通道3存储的特征
+        :param tra_4: 通道4存储的特征
+        :return:
+        """
+        if tra_4 is None:
+            tra_4 = []
+        if tra_3 is None:
+            tra_3 = []
+        if tra_2 is None:
+            tra_2 = []
+        if tra_1 is None:
+            tra_1 = []
         pbar = tqdm(file_name, ncols=100)
         for name in pbar:
             with open(name, "r") as f:
-                self.skip_n_column(f)
+                self.__skip_n_column(f)
                 self.sample_interval = float(f.readline()[29:])
-                self.skip_n_column(f)
+                self.__skip_n_column(f)
                 points_num = int(f.readline()[36:])
                 self.channel_num = int(f.readline().strip()[16:])
                 self.hit_num = int(f.readline()[12:])
@@ -210,6 +272,12 @@ class Preprocessing:
         return tra_1, tra_2, tra_3, tra_4
 
     def read_pac_features(self, res, min_cnts=2):
+        """
+        Load the features of signal acquired by the PAC system
+        :param res: 特征列表
+        :param min_cnts: 预设的最低振铃数
+        :return:
+        """
         pri, chan_1, chan_2, chan_3, chan_4 = [], [], [], [], []
         pbar = tqdm(res, ncols=100)
         for i in pbar:
@@ -231,6 +299,15 @@ class Preprocessing:
         return pri, chan_1, chan_2, chan_3, chan_4
 
     def read_wave_realtime(self, file_list, file_idx, chan, hit_num, valid=True):
+        """
+        按特定序号载入波形
+        :param file_list: 待计算的波形文件名称
+        :param file_idx:
+        :param chan: 通道编号
+        :param hit_num: 波形序号
+        :param valid: 是否按振铃数筛选有效电压信号
+        :return:
+        """
         chan_idx = np.where(file_idx[:, 0] == chan)[0]
         if not len(chan_idx):
             print('Error: There is no data in channel %d!' % chan)
@@ -240,9 +317,9 @@ class Preprocessing:
             print('Error: Can not find hit number %d in channel %d!' % (hit_num, chan))
             return
         with open(file_list[wave_idx[0]], 'r') as f:
-            self.skip_n_column(f)
+            self.__skip_n_column(f)
             self.sample_interval = float(f.readline()[29:])
-            self.skip_n_column(f)
+            self.__skip_n_column(f)
             points_num = int(f.readline()[36:])
             self.channel_num = int(f.readline().strip()[16:])
             self.hit_num = int(f.readline()[12:])
@@ -261,6 +338,16 @@ class Preprocessing:
 
 
 def convert_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB, load_wave=False):
+    """
+    Calculate the features of signal acquired by the PAC system
+    :param file_list: 待计算的波形文件名称
+    :param data_path: 存储波形文件的绝对路径，此路径内不得含有除波形、特征外的其余文件
+    :param processor: 调用进程数
+    :param threshold_dB: PAC系统采集时的阈值
+    :param magnification_dB: PAC系统采集时的前放倍数
+    :param load_wave: 计算结束后是否载入特征及波形信息
+    :return:
+    """
     # check existing file
     tar = data_path.split('/')[-1] + '.txt'
     if tar in file_list:
@@ -293,7 +380,7 @@ def convert_pac_data(file_list, data_path, processor, threshold_dB, magnificatio
         process = Preprocessing(idx, threshold_dB, magnification_dB, data_path, processor)
         result.append(pool.apply_async(process.main, (file_list[i:i + each_core], obj, load_wave,)))
 
-    pri = process.save_features(result)
+    pri = process.__save_features(result)
 
     pool.close()
     pool.join()
@@ -321,6 +408,15 @@ def convert_pac_data(file_list, data_path, processor, threshold_dB, magnificatio
 
 
 def main_read_pac_data(file_list, data_path, processor, threshold_dB, magnification_dB):
+    """
+    Load the waveforms of signal acquired by the PAC system
+    :param file_list: 待载入的波形文件名称
+    :param data_path: 存储波形文件的绝对路径，此路径内不得含有除波形、特征外的其余文件
+    :param processor: 调用进程数
+    :param threshold_dB: PAC系统采集时的阈值
+    :param magnification_dB: PAC系统采集时的前放倍数
+    :return:
+    """
     # check existing file
     tar = data_path.split('/')[-1] + '.txt'
     if tar in file_list:
@@ -366,6 +462,11 @@ def main_read_pac_data(file_list, data_path, processor, threshold_dB, magnificat
 
 
 def main_read_pac_features(data_path):
+    """
+    Load the features of signal acquired by the PAC system
+    :param data_path: 存储特征文件的绝对路径，此路径内不得含有除波形、特征外的其余文件
+    :return:
+    """
     dir_features = data_path.split('/')[-1] + '.txt'
     with open(dir_features, 'r') as f:
         res = [i.strip("\n").strip(',') for i in f.readlines()[1:]]
@@ -390,7 +491,7 @@ def main_read_pac_features(data_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-path", "--data_path", type=str,
-                        default=r"H:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115",
+                        default=r"F:\PAC\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115\Pure Ni-tension test--0.01-2-AE Vallen&PAC-20211115",
                         help="Absolute path of data(add 'r' in front)")
     parser.add_argument("-thr", "--threshold_dB", type=int, default=25, help="Detection threshold")
     parser.add_argument("-mag", "--magnification_dB", type=int, default=40, help="Magnification /dB")
@@ -406,11 +507,11 @@ if __name__ == "__main__":
     # print(file_list)
     print("=" * 42 + " Read Files Done " + "=" * 41)
 
-    # pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
+    pri, obj, data_tra_1, data_tra_2, data_tra_3, data_tra_4 = convert_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB, True)
 
-    data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
+    # data_tra_1, data_tra_2, data_tra_3, data_tra_4 = main_read_pac_data(file_list, opt.data_path, opt.processor, opt.threshold_dB, opt.magnification_dB)
 
-    data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path)
+    # data_pri, chan_1, chan_2, chan_3, chan_4 = main_read_pac_features(opt.data_path)
 
     chan = chan_1
     Time, Amp, RiseT, Dur, Eny, RMS, Counts, TRAI = chan[:, 1], chan[:, 5], chan[:, 7] * pow(10, 6), \

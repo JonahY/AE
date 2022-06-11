@@ -18,6 +18,17 @@ from scipy.signal import butter, filtfilt
 
 class Waveform:
     def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25):
+        """
+        波形提取与可视化
+        :param color_1: 自定义分支颜色
+        :param color_2: 自定义分支颜色
+        :param data_tra: 波形数据库提取的列表
+        :param path: 波形存储路径
+        :param path_pri: 波形存储文件名开头
+        :param status: 图注
+        :param device: 声发射采集设备
+        :param thr_dB: PAC系统采集时的阈值
+        """
         self.data_tra = data_tra
         self.path = path
         self.path_pri = path_pri
@@ -28,6 +39,12 @@ class Waveform:
         self.thr = pow(10, thr_dB / 20)
 
     def cal_wave(self, i, valid=True):
+        """
+        波形提取
+        :param i: 波形编号
+        :param valid: 是否按振铃数筛选有效电压信号
+        :return:
+        """
         if self.device == 'vallen':
             # Time, Chan, Thr, SampleRate, Samples, TR_mV, Data, TRAI
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
@@ -270,7 +287,7 @@ class Waveform:
         os.chdir(self.path)
         for idx, j in enumerate(tqdm(TRAI)):
             i = self.data_tra[j - 1]
-            valid_time, valid_data = self.cal_wave(i, False)
+            valid_time, valid_data = self.cal_wave(i)
             with open(self.path_pri[:-6] + '_pop%s-%d' % (pop, idx + 1) + '.txt', 'w') as f:
                 f.write('Time, Signal\n')
                 for k in range(valid_data.shape[0]):
@@ -279,6 +296,18 @@ class Waveform:
 
 class Frequency:
     def __init__(self, color_1, color_2, data_tra, path, path_pri, status, device, thr_dB=25, size=250):
+        """
+        波形频域分析与可视化
+        :param color_1: 自定义分支颜色
+        :param color_2: 自定义分支颜色
+        :param data_tra: 波形数据库提取的列表
+        :param path: 波形存储路径
+        :param path_pri: 波形存储文件名开头
+        :param status: 图注
+        :param device: 声发射采集设备
+        :param thr_dB: PAC系统采集时的阈值
+        :param size: 平均频谱计算时的格子数
+        """
         self.data_tra = data_tra
         self.color_1 = color_1
         self.color_2 = color_2
@@ -290,6 +319,12 @@ class Frequency:
         self.thr = pow(10, thr_dB / 20)
 
     def cal_frequency(self, k, valid=True):
+        """
+        波形提取与短时傅里叶变换
+        :param k: 波形编号
+        :param valid: 是否按振铃数筛选有效电压信号
+        :return:
+        """
         if self.device == 'vallen':
             i = self.data_tra[k]
             sig = np.multiply(array.array('h', bytes(i[-2])), i[-3] * 1000)
