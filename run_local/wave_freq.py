@@ -5,12 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
-from preprocess import Preprocessing
+from preprocess_old import Preprocessing
 import pywt
 import librosa
 from librosa import display
 import signal_envelope as se
-from stream import *
+from stream_old import *
 from utils import hl_envelopes_idx
 from ssqueezepy import ssq_cwt
 from scipy.signal import butter, filtfilt

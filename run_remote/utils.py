@@ -13,7 +13,7 @@ from scipy.signal import savgol_filter
 import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib.pylab import mpl
-from stream import *
+from stream_old import *
 
 
 mpl.rcParams['axes.unicode_minus'] = False  # 显示负号

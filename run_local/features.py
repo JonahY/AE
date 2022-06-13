@@ -15,7 +15,7 @@ import sqlite3
 from kmeans import *
 from utils import *
 from wave_freq import *
-from stream import *
+from stream_old import *
 import warnings
 from matplotlib.pylab import mpl
 from matplotlib.ticker import FuncFormatter

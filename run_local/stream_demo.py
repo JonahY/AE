@@ -8,6 +8,7 @@ from scipy.io import savemat, loadmat
 
 def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
     """
+    短时能量及短时过零率计算
     :param signal: raw signal of waveform, unit: μV
     :param framelen: length of per frame, type: int
     :param stride: length of translation per frame
@@ -52,6 +53,12 @@ def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming
 
 
 def cal_deriv(x, y):
+    """
+    一阶导计算
+    :param x:
+    :param y:
+    :return:
+    """
     diff_x = []
     for i, j in zip(x[0::], x[1::]):
         diff_x.append(j - i)
@@ -74,6 +81,18 @@ def cal_deriv(x, y):
 
 
 def find_wave_multiOutput(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNoise=0):
+    """
+    阈值自适应检测
+    :param stE: 短时能量
+    :param stE_dev: 短时能量一阶导
+    :param zcR: 短时过零率
+    :param t_stE: 短时能量对应的时间
+    :param IZCRT: 初始阈值——短时过零率
+    :param ITU: 初始阈值——短时能量阈值上限
+    :param alpha: 背影噪声评估加权因子
+    :param t_backNoise: 背景噪声评估时间
+    :return:
+    """
     start, end = [], []
     startTmp, endTmp, ITUTmp, IZCRTTmp, ITLTmp = [], [], [], [], []
     last_end = 0
@@ -152,6 +171,32 @@ def plot_norm(ax, xlabel=None, ylabel=None, zlabel=None, title=None, x_lim=[], y
               grid=False, frameon=True, legend_loc='upper left', font_color='black', legendsize=11, labelsize=14,
               titlesize=15, ticksize=13, linewidth=2, fontname='Arial', legendWeight='normal', labelWeight='bold',
               titleWeight='bold'):
+    """
+    画图模板
+    :param ax: 轴
+    :param xlabel: 横坐标
+    :param ylabel: 纵坐标
+    :param zlabel: 三维坐标
+    :param title: 标题
+    :param x_lim: 横轴范围
+    :param y_lim: 纵轴范围
+    :param z_lim: 三维范围
+    :param legend: 是否显示图例
+    :param grid: 是否显示网格
+    :param frameon: 是否显示图例背景
+    :param legend_loc: 图例位置
+    :param font_color: 字体颜色
+    :param legendsize: 图例字号
+    :param labelsize: 标签字号
+    :param titlesize: 标题字号
+    :param ticksize: 坐标轴字号
+    :param linewidth: 坐标轴宽度
+    :param fontname: 字体类型
+    :param legendWeight: 图例字体粗细
+    :param labelWeight: 标签字体粗细
+    :param titleWeight: 标题字体粗细
+    :return:
+    """
     ax.spines['bottom'].set_linewidth(linewidth)
     ax.spines['left'].set_linewidth(linewidth)
     ax.spines['right'].set_linewidth(linewidth)

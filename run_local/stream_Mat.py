@@ -13,12 +13,11 @@ import scipy.io as scio
 
 def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming'):
     """
-    短时能量及短时过零率计算
     :param signal: raw signal of waveform, unit: μV
     :param framelen: length of per frame, type: int
     :param stride: length of translation per frame
     :param fs: sampling rate per microsecond
-    :param window: window's function, e.g., hamming, hanning, blackman, bartlett
+    :param window: window's function
     :return: time_zcR, zcR
     """
     if signal.shape[0] <= framelen:
@@ -58,12 +57,6 @@ def shortTermEny_zerosCrossingRate(signal, framelen, stride, fs, window='hamming
 
 
 def cal_deriv(x, y):
-    """
-    一阶导计算
-    :param x:
-    :param y:
-    :return:
-    """
     diff_x = []
     for i, j in zip(x[0::], x[1::]):
         diff_x.append(j - i)
@@ -86,18 +79,6 @@ def cal_deriv(x, y):
 
 
 def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNoise=0):
-    """
-    阈值自适应检测
-    :param stE: 短时能量
-    :param stE_dev: 短时能量一阶导
-    :param zcR: 短时过零率
-    :param t_stE: 短时能量对应的时间
-    :param IZCRT: 初始阈值——短时过零率
-    :param ITU: 初始阈值——短时能量阈值上限
-    :param alpha: 背影噪声评估加权因子
-    :param t_backNoise: 背景噪声评估时间
-    :return:
-    """
     start, end = [], []
     last_end = 0
 
@@ -146,14 +127,6 @@ def find_wave(stE, stE_dev, zcR, t_stE, IZCRT=0.3, ITU=75, alpha=0.5, t_backNois
 
 
 def cut_stream(files, streamFold, saveFold, config):
-    """
-    阈值自适应检测
-    :param files:
-    :param streamFold:
-    :param saveFold:
-    :param config:
-    :return:
-    """
     try:
         pbar = tqdm(files, ncols=100)
         for file in pbar:

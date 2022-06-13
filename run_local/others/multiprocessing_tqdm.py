@@ -20,7 +20,7 @@ class OP():
         pbar.set_description(' Flow ')
         update = lambda *args: pbar.update()
         # --------------------------------------
-        pool = mp.Pool(16)
+        pool = mp.Pool(4)
         for _ in range(self.length):
             pool.apply_async(pickle_process, args=(self, ), callback=update) # 通过callback来更新进度条
         pool.close()
