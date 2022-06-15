@@ -1,5 +1,5 @@
 # ================================================ Depiction of method =================================================
-t_initial, sig_initial = waveform.cal_wave(data_tra[18481 - 1], False)
+t_initial, sig_initial = waveform._Waveform__cal_wave(data_tra[18481 - 1], False)
 
 
 staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 0, 'hamming', 0.1, 650, 0.4, 0
@@ -77,7 +77,7 @@ plt.subplots_adjust(wspace=0, hspace=0)
 
 
 # ===================================================== Same ITU =======================================================
-t_initial, sig_initial = waveform.cal_wave(data_tra[167541 - 1], False)
+t_initial, sig_initial = waveform._Waveform__cal_wave(data_tra[167541 - 1], False)
 
 # ----------------------------------------------------- Alpha 1.2 ------------------------------------------------------
 staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 1, 'hamming', 0.3, 650, 0.5, 50
@@ -303,7 +303,7 @@ plt.subplots_adjust(wspace=0, hspace=0)
 
 
 # ==================================================== Same Alpha ======================================================
-t_initial, sig_initial = waveform.cal_wave(data_tra[185944 - 1], False)
+t_initial, sig_initial = waveform._Waveform__cal_wave(data_tra[185944 - 1], False)
 
 # ------------------------------------------------------ ITU 650 -------------------------------------------------------
 staLen, overlap, staWin, IZCRT, ITU, alpha, t_backNoise = 2, 10, 'hamming', 0.2, 650, 1.3, 0

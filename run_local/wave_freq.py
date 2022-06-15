@@ -38,7 +38,7 @@ class Waveform:
         self.device = device
         self.thr = pow(10, thr_dB / 20)
 
-    def cal_wave(self, i, valid=True):
+    def __cal_wave(self, i, valid=True):
         """
         波形提取
         :param i: 波形编号
@@ -91,7 +91,7 @@ class Waveform:
         if i[-1] != TRAI_select_1:
             print('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], TRAI_select_1))
             return
-        valid_time, valid_data = self.cal_wave(i, valid=valid)
+        valid_time, valid_data = self.__cal_wave(i, valid=valid)
 
         ax = fig.add_subplot(1, 2, 1)
         ax.plot(valid_time, valid_data, lw=0.5, color=self.color_1)
@@ -104,19 +104,26 @@ class Waveform:
         if i[-1] != TRAI_select_2:
             print('Error: TRAI %d in data_tra is inconsistent with %d by input!' % (i[-1], TRAI_select_2))
             return
-        valid_time, valid_data = self.cal_wave(i, valid=valid)
+        valid_time, valid_data = self.__cal_wave(i, valid=valid)
         ax2.plot(valid_time, valid_data, lw=0.5, color=self.color_2)
         ax2.axhline(abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         ax2.axhline(-abs(i[2]), 0, valid_data.shape[0], linewidth=1, color="black")
         plot_norm(ax2, xlabel='Time (μs)', ylabel='Amplitude (μV)', legend=False, grid=True)
 
     def plot_wave_TRAI(self, k, valid=False, color='blue'):
+        """
+        根据波形编号可视化
+        :param k: 编号
+        :param valid: 是否依据阈值进行筛选
+        :param color: 颜色
+        :return:
+        """
         # Waveform with specific TRAI
         i = self.data_tra[k - 1]
         if i[0 if self.device == 'stream' else -1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
                        (i[0 if self.device == 'stream' else -1], k))
-        time, sig = self.cal_wave(i, valid=valid)
+        time, sig = self.__cal_wave(i, valid=valid)
         for tmp_tail, s in enumerate(sig[::-1]):
             if s != 0:
                 tail = -tmp_tail if tmp_tail > 0 else None
@@ -164,7 +171,7 @@ class Waveform:
         if tmp[0 if self.device == 'stream' else -1] != k:
             return str('Error: TRAI %d in data_tra is inconsistent with %d by input!' %
                        (tmp[0 if self.device == 'stream' else -1], k))
-        time, sig = self.cal_wave(tmp, valid=valid)
+        time, sig = self.__cal_wave(tmp, valid=valid)
         if t_str:
             range_idx = np.where((time >= t_str) & (time < t_end))[0]
             time = time[range_idx] - time[range_idx[0]]
@@ -195,6 +202,16 @@ class Waveform:
         return start, end, time, sig, t_stE
 
     def plot_envelope(self, TRAI, COLOR, features_path, valid=False, method='hl', xlog=False):
+        """
+        波形包络线
+        :param TRAI: 波形编号
+        :param COLOR: 颜色
+        :param features_path: 存储路径
+        :param valid: 是否依据阈值进行筛选
+        :param method: 计算包络方法，可选参数：'se', 'hl'
+        :param xlog: 是否以对数轴显示
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9])
         fig.text(0.95, 0.17, self.status, fontdict={'family': 'Arial', 'fontweight': 'bold', 'fontsize': 12},
                  horizontalalignment="right")
@@ -203,7 +220,7 @@ class Waveform:
             XX, YY = [], []
             for k in tqdm(trai):
                 tmp = self.data_tra[k - 1]
-                time, sig = self.cal_wave(tmp, valid=valid)
+                time, sig = self.__cal_wave(tmp, valid=valid)
                 if time[-1] < 50:
                     continue
                 if method == 'se':
@@ -249,7 +266,7 @@ class Waveform:
         tmp = self.data_tra[int(TRAI - 1)]
         if TRAI != tmp[-1]:
             print('Error: TRAI is incorrect!')
-        time, sig = self.cal_wave(tmp, valid=valid)
+        time, sig = self.__cal_wave(tmp, valid=valid)
         b, a = butter(N, list(map(lambda x: 2 * x * 1e3 / tmp[3], CutoffFreq)), btype)
         sig_filter = filtfilt(b, a, sig)
 
@@ -287,7 +304,7 @@ class Waveform:
         os.chdir(self.path)
         for idx, j in enumerate(tqdm(TRAI)):
             i = self.data_tra[j - 1]
-            valid_time, valid_data = self.cal_wave(i)
+            valid_time, valid_data = self.__cal_wave(i)
             with open(self.path_pri[:-6] + '_pop%s-%d' % (pop, idx + 1) + '.txt', 'w') as f:
                 f.write('Time, Signal\n')
                 for k in range(valid_data.shape[0]):
@@ -318,7 +335,7 @@ class Frequency:
         self.device = device
         self.thr = pow(10, thr_dB / 20)
 
-    def cal_frequency(self, k, valid=True):
+    def __cal_frequency(self, k, valid=True):
         """
         波形提取与短时傅里叶变换
         :param k: 波形编号
@@ -357,10 +374,17 @@ class Frequency:
         return half_frq, normalization_half, time
 
     def cal_ave_freq(self, TRAI, valid=False, t_lim=100):
+        """
+        计算一系列波形的平均频谱
+        :param TRAI: 波形编号列表
+        :param valid: 是否依据阈值进行筛选
+        :param t_lim: 持续时间下限，即仅计算持续时间高于此值的信号
+        :return:
+        """
         Res = np.array([0 for _ in range(self.size)]).astype('float64')
         num = 0
         for j in TRAI:
-            half_frq, normalization_half, time = self.cal_frequency(j - 1, valid=valid)
+            half_frq, normalization_half, time = self.__cal_frequency(j - 1, valid=valid)
             # normalization_half /= max(normalization_half)     # Normalization
             if time[-1] < t_lim:
                 continue
@@ -378,6 +402,14 @@ class Frequency:
         return Res, num
 
     def cal_wtpacket(self, signal, w, n, plot=False):
+        """
+        小波包分解
+        :param signal: 波形
+        :param w: 小波基
+        :param n: 阶数
+        :param plot: 是否可视化
+        :return:
+        """
         w = pywt.Wavelet(w)
         wp = pywt.WaveletPacket(data=signal, wavelet=w, mode='symmetric', maxlevel=n)
 
@@ -418,9 +450,19 @@ class Frequency:
         return map, wp, energy
 
     def plot_wave_frequency(self, TRAI, valid=False, t_lim=100, n=3, wtpacket=False, wtpacket_eng=False):
+        """
+        可视化波形与频谱
+        :param TRAI: 波形编号
+        :param valid: 是否依据阈值进行筛选
+        :param t_lim: 持续时间下限，即仅计算持续时间高于此值的信号
+        :param n: 阶数
+        :param wtpacket: 是否显示小波分解
+        :param wtpacket_eng: 是否显示小波分解能量
+        :return:
+        """
         i = self.data_tra[TRAI - 1]
-        valid_time, valid_data = self.waveform.cal_wave(i, valid=valid)
-        half_frq, normalization_half, time = self.cal_frequency(TRAI - 1, valid=valid)
+        valid_time, valid_data = self.waveform.__cal_wave(i, valid=valid)
+        half_frq, normalization_half, time = self.__cal_frequency(TRAI - 1, valid=valid)
         if time[-1] < t_lim:
             return
 
@@ -456,6 +498,17 @@ class Frequency:
                 plot_norm(ax, 'Clusters', 'Reviews (%)', legend=False)
 
     def plot_ave_freq(self, Res, N, title, color='blue', y_lim=[0, 1.7], label='whole', save_path=False):
+        """
+        可视化一系列波形的平均频谱，配合[cal_ave_freq]使用
+        :param Res: 频谱网格，[cal_ave_freq]输出结果
+        :param N: 计算的波形数量，[cal_ave_freq]输出结果
+        :param title: 标题
+        :param color: 颜色
+        :param y_lim: 纵轴范围
+        :param label: 标签
+        :param save_path: 存储路径
+        :return:
+        """
         if save_path:
             with open(os.path.join(save_path, 'AveFreq-%s.txt' % title), 'w') as f:
                 f.write('Frequency (kHz), Amplitude\n')
@@ -468,8 +521,14 @@ class Frequency:
         plot_norm(ax, x_lim=[0, 800], y_lim=y_lim, xlabel='Frequency (kHz)', ylabel='Normalized Amplitude', title='Average Frequency')
 
     def plot_freq_TRAI(self, k, valid=False, color='blue'):
-        # Frequency with specific TRAI
-        half_frq, normalization_half, _ = self.cal_frequency(k - 1, valid=valid)
+        """
+        依据编号可视化频谱
+        :param k: 波形编号
+        :param valid: 是否依据阈值进行筛选
+        :param color: 颜色
+        :return:
+        """
+        half_frq, normalization_half, _ = self.__cal_frequency(k - 1, valid=valid)
 
         fig = plt.figure(figsize=(6, 4.1), num='Frequency--TRAI:%d (%s)' % (k, valid))
         ax = plt.subplot()
@@ -479,20 +538,29 @@ class Frequency:
     def plot_2cls_freq(self, TRAI_1, TRAI_2, same):
         fig = plt.figure(figsize=(6.5, 10), num='Frequency with same %s' % same)
         for idx, k in enumerate(TRAI_1):
-            half_frq, normalization_half, _ = self.cal_frequency(k - 1)
+            half_frq, normalization_half, _ = self.__cal_frequency(k - 1)
             ax = fig.add_subplot(5, 2, 1 + idx * 2)
             ax.plot(half_frq / 1000, normalization_half, lw=1)
             plot_norm(ax, 'Freq (kHz)', '|Y(freq)|', x_lim=[0, pow(10, 3)], legend=False)
 
-            half_frq, normalization_half, _ = self.cal_frequency(TRAI_2[idx] - 1)
+            half_frq, normalization_half, _ = self.__cal_frequency(TRAI_2[idx] - 1)
             ax2 = fig.add_subplot(5, 2, 2 + idx * 2)
             ax2.plot(half_frq, normalization_half, lw=1)
             plot_norm(ax2, 'Freq (Hz)', '|Y(freq)|', x_lim=[0, pow(10, 6)], legend=False)
 
     def cal_freq_max(self, ALL_TRAI, t_lim=0, status='peak', value=[300000, 500000]):
+        """
+        区分频谱范围以计算低中高频的信号
+        :param ALL_TRAI: 波形编号列表
+        :param t_lim: 持续时间下限，即仅计算持续时间高于此值的信号
+        :param status: 计算模式，可选参数：'peak'：仅计算峰频
+                                       'three peaks'：计算不同区间峰频
+        :param value: 频率区间，例[300000, 500000]表示<30000kHz，30000~50000kHz及 >50000kHz三个频率区间
+        :return:
+        """
         freq, stage_idx = [], []
         for idx, trai in enumerate(tqdm(ALL_TRAI)):
-            half_frq, normalization_half, time = self.cal_frequency(trai - 1, valid=False)
+            half_frq, normalization_half, time = self.__cal_frequency(trai - 1, valid=False)
             if time[-1] < t_lim:
                 continue
             if status == 'peak':
@@ -607,6 +675,16 @@ class Frequency:
             plt.savefig(os.path.join(save_path, '%i.jpg' % TRAI), pad_inches=0)
 
     def plot_XXX_Freq(self, freq, feature, ylabel, marker='o', markersize=10, color='blue'):
+        """
+        可视化频率与其他特征
+        :param freq: 频谱
+        :param feature: 特征
+        :param ylabel: 坐标轴标签
+        :param marker: 散点符号
+        :param markersize: 散点大小
+        :param color: 颜色
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9])
         ax = fig.add_subplot()
         ax.set_yscale("log", nonposy='clip')
@@ -614,11 +692,18 @@ class Frequency:
         plot_norm(ax, 'Peak Frequency (kHz)', ylabel, x_lim=[0, 800], legend=False)
 
     def plot_freqDomain(self, ALL_TRAI, t_lim=100, lw=1):
+        """
+        可视化一系列波形的频谱（3D）
+        :param ALL_TRAI: 波形编号列表
+        :param t_lim: 持续时间下限，即仅计算持续时间高于此值的信号
+        :param lw: 线宽
+        :return:
+        """
         fig = plt.figure(figsize=[6, 3.9], num='Frequency domain')
         z = 0
         ax = fig.add_subplot(111, projection='3d')
         for i in ALL_TRAI:
-            half_frq, normalization_half, t = self.cal_frequency(i - 1)
+            half_frq, normalization_half, t = self.__cal_frequency(i - 1)
             if t[-1] < t_lim:
                 continue
             valid_idx = np.where((half_frq / 1000) < 1000)[0]
