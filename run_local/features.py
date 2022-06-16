@@ -1001,9 +1001,9 @@ if __name__ == "__main__":
     with open('./metarialsInfo.json', 'r', encoding='utf-8') as f:
         js = json.load(f)
 
-    path = r'F:\VALLEN\ZPH'
-    fold = "tini50.8-cw40-aged400-1h-1-2-AE-0.05"
-    info = js['Fe'][fold]
+    path = r'I:\mine\硕士工作\VALLEN\Ni'
+    fold = "Ni-tension test-electrolysis-1-0.01-AE-20201031"
+    info = js['Ni'][fold]
     path_pri = fold + '.pridb'
     path_tra = fold + '.tradb'
     features_path = fold + '.txt'
